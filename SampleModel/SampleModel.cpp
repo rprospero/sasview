@@ -36,16 +36,18 @@ bool update_model(void* ptr, void** p) {
     // update model
     ParameterInfo* param_info = param_infos;
     while (param_info->Name != NULL) {
-        if (p == NULL)
+        if (*p == NULL)
             return false;
 
-        switch (*(size_t*)p) {
-        case PT_End:
-            return false;
+        switch (*(size_t*)(*p)) {
         case PT_Simple:
-            model_params->value = AsSimpleParameter(p);
+            model_params->value = AsSimpleParameter(*p);
+            break;
         case PT_Polydisperse:
-            model_params->dispersion = &AsPolydisperseParameter(p);
+            model_params->dispersion = &AsPolydisperseParameter(*p);
+            break;
+        default:
+            return false;
         }
 
         model_params++;
@@ -54,7 +56,7 @@ bool update_model(void* ptr, void** p) {
     }
     return true;
 }
-void show_error(const char* function, int nq = 0, double iq[] = NULL) {
+void show_error(const char* function, size_t nq = 0, double iq[] = NULL) {
     std::cerr << "error in " << function << " - update_model failed!" << std::endl;
     while (nq-- != 0)
         *iq = DBL_NAN;
@@ -62,6 +64,12 @@ void show_error(const char* function, int nq = 0, double iq[] = NULL) {
 
 // model handling
 CExport void* get_model_info() {
+    static bool is_initilized = false;
+    if (!is_initilized) {
+        void* model = create_model(NULL);
+        destroy_model(model);
+        is_initilized = true;
+    }
     // ensure that returned pointer points to static data which doesn’t require to be released
     return &model_info;
 }
@@ -72,9 +80,16 @@ CExport void* create_model(void* data) { // "data" is only provided if associate
     // update description after construction of model
     ParameterInfo* param_info = param_infos;
     while (param_info->Name != NULL) {
-        param_info->DispMin = model_params->min;
-        param_info->DispMax = model_params->max;
-        
+        if (model_params->has_min)
+            param_info->DispMin = model_params->min;
+        else
+            param_info->DispMin = -DBL_INF;
+
+        if (model_params->has_max)
+            param_info->DispMax = model_params->max;
+        else
+            param_info->DispMax = +DBL_INF;
+
         if (model_params->has_dispersion)
             param_info->Flags |= PF_Polydisperse;
         
@@ -88,21 +103,21 @@ CExport void destroy_model(void* ptr) {
     delete (SphereModel*)ptr;
 }
 // calculations
-CExport void calculate_q(void* ptr, void** p, int nq, double iq[], double q[]) {
+CExport void calculate_q(void* ptr, void** p, size_t nq, double iq[], double q[]) {
     if (!update_model(ptr, p))
         show_error("calculate_q", nq, iq);
     else
         while (nq-- != 0)
             *iq++ = (*(SphereModel*)ptr)(*q++);
 }
-CExport void calculate_qxqy(void* ptr, void** p, int nq, double iq[], double qx[], double qy[]) {
+CExport void calculate_qxqy(void* ptr, void** p, size_t nq, double iq[], double qx[], double qy[]) {
     if (!update_model(ptr, p))
         show_error("calculate_qxqy", nq, iq);
     else
         while (nq-- != 0)
             *iq++ = (*(SphereModel*)ptr)(*qx++, *qy++);
 }
-CExport void calculate_qxqyqz(void* ptr, void** p, int nq, double iq[], double qx[], double qy[], double qz[]) {
+CExport void calculate_qxqyqz(void* ptr, void** p, size_t nq, double iq[], double qx[], double qy[], double qz[]) {
     if (!update_model(ptr, p))
         show_error("calculate_qxqyqz", nq, iq);
     else

@@ -162,9 +162,9 @@ class ParameterInfo(object): # ModelInfo.parameters contains ParameterInfo for e
        
 class PluginModel(object): # represents a concrete model with all its parameters. It's used for simulations.
     # instance
-    def __init__(self, factory, cmodel, model_info, parameters):
+    def __init__(self, factory, id, model_info, parameters):
         self.factory    = factory    # factory object which created this PluginModel
-        self.cmodel     = cmodel     # pointer to unspecified data which can be used by external library
+        self.id         = id         # instance id
         self.model_info = model_info # should be of type ModelInfo
         self.parameters = parameters # instance of PluginModelParameterCollection
 
@@ -177,8 +177,7 @@ class PluginModel(object): # represents a concrete model with all its parameters
         
     # model instantiation
     def destroy(self):
-        if self.cmodel is not None:
-            self.factory.destroy_model(self)
+        self.factory.destroy_model(self)
 
     # calculations
     def calculate_q(self, q):
@@ -247,7 +246,8 @@ class PluginModelFactory(object): # does the hard work
         self._calculate_ER     = None
         self._calculate_VR     = None
         # created models
-        self._cmodels = []                  # list of created c-models (used to ensure that external library can be correctly unloaded)
+        self._next_model_id  = 1            # every model created will get a new id
+        self._created_models = {}           # id -> c-model (used to allow us to unload current library on demand)
         
         # load library
         if path is not None:
@@ -262,31 +262,40 @@ class PluginModelFactory(object): # does the hard work
             self.unload()
 
         # open library
-        self._cmodels = []
+        self._created_models = {}
         self._modelLib.open(path)
         self._cdll = CDLL(None, handle=self._modelLib.handle)
         self.path  = path
         try:
-            def loadfunction(cdll, name, restype, argtypes, optional=False):
+            def loadfunction(cdll, name, restype, argtypes, default=None):
                 try:
                     f = cdll[name]
                     f.restype  = restype
                     f.argtypes = argtypes
                     return f
                 except:
-                    if optional:
-                        return None
+                    if default:
+                        return default
                     raise
 
+            def default_create_model(data):
+                return None
+            def default_destroy_model(cmodel):
+                pass
+            def default_calculate(cmodel, cparameter_ptrs, n, iq_data, qx=None, qy=None, qz=None):
+                nan = float('nan')
+                for k in xrange(n):
+                    iq_data[k] = nan
+                    
             # load functions
             self._get_model_info   = loadfunction(self._cdll, 'get_model_info'  , c_model_info_p, [])
             # model instantiation
-            self._create_model     = loadfunction(self._cdll, 'create_model'    , c_cmodel_p, [c_data_p  ])
-            self._destroy_model    = loadfunction(self._cdll, 'destroy_model'   , None      , [c_cmodel_p])
+            self._create_model     = loadfunction(self._cdll, 'create_model'    , c_cmodel_p, [c_data_p  ], default=default_create_model )
+            self._destroy_model    = loadfunction(self._cdll, 'destroy_model'   , None      , [c_cmodel_p], default=default_destroy_model)
             # I/Q calculations
-            self._calculate_q      = loadfunction(self._cdll, 'calculate_q'     , None, [c_cmodel_p, c_parameters_p, c_size_t, c_double_p, c_double_p                        ])
-            self._calculate_qxqy   = loadfunction(self._cdll, 'calculate_qxqy'  , None, [c_cmodel_p, c_parameters_p, c_size_t, c_double_p, c_double_p, c_double_p            ], optional=True)
-            self._calculate_qxqyqz = loadfunction(self._cdll, 'calculate_qxqyqz', None, [c_cmodel_p, c_parameters_p, c_size_t, c_double_p, c_double_p, c_double_p, c_double_p], optional=True)
+            self._calculate_q      = loadfunction(self._cdll, 'calculate_q'     , None, [c_cmodel_p, c_parameters_p, c_size_t, c_double_p, c_double_p                        ], default=default_calculate)
+            self._calculate_qxqy   = loadfunction(self._cdll, 'calculate_qxqy'  , None, [c_cmodel_p, c_parameters_p, c_size_t, c_double_p, c_double_p, c_double_p            ], default=default_calculate)
+            self._calculate_qxqyqz = loadfunction(self._cdll, 'calculate_qxqyqz', None, [c_cmodel_p, c_parameters_p, c_size_t, c_double_p, c_double_p, c_double_p, c_double_p], default=default_calculate)
             # other calculations
             self._calculate_ER     = loadfunction(self._cdll, 'calculate_ER'    , c_double, [c_cmodel_p, c_parameters_p])
             self._calculate_VR     = loadfunction(self._cdll, 'calculate_VR'    , c_double, [c_cmodel_p, c_parameters_p])
@@ -298,11 +307,11 @@ class PluginModelFactory(object): # does the hard work
             raise
         
     def unload(self):
-        # destroy existing models
+        # destroy existing c-models
         if self._destroy_model is not None:
-            for cmodel in self._cmodels:
+            for cmodel in self._created_models.itervalues():
                 self._destroy_model(cmodel)
-        self._cmodels = []
+        self._created_models = {}
         # reset functions
         self._get_model_info   = None
         self._create_model     = None
@@ -347,31 +356,32 @@ class PluginModelFactory(object): # does the hard work
         if self._create_model is None:
             raise Exception()
 
-        # create cmodel
-        cmodel = self._create_model(data)
-        if (cmodel is None) or (cmodel == 0):
-            raise Exception()
+        # increment id
+        current_id          = self._next_model_id
+        self._next_model_id += 1
         
-        self._cmodels.extend([cmodel])
+        # create cmodel
+        self._created_models[current_id] = self._create_model(data)
 
         model_info         = self.get_model_info()
         default_parameters = PluginModelParameterCollection({
             p.name : (p.default if not p.flags & ParameterFlags.Polydisperse else PolydisperseParameter([p.default]))
             for p in model_info.parameters})
 
-        return PluginModel(self, cmodel, model_info, default_parameters)
+        return PluginModel(self, current_id, model_info, default_parameters)
         
     def destroy_model(self, model): # destroys a concrete model
-        if not model.cmodel in self._cmodels:
-            raise ValueError('model.cmodel')
+        if not model.id in self._created_models:
+            raise ValueError('model.id')
         if self._destroy_model is None:
             raise Exception()
         
         try:
-            self._destroy_model(model.cmodel)
+            cmodel = self._created_models[model.id]
+            self._destroy_model(cmodel)
         finally:
-            self._cmodels.remove(model.cmodel)
-            model.cmodel     = None
+            self._created_models.pop(model.id)
+            model.id         = None
             model.factory    = None
             model.model_info = None
             model.parameters = None
@@ -387,33 +397,35 @@ class PluginModelFactory(object): # does the hard work
     
     # I/Q calculations
     def calculate_q(self, model, q):
-        if not model.cmodel in self._cmodels:
-            raise ValueError('model.cmodel')
+        if not model.id in self._created_models:
+            raise ValueError('model.id')
         if self._calculate_q is None:
             raise Exception()
 
+        cmodel = self._created_models[model.id]
         cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
         
         if q is None:
-            self._calculate_q(model.cmodel, cparameter_ptrs, 0, None, None)
+            self._calculate_q(cmodel, cparameter_ptrs, 0, None, None)
             return []
 
         n       = len(q)
         iq_data = (c_double * n)()
         q_data  = (c_double * n)(*q)
-        self._calculate_q(model.cmodel, cparameter_ptrs, n, iq_data, q_data)
+        self._calculate_q(cmodel, cparameter_ptrs, n, iq_data, q_data)
         return list(iq_data)
         
     def calculate_qxqy(self, model, qx, qy):
-        if not model.cmodel in self._cmodels:
-            raise ValueError('model.cmodel')
+        if not model.id in self._created_models:
+            raise ValueError('model.id')
         if self._calculate_qxqy is None:
             raise Exception()
 
+        cmodel = self._created_models[model.id]
         cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
 
         if (qx is None) or (qy is None):
-            self._calculate_qxqy(model.cmodel, cparameter_ptrs, 0, None, None, None)
+            self._calculate_qxqy(cmodel, cparameter_ptrs, 0, None, None, None)
             return []
 
         nx = len(qx)
@@ -425,19 +437,20 @@ class PluginModelFactory(object): # does the hard work
         iq_data = (c_double * n)()
         qx_data = (c_double * n)(*qx)
         qy_data = (c_double * n)(*qy)
-        self._calculate_qxqy(model.cmodel, cparameter_ptrs, n, iq_data, qx_data, qy_data)
+        self._calculate_qxqy(cmodel, cparameter_ptrs, n, iq_data, qx_data, qy_data)
         return list(iq_data)
         
     def calculate_qxqyqz(self, model, qx, qy, qz):
-        if not model.cmodel in self._cmodels:
-            raise ValueError('model.cmodel')
+        if not model.id in self._created_models:
+            raise ValueError('model.id')
         if self._calculate_qxqyqz is None:
             raise Exception()
 
+        cmodel = self._created_models[model.id]
         cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
 
         if (qx is None) or (qy is None) or (qz is None):
-            self._calculate_qxqyqz(model.cmodel, cparameter_ptrs, 0, None, None, None, None)
+            self._calculate_qxqyqz(cmodel, cparameter_ptrs, 0, None, None, None, None)
             return []
 
         nx = len(qx)
@@ -451,27 +464,31 @@ class PluginModelFactory(object): # does the hard work
         qx_data = (c_double * n)(*qx)
         qy_data = (c_double * n)(*qy)
         qz_data = (c_double * n)(*qz)
-        self._calculate_qxqyqz(model.cmodel, cparameter_ptrs, n, iq_data, qx_data, qy_data, qz_data)
+        self._calculate_qxqyqz(cmodel, cparameter_ptrs, n, iq_data, qx_data, qy_data, qz_data)
         return list(iq_data)
 
     # other calculations
     def calculate_ER(self, model):
-        if not model.cmodel in self._cmodels:
-            raise ValueError('model.cmodel')
+        if not model.id in self._created_models:
+            raise ValueError('model.id')
         if self._calculate_ER is None:
             raise Exception()
         
+        cmodel = self._created_models[model.id]
         cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
-        return self._calculate_ER(model.cmodel, cparameter_ptrs)
+        
+        return self._calculate_ER(cmodel, cparameter_ptrs)
         
     def calculate_VR(self, model):
-        if not model.cmodel in self._cmodels:
-            raise ValueError('model.cmodel')
+        if not model.id in self._created_models:
+            raise ValueError('model.id')
         if self._calculate_VR is None:
             raise Exception()
         
+        cmodel = self._created_models[model.id]
         cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
-        return self._calculate_VR(model.cmodel, cparameter_ptrs)
+        
+        return self._calculate_VR(cmodel, cparameter_ptrs)
 
 
 #################################################################################
@@ -480,12 +497,19 @@ class PluginModelFactory(object): # does the hard work
 def Test():
     # PluginModelFactory can be used to load and unload an external c-model
     factory = PluginModelFactory()
-    factory.load(r'C:\Users\davidm\Desktop\SasView\SampleModel\Release\SampleModel.dll')
+    #factory.load(r'C:\Users\davidm\Desktop\SasView\CPlugin\SampleModel\Debug\SampleModel.dll')
+    factory.load(r'C:\Users\davidm\Desktop\SasView\CPlugin\SimpleModel\Debug\SimpleModel.dll')
 
     # ModelInfo provides information of all paramters
     model_info = factory.get_model_info()
+
+    print
+    print 'name:        ', model_info.name
+    print 'description: ', model_info.description
+    print
+    
     for p in model_info.parameters:
-        print 'name: %-15s default: %11f' % (p.name, p.default)
+        print 'parameter: %-15s default: %11f' % (p.name, p.default)
         
     print
     print 'orientation: ', model_info.orientation
@@ -499,19 +523,21 @@ def Test():
     model = factory.create_model()
 
     # "model.parameters" can be used as a dictionary or parameters can be accessed directly
-    model.parameters['scale']       =  1.1
-    model.parameters.radius.values  = [10.0, 20.0]
-    model.parameters.radius.weights = [ 0.5,  0.5]
+    if 'radius' in model_info.polydisperse:
+        model.parameters.radius.values  = [10.0, 20.0]
+        model.parameters.radius.weights = [ 0.5,  0.5]
+    else:
+        model.parameters.radius = 5.0
 
-    print 'q     ', model.calculate_q([1, 2])
-    print 'qxqy  ', model.calculate_qxqy([1, 2], [1, 2])
+    print 'q     ', model.calculate_q(     [1, 2])
+    print 'qxqy  ', model.calculate_qxqy(  [1, 2], [1, 2])
     print 'qxqyqz', model.calculate_qxqyqz([1, 2], [1, 2], [1, 2])
     print 'er    ', model.calculate_ER()
     print 'vr    ', model.calculate_VR()
     print
     
     # a single value can be assigned to a polydisperse parameter
-    model.parameters.radius = 10.0
+    model.parameters['radius'] = 10.0
     
     print 'er    ', model.calculate_ER()
     print 'vr    ', model.calculate_VR()
