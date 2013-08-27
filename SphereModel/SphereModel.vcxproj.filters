@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SimpleModel.cpp">
+    <ClCompile Include="SphereModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
