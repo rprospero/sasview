@@ -62,7 +62,7 @@ struct SimpleParameter {
 };
 struct PolydisperseParameter {
     size_t Type;
-    size_t Length;
+    size_t NPoints;
     double *Values;
     double *Weights;
 };

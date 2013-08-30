@@ -22,7 +22,6 @@ CExport void* get_model_info() {
     return &model_info;
 }
 
-
 // Modified from sphere form calculator from libigor
 // scale and bkg moved to caller
 double SphereForm(double radius, double delrho, double q) {
@@ -54,7 +53,7 @@ CExport void calculate_q(void* ptr, void** p, size_t nq, double iq[], double q[]
     const double delRho     = AsSimpleParameter(p[2]) - AsSimpleParameter(p[3]);
     
     // Get the dispersion points for the radius
-    const PolydisperseParameter& radius = AsPolydisperseParameter(p[1]);
+    PolydisperseParameter radius = AsPolydisperseParameter(p[1]);
 
     // Perform the computation, with all weight points
     double sum  = 0.0;
@@ -65,15 +64,15 @@ CExport void calculate_q(void* ptr, void** p, size_t nq, double iq[], double q[]
     for (size_t i = 0; i < nq; i++) {
         const double qi = q[i];
 
-        for(size_t ri = 0; ri< radius.Length; ri++) {
-            const double& r = radius.Values[ri];
-            const double& w = radius.Weights[ri];
+        for(size_t ri = 0; ri < radius.NPoints; ri++) {
+            double r = radius.Values[ri];
+            double w = radius.Weights[ri];
 
             //Un-normalize SphereForm by volume
             sum += w * SphereForm(r, delRho, qi) * (r * r * r);
 
             //Find average volume
-            vol  += w  * (r * r * r);
+            vol  += w * (r * r * r);
             norm += w;
         }
 
@@ -96,7 +95,7 @@ CExport double calculate_ER(void* ptr, void** p) {
     const PolydisperseParameter& radius = AsPolydisperseParameter(p[1]);
 
     // Loop over radius weight points to average the radius value
-    for (size_t ri = 0; ri < radius.Length; ri++) {
+    for (size_t ri = 0; ri < radius.NPoints; ri++) {
         const double& r = radius.Values[ri];
         const double& w = radius.Weights[ri];
 
