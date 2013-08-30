@@ -1,4 +1,5 @@
 import os
+import struct
 from ctypes import *
 
 API_VERSION = 1
@@ -78,59 +79,12 @@ c_model_info_p     = POINTER(c_model_info)
 ## objects of the following types are passed to external library
 
 ParameterType = enum(
-    End          = 0x00000000,
+    End          = 0xAAAAAAA0,
     Simple       = 0xAAAAAAA1,
     Polydisperse = 0xAAAAAAA2)
         
 c_data_p       = c_void_p
 c_parameters_p = c_void_p
-
-class c_end_parameter(Structure):
-    _fields_ = [
-        ("type" , c_size_t)]
-    # instance
-    def __init__(self):
-        self.type  = ParameterType.End
-
-class c_simple_parameter(Structure):
-    _fields_ = [
-        ("type" , c_size_t),
-        ("value", c_double)]
-    # instance
-    def __init__(self, value):
-        self.type  = ParameterType.Simple
-        self.value = value
-
-class c_polydisperse_parameter(Structure):
-    _fields_ = [
-        ("type"   , c_size_t),
-        ("length" , c_size_t),
-        ("values" , c_double_p),
-        ("weights", c_double_p)]
-    # instance
-    def __init__(self, values_weights):
-        self.type    = ParameterType.Polydisperse
-
-        # we need to ensure that a polydisperse parameter always
-        # contains one array for values and one for weights
-        if isinstance(values_weights, (int, long, float)):
-            self.length  = 1
-            self.values  = (c_double * 1)(values_weights)
-            self.weights = (c_double * 1)(1)
-        else:        
-            values  = values_weights.values
-            weights = values_weights.weights
-            if len(values) != len(weights):
-                raise ValueError('len(weights)')
-            
-            self.length  = len(values)
-            self.values  = (c_double * self.length)(*values )
-            self.weights = (c_double * self.length)(*weights)
-            
-c_end_parameter_p          = POINTER(c_end_parameter)
-c_simple_parameter_p       = POINTER(c_simple_parameter)
-c_polydisperse_parameter_p = POINTER(c_polydisperse_parameter)
-
 
 #################################################################################
 ## only objects of the following types should be used to access external models
@@ -388,12 +342,88 @@ class PluginModelFactory(object): # does the hard work
         
     # helper
     def _get_cparameters(self, model_info, parameters): # creates a c-array which holds parameter values (expected by c-model)
-        cparameter_objs = [
-            c_simple_parameter(getattr(parameters, p.name)) if not p.flags & ParameterFlags.Polydisperse else c_polydisperse_parameter(getattr(parameters, p.name))
-            for p in model_info.parameters]
-        cparameter_objs.extend([c_end_parameter()])
-        cparameter_ptrs = (c_void_p * len(cparameter_objs))(*[addressof(p) for p in cparameter_objs])
-        return cparameter_objs, cparameter_ptrs
+        is32bit = sizeof(c_size_t) == 4
+
+        # determine size and offsets
+        data_size = 0
+        offsets   = []
+        for p in model_info.parameters:
+            offsets.append(data_size)
+            if not p.flags & ParameterFlags.Polydisperse:
+                data_size += sizeof(c_size_t) # size_t type = ParameterType.Simple;
+                data_size += sizeof(c_double) # double value;
+            else:
+                values_weights = getattr(parameters, p.name)
+                if isinstance(values_weights, (int, long, float)):
+                    npoints = 1
+                else:
+                    npoints = len(values_weights.values)
+                
+                data_size += sizeof(c_size_t)            # size_t type = ParameterType.Polydisperse;
+                data_size += sizeof(c_size_t)            # size_t npoints;
+                data_size += sizeof(c_double) * npoints  # double values[npoints];
+                data_size += sizeof(c_double) * npoints  # double weights[npoints];
+
+        offsets.append(data_size)
+        data_size += sizeof(c_size_t) # size_t type = ParameterType.End;
+
+        # determine header size
+        header_size  = sizeof(c_size_t)                # size_t count;
+        header_size += sizeof(c_size_t) * len(offsets) # size_t offsets[count];
+
+        # create buffer
+        buffer = create_string_buffer(header_size + data_size)
+        # write header
+        if is32bit:
+            struct.pack_into('I%iI' % len(offsets), buffer, 0, len(offsets), *offsets)
+        else:
+            struct.pack_into('Q%iQ' % len(offsets), buffer, 0, len(offsets), *offsets)
+        # wrtie data
+        offset = header_size
+        for p in model_info.parameters:
+            if not p.flags & ParameterFlags.Polydisperse:
+                if is32bit:
+                    struct.pack_into('I', buffer, offset, ParameterType.Simple)
+                else:
+                    struct.pack_into('Q', buffer, offset, ParameterType.Simple)
+                offset += sizeof(c_size_t) # size_t type = ParameterType.Simple;
+
+                struct.pack_into('=d', buffer, offset, getattr(parameters, p.name))
+                offset += sizeof(c_double) # double value;
+            else:
+                values_weights = getattr(parameters, p.name)
+                is_single      = isinstance(values_weights, (int, long, float))
+                if is_single:
+                    npoints = 1
+                else:
+                    npoints = len(values_weights.values)
+
+                if is32bit:
+                    struct.pack_into('II', buffer, offset, ParameterType.Polydisperse, npoints)
+                else:
+                    struct.pack_into('QQ', buffer, offset, ParameterType.Polydisperse, npoints)
+                offset += sizeof(c_size_t) # size_t type = ParameterType.Polydisperse;
+                offset += sizeof(c_size_t) # size_t npoints;
+
+                if is_single:
+                    struct.pack_into('=dd', buffer, offset, values_weights, 1.0)
+                    offset += sizeof(c_double)            # double values[1];
+                    offset += sizeof(c_double)            # double weights[1];
+                else:
+                    format = '=%id' % npoints
+                    struct.pack_into(format, buffer, offset, *values_weights.values)
+                    offset += sizeof(c_double) * npoints  # double values[npoints];
+                    
+                    struct.pack_into(format, buffer, offset, *values_weights.weights)
+                    offset += sizeof(c_double) * npoints  # double weights[npoints];
+                
+        # write end
+        if is32bit:
+            struct.pack_into('I', buffer, offset, ParameterType.End)
+        else:
+            struct.pack_into('Q', buffer, offset, ParameterType.End)
+
+        return buffer
     
     # I/Q calculations
     def calculate_q(self, model, q):
@@ -402,17 +432,17 @@ class PluginModelFactory(object): # does the hard work
         if self._calculate_q is None:
             raise Exception()
 
-        cmodel = self._created_models[model.id]
-        cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
+        cmodel      = self._created_models[model.id]
+        cparameters = self._get_cparameters(model.model_info, model.parameters)
         
         if q is None:
-            self._calculate_q(cmodel, cparameter_ptrs, 0, None, None)
+            self._calculate_q(cmodel, cparameters, 0, None, None)
             return []
 
         n       = len(q)
         iq_data = (c_double * n)()
         q_data  = (c_double * n)(*q)
-        self._calculate_q(cmodel, cparameter_ptrs, n, iq_data, q_data)
+        self._calculate_q(cmodel, cparameters, n, iq_data, q_data)
         return list(iq_data)
         
     def calculate_qxqy(self, model, qx, qy):
@@ -421,11 +451,11 @@ class PluginModelFactory(object): # does the hard work
         if self._calculate_qxqy is None:
             raise Exception()
 
-        cmodel = self._created_models[model.id]
-        cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
+        cmodel      = self._created_models[model.id]
+        cparameters = self._get_cparameters(model.model_info, model.parameters)
 
         if (qx is None) or (qy is None):
-            self._calculate_qxqy(cmodel, cparameter_ptrs, 0, None, None, None)
+            self._calculate_qxqy(cmodel, cparameters, 0, None, None, None)
             return []
 
         nx = len(qx)
@@ -437,7 +467,7 @@ class PluginModelFactory(object): # does the hard work
         iq_data = (c_double * n)()
         qx_data = (c_double * n)(*qx)
         qy_data = (c_double * n)(*qy)
-        self._calculate_qxqy(cmodel, cparameter_ptrs, n, iq_data, qx_data, qy_data)
+        self._calculate_qxqy(cmodel, cparameters, n, iq_data, qx_data, qy_data)
         return list(iq_data)
         
     def calculate_qxqyqz(self, model, qx, qy, qz):
@@ -446,11 +476,11 @@ class PluginModelFactory(object): # does the hard work
         if self._calculate_qxqyqz is None:
             raise Exception()
 
-        cmodel = self._created_models[model.id]
-        cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
+        cmodel      = self._created_models[model.id]
+        cparameters = self._get_cparameters(model.model_info, model.parameters)
 
         if (qx is None) or (qy is None) or (qz is None):
-            self._calculate_qxqyqz(cmodel, cparameter_ptrs, 0, None, None, None, None)
+            self._calculate_qxqyqz(cmodel, cparameters, 0, None, None, None, None)
             return []
 
         nx = len(qx)
@@ -464,7 +494,7 @@ class PluginModelFactory(object): # does the hard work
         qx_data = (c_double * n)(*qx)
         qy_data = (c_double * n)(*qy)
         qz_data = (c_double * n)(*qz)
-        self._calculate_qxqyqz(cmodel, cparameter_ptrs, n, iq_data, qx_data, qy_data, qz_data)
+        self._calculate_qxqyqz(cmodel, cparameters, n, iq_data, qx_data, qy_data, qz_data)
         return list(iq_data)
 
     # other calculations
@@ -474,10 +504,10 @@ class PluginModelFactory(object): # does the hard work
         if self._calculate_ER is None:
             raise Exception()
         
-        cmodel = self._created_models[model.id]
-        cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
+        cmodel      = self._created_models[model.id]
+        cparameters = self._get_cparameters(model.model_info, model.parameters)
         
-        return self._calculate_ER(cmodel, cparameter_ptrs)
+        return self._calculate_ER(cmodel, cparameters)
         
     def calculate_VR(self, model):
         if not model.id in self._created_models:
@@ -485,21 +515,20 @@ class PluginModelFactory(object): # does the hard work
         if self._calculate_VR is None:
             raise Exception()
         
-        cmodel = self._created_models[model.id]
-        cparameter_objs, cparameter_ptrs = self._get_cparameters(model.model_info, model.parameters)
+        cmodel      = self._created_models[model.id]
+        cparameters = self._get_cparameters(model.model_info, model.parameters)
         
-        return self._calculate_VR(cmodel, cparameter_ptrs)
+        return self._calculate_VR(cmodel, cparameters)
 
 
 #################################################################################
 ## Tests/Demos
 
-def Test():
+def Test(path):
     # PluginModelFactory can be used to load and unload an external c-model
     factory = PluginModelFactory()
-    #factory.load(r'C:\Users\davidm\Desktop\SasView\CPlugin\SampleModel\Debug\SampleModel.dll')
-    factory.load(r'C:\Users\davidm\Desktop\SasView\CPlugin\SimpleModel\Debug\SimpleModel.dll')
-
+    factory.load(path)
+    
     # ModelInfo provides information of all paramters
     model_info = factory.get_model_info()
 
@@ -546,5 +575,7 @@ def Test():
     # when factory and model become out of scope, the model and library will be released 
 
 print '---'
-Test()
+#Test(r'C:\Users\davidm\Desktop\SasView\CPlugin\SimpleModel.dll')
+#Test(r'C:\Users\davidm\Desktop\SasView\CPlugin\SphereModel\Debug\SphereModel.dll')
+Test(r'C:\Users\davidm\Desktop\SasView\CPlugin\SimpleModel\Debug\SimpleModel.dll')
 print 'done'

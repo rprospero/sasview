@@ -16,26 +16,33 @@ CExport void* get_model_info() {
     return &model_info;
 }
 // calculations
-CExport void calculate_q(void* ptr, void** p, size_t nq, double iq[], double q[]) {
-    if ((p == NULL) || (*p == NULL))
-        return;
-    
-    double radius = AsSimpleParameter(p[0]);
-    double bkg    = AsSimpleParameter(p[1]);
+CExport void calculate_q(void* ptr, void* p, size_t nq, double iq[], double q[]) {
+	Parameters parameters(p);
+
+//	if (!parameters.valid())
+//		return;
+
+	if (!parameters.valid(model_info))
+		return;
+
+	double radius = parameters[0];
+	double bkg    = parameters[1];
 
     for (size_t i = 0; i != nq; i++)
         iq[i] = q[i] * radius + bkg;
 }
-CExport double calculate_ER(void* ptr, void** p) {
-    if ((p == NULL) || (*p == NULL))
-        return DBL_NAN;
-    
-    double radius = AsSimpleParameter(p[0]);
+CExport double calculate_ER(void* ptr, void* p) {
+	Parameters parameters(p);
+	if (!parameters.valid())
+		return DBL_NAN;
+
+    double radius = parameters[0];
     return radius;
 }
-CExport double calculate_VR(void* ptr, void** p) {
-    if ((p == NULL) || (*p == NULL))
-        return DBL_NAN;
+CExport double calculate_VR(void* ptr, void* p) {
+	Parameters parameters(p);
+	if (!parameters.valid())
+		return DBL_NAN;
 
     return 1.0;
 }
