@@ -676,11 +676,14 @@ class ViewerFrame(PARENT_FRAME):
         update edit menu if available
         """
         if event != None:
+            print "Event was generated."
             self.panel_on_focus = event.panel
         if self.panel_on_focus is not None:
+            print "A panel is in focus."
             #Disable save application if the current panel is in batch mode
             flag = self.panel_on_focus.get_save_flag()
             if self._save_appl_menu != None:
+                print "_save_appl_menu is not None"
                 self._save_appl_menu.Enable(flag)
 
             if self.panel_on_focus not in self.plot_panels.values():
@@ -690,6 +693,8 @@ class ViewerFrame(PARENT_FRAME):
 
             if self._data_panel is not None and \
                             self.panel_on_focus is not None:
+                print self._data_panel
+                print "Go through the helpers."
                 self.set_panel_on_focus_helper()
                 #update toolbar
                 self._update_toolbar_helper()
