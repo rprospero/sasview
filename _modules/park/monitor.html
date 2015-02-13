@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.monitor &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.monitor</h1><div class="highlight"><pre>
+<span class="c"># This program is public domain</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Asychronous execution monitoring service.</span>
+
+<span class="sd">Long running computations need to convey status information to the user.</span>
+<span class="sd">This status can take multiple forms, such as output to the console or</span>
+<span class="sd">activity on a GUI, or even mail to your inbox.</span>
+
+<span class="sd">park.monitor defines several standard message types::</span>
+
+<span class="sd">    `Start` for job start</span>
+<span class="sd">    `Join` first message when joining an already running job</span>
+<span class="sd">    `Progress` for job activity</span>
+<span class="sd">    `Improvement` for partial results</span>
+<span class="sd">    `Complete` for final result</span>
+<span class="sd">    `Abort` when job is killed</span>
+<span class="sd">    `Error` when job has an error</span>
+<span class="sd">    `Log` for various debugging messages</span>
+
+<span class="sd">Individual services may have specialized message types.</span>
+
+<span class="sd">park.monitor also defines `Monitor` to process the various kinds of messages,</span>
+<span class="sd">and dispatch them to the various user defined handlers.</span>
+
+<span class="sd">For each message type, the Monitor dispatcher will look for a function</span>
+<span class="sd">named onMonitorQQQ where QQQ is the message type.  For example,</span>
+<span class="sd">onMonitorStart(self, message) will be called in response to a Start message.</span>
+<span class="sd">If onMonitorQQQ is not defined, then onMonitorMessage will be called.  The</span>
+<span class="sd">default behaviour of onMonitorMessage is to print the message on the console.</span>
+
+<span class="sd">Log messages are sent to the standard system logger.  See logging in the</span>
+<span class="sd">python standard library for details.</span>
+
+<span class="sd">The Monitor class has methods for onMonitorStart(message), etc.</span>
+<span class="sd">In panel, be sure to have methods for onMonitorStart(message), </span>
+<span class="sd">onMonitorProgress(message), etc., for the kinds of monitor messages </span>
+<span class="sd">the application will send.  The catch-all method is onMonitorMessage.</span>
+
+<span class="sd">See `park.monitor` for details on the message types.  Individual services</span>
+<span class="sd">may have additional message types.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Monitor&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="k">class</span> <span class="nc">Message</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Message type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="k">class</span> <span class="nc">Start</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start.</span>
+
+<span class="sd">    Sent when the job has started processing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s">&quot;Start&quot;</span>
+
+<span class="k">class</span> <span class="nc">Join</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Join: k units of n with partial result</span>
+<span class="sd">    </span>
+<span class="sd">    Sent when the listener is attached to a running job.  This is</span>
+<span class="sd">    a combination of Progress and Improvement.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">partial</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="sd">&quot;&quot;&quot;Total work to complete&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complete</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="sd">&quot;&quot;&quot;Amount of work complete&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">partial</span>
+        <span class="sd">&quot;&quot;&quot;The partial result completed; this is job specific&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s">&quot;Join: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+    
+<span class="k">class</span> <span class="nc">Progress</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Progress: k units of n.</span>
+
+<span class="sd">    Sent when a certain amount of progress has happened.</span>
+
+<span class="sd">    Use the job controller to specify the reporting</span>
+<span class="sd">    frequency (time and/or percentage).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="sd">&quot;&quot;&quot;Total work to complete&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">complete</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="sd">&quot;&quot;&quot;Amount of work complete&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="sd">&quot;&quot;&quot;Units of work, or None&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Progress: </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> of </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">complete</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Progress: </span><span class="si">%s</span><span class="s"> of </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">complete</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Improvement</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Improvement: partial result.</span>
+
+<span class="sd">    Use the job controller to specify the improvement frequency</span>
+<span class="sd">    (time and/or percentage).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partial</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">partial</span>
+        <span class="sd">&quot;&quot;&quot;The partial result completed; this is job specific&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Improvement: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Complete</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Complete: final result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">final</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">final</span>
+        <span class="sd">&quot;&quot;&quot;The final completed result; this is job specific&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Complete: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Traceback stack trace.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">trace</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">trace</span>
+        <span class="sd">&quot;&quot;&quot;The stack trace returned from exc_info()&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#print &quot;traceback&quot;,traceback.format_exception(*self.trace)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;Error: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Abort</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abort: partial result</span>
+
+<span class="sd">    Use the job controller to signal an abort.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partial</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">partial</span>
+        <span class="sd">&quot;&quot;&quot;The partial result completed; this is job specific&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Abort: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Log</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Log module.function: log record</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s">&quot;Log </span><span class="si">%(module)s</span><span class="s">.</span><span class="si">%(funcName)s</span><span class="s">: </span><span class="si">%(message)s</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">record</span> <span class="o">=</span> <span class="n">record</span>
+        <span class="sd">&quot;&quot;&quot;The partial result completed; this is job specific&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">record</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Monitor"><a class="viewcode-back" href="../../dev/api/park.html#park.monitor.Monitor">[docs]</a><span class="k">class</span> <span class="nc">Monitor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Messages that are received during the processing of the job.</span>
+
+<span class="sd">    Standard message types::</span>
+
+<span class="sd">        `Start`, `Progress`, `Improvement`, `Complete`, `Error`, `Abort`, `Log`</span>
+
+<span class="sd">    Specific job types may have their own monitor messages.</span>
+
+<span class="sd">    The messages themselves should all produce nicely formatted results</span>
+<span class="sd">    in response to str(message).</span>
+
+<span class="sd">    The message dispatch calls on&lt;Class&gt;(message) if the on&lt;Class&gt;</span>
+<span class="sd">    method exists for the message type.  If not, then dispatch</span>
+<span class="sd">    calls otherwise(message).  By default onLog(message) submits the</span>
+<span class="sd">    log record to the logger.</span>
+
+<span class="sd">    Subclass Monitor to define your own behaviours.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Monitor.put"><a class="viewcode-back" href="../../dev/api/park.html#park.monitor.Monitor.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called from thread when new message has arrived.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                     <span class="s">&quot;onMonitor&quot;</span><span class="o">+</span><span class="n">message</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> 
+                     <span class="bp">self</span><span class="o">.</span><span class="n">onMonitorMessage</span><span class="p">)</span>
+        <span class="n">fn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Monitor.onMonitorMessage"><a class="viewcode-back" href="../../dev/api/park.html#park.monitor.Monitor.onMonitorMessage">[docs]</a>    <span class="k">def</span> <span class="nf">onMonitorMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        What to do if the message handler is not found.</span>
+
+<span class="sd">        Default is to ignore the message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;&gt;&quot;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Monitor.onMonitorLog"><a class="viewcode-back" href="../../dev/api/park.html#park.monitor.Monitor.onMonitorLog">[docs]</a>    <span class="k">def</span> <span class="nf">onMonitorLog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the job sends a logging record.</span>
+
+<span class="sd">        The logging record contains a normal python logging record.</span>
+
+<span class="sd">        The default behaviour is to tie into the application logging</span>
+<span class="sd">        system using::</span>
+
+<span class="sd">            logger = logging.getLogger(message.record.name)</span>
+<span class="sd">            logger.handle(message.record)</span>
+
+<span class="sd">        Logging levels are set in the job controller.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="p">)</span>
+
+</div></div>
+<span class="k">def</span> <span class="nf">demo</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">thread</span><span class="o">,</span> <span class="nn">logging</span>
+    <span class="kn">import</span> <span class="nn">park.monitor</span>
+
+    <span class="n">monitor</span> <span class="o">=</span> <span class="n">Monitor</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">messagestream</span><span class="p">(</span><span class="n">monitor</span><span class="p">,</span><span class="n">rate</span><span class="p">,</span><span class="n">stream</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">(</span><span class="s">&#39;hi&#39;</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="s">&#39;hello.py&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s">&#39;log message&#39;</span><span class="p">,(),</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;here&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Test exception&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+    <span class="n">stream</span><span class="o">=</span><span class="p">[</span><span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Start</span><span class="p">(),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Join</span><span class="p">(</span><span class="s">&#39;Good&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Improvement</span><span class="p">(</span><span class="s">&#39;Better!&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Abort</span><span class="p">(</span><span class="s">&#39;Abandoned&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Start</span><span class="p">(),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="s">&#39;seconds&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Improvement</span><span class="p">(</span><span class="s">&#39;Better!&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Complete</span><span class="p">(</span><span class="s">&#39;Best!&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Start</span><span class="p">(),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Log</span><span class="p">(</span><span class="n">R</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">trace</span><span class="p">)]</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">start_new_thread</span><span class="p">(</span><span class="n">messagestream</span><span class="p">,</span> <span class="p">(</span><span class="n">monitor</span><span class="p">,</span><span class="n">rate</span><span class="p">,</span><span class="n">stream</span><span class="p">))</span>
+
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="p">(</span><span class="n">rate</span><span class="o">+</span><span class="mf">0.01</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span> <span class="n">demo</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sas.fit.Fitting &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for sas.fit.Fitting</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Class Fit contains ScipyFit and ParkFit methods declaration</span>
+<span class="sd">allows to create instance of type ScipyFit or ParkFit to perform either</span>
+<span class="sd">a park fit or a scipy fit.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">#from scipy import optimize</span>
+<span class="kn">from</span> <span class="nn">sas.fit.ScipyFitting</span> <span class="kn">import</span> <span class="n">ScipyFit</span>
+<span class="kn">from</span> <span class="nn">sas.fit.ParkFitting</span> <span class="kn">import</span> <span class="n">ParkFit</span>
+<span class="kn">from</span> <span class="nn">sas.fit.BumpsFitting</span> <span class="kn">import</span> <span class="n">BumpsFit</span>
+
+<span class="n">ENGINES</span><span class="o">=</span><span class="p">{</span>
+    <span class="s">&#39;scipy&#39;</span><span class="p">:</span> <span class="n">ScipyFit</span><span class="p">,</span>
+    <span class="s">&#39;park&#39;</span><span class="p">:</span> <span class="n">ParkFit</span><span class="p">,</span>
+    <span class="s">&#39;bumps&#39;</span><span class="p">:</span> <span class="n">BumpsFit</span><span class="p">,</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="Fit"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit">[docs]</a><span class="k">class</span> <span class="nc">Fit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Wrap class that allows to select the fitting type.this class </span>
+<span class="sd">    can be used as follow : ::</span>
+<span class="sd">    </span>
+<span class="sd">        from sas.fit.Fitting import Fit</span>
+<span class="sd">        fitter= Fit()</span>
+<span class="sd">        fitter.fit_engine(&#39;scipy&#39;) or fitter.fit_engine(&#39;park&#39;)</span>
+<span class="sd">        engine = fitter.returnEngine()</span>
+<span class="sd">        engine.set_data(data,id)</span>
+<span class="sd">        engine.set_param( model,model.name, pars)</span>
+<span class="sd">        engine.set_model(model,id)</span>
+<span class="sd">        </span>
+<span class="sd">        chisqr1, out1, cov1=engine.fit(pars,qmin,qmax)</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s">&#39;scipy&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#self._engine will contain an instance of ScipyFit or ParkFit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitter_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_engine</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+          
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        set fitter_id and its engine at the same time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&quot;fitter_id&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;_engine&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">fitter_id</span> <span class="o">=</span> <span class="n">value</span>    
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&quot;_engine&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;fitter_id&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitter_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">fitter_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitter_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                
+<div class="viewcode-block" id="Fit.set_engine"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.set_engine">[docs]</a>    <span class="k">def</span> <span class="nf">set_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Select the type of Fit </span>
+<span class="sd">        </span>
+<span class="sd">        :param word: the keyword to select the fit type </span>
+<span class="sd">        </span>
+<span class="sd">        :raise: if the user does not enter &#39;scipy&#39; or &#39;park&#39;,</span>
+<span class="sd">             a valueError is raised </span>
+<span class="sd">             </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="o">=</span> <span class="n">ENGINES</span><span class="p">[</span><span class="n">word</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;fit engine should be one of scipy, park or bumps&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Fit.fit"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg_q</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">curr_thread</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">ftol</span><span class="o">=</span><span class="mf">1.49012e-8</span><span class="p">,</span>
+                        <span class="n">reset_flag</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform the fit &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">msg_q</span><span class="o">=</span><span class="n">msg_q</span><span class="p">,</span> 
+                                <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">handler</span><span class="p">,</span> <span class="n">curr_thread</span><span class="o">=</span><span class="n">curr_thread</span><span class="p">,</span>
+                                <span class="n">ftol</span><span class="o">=</span><span class="n">ftol</span><span class="p">,</span> <span class="n">reset_flag</span><span class="o">=</span><span class="n">reset_flag</span><span class="p">)</span>
+     </div>
+<div class="viewcode-block" id="Fit.set_model"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.set_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">pars</span><span class="o">=</span><span class="p">[],</span> <span class="n">constraints</span><span class="o">=</span><span class="p">[],</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        store a model model to fit at the position id of the fit engine</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">constraints</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+   </div>
+<div class="viewcode-block" id="Fit.set_data"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">smearer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">qmin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">qmax</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Store data to fit at the psotion id of the fit engine</span>
+<span class="sd">        </span>
+<span class="sd">        :param data: data to fit</span>
+<span class="sd">        :param smearer: smearerobject to smear data</span>
+<span class="sd">        :param qmin: the minimum q range to fit </span>
+<span class="sd">        :param qmax: the minimum q range to fit</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">smearer</span><span class="p">,</span> <span class="n">qmin</span><span class="p">,</span> <span class="n">qmax</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Fit.get_model"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.get_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; return list of data&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Fit.remove_fit_problem"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.remove_fit_problem">[docs]</a>    <span class="k">def</span> <span class="nf">remove_fit_problem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;remove fitarrange in id&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">remove_fit_problem</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Fit.select_problem_for_fit"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.select_problem_for_fit">[docs]</a>    <span class="k">def</span> <span class="nf">select_problem_for_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        select a couple of model and data at the id position in dictionary</span>
+<span class="sd">        and set in self.selected value to value</span>
+<span class="sd">        </span>
+<span class="sd">        :param value: the value to allow fitting.</span>
+<span class="sd">             can only have the value one or zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">select_problem_for_fit</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Fit.get_problem_to_fit"><a class="viewcode-back" href="../../../dev/api/sas.fit.html#sas.fit.Fitting.Fit.get_problem_to_fit">[docs]</a>    <span class="k">def</span> <span class="nf">get_problem_to_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return the self.selected value of the fit problem of id</span>
+<span class="sd">           </span>
+<span class="sd">        :param id: the id of the problem</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">get_problem_to_fit</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

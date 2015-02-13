@@ -1,0 +1,638 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.parameter &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.parameter</h1><div class="highlight"><pre>
+<span class="c"># This program is public domain</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Parameters and parameter sets.</span>
+
+<span class="sd">Parameter defines an individual parameter, and ParameterSet groups them</span>
+<span class="sd">into a hierarchy.</span>
+
+<span class="sd">Individual models need to provide a parameter set with the correct</span>
+<span class="sd">properties, either by using park.ParameterSet in their model definition,</span>
+<span class="sd">or by providing a wrapper which can translate assignment to parameter.value</span>
+<span class="sd">into the appropriate change in the wrapped model.  See wrapper.py for</span>
+<span class="sd">an example.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Parameter&#39;</span><span class="p">,</span> <span class="s">&#39;ParameterSet&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">expression</span>        
+
+<span class="k">class</span> <span class="nc">Pnormal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Negative log likelihood function for a parameter from a Gaussian</span>
+<span class="sd">    distribution.</span>
+<span class="sd">    </span>
+<span class="sd">    Given P(v;mu,sigma) = exp(-1/2 (mu-v)^2/sigma^2)/sqrt(2 pi sigma^2)</span>
+<span class="sd">    then -log(P) = 1/2 (mu-v)^2/sigma^2 + 1/2 log(2*pi*sigma^2)</span>
+<span class="sd">    </span>
+<span class="sd">    Assuming that parameter P is selected from a normal distribution,</span>
+<span class="sd">    then P.likelihood = Pnormal(mu,sigma)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">std</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">const</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">value</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">const</span>
+    
+<span class="n">inf</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inf</span>
+<div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A parameter is a box for communicating with the fitting service.</span>
+<span class="sd">    Parameters can have a number of properties, </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters have a number of properties:</span>
+<span class="sd">    </span>
+<span class="sd">    name &quot;string&quot;</span>
+<span class="sd">        name of the parameter within the parameter set.  </span>
+<span class="sd">        </span>
+<span class="sd">        The name is read only.  You can rename a parameter but only </span>
+<span class="sd">        in the context of the parameter set which contains it, using</span>
+<span class="sd">        parameterset.rename(par,name).  This will change all expressions</span>
+<span class="sd">        containing the named parameter.</span>
+<span class="sd">    </span>
+<span class="sd">    path</span>
+<span class="sd">        dotted name of the parameter within the set of models.  The</span>
+<span class="sd">        dotted name is automatically generated by the parameter set</span>
+<span class="sd">        before expressions are parsed and evaluated.  There are</span>
+<span class="sd">        some operations on parameter sets (such as renaming the</span>
+<span class="sd">        layer containing a parameter) which will force an adjustment</span>
+<span class="sd">        of all the underlying parameter names, as well as any</span>
+<span class="sd">        expressions in which they are referenced.</span>
+<span class="sd">    </span>
+<span class="sd">    limits (low, high)</span>
+<span class="sd">        hard limits on the range of allowed parameter values, dictated</span>
+<span class="sd">        by physics rather than by knowledge of the particular system.</span>
+<span class="sd">        For example, thickness parameters would have limits (0,inf)</span>
+<span class="sd">        because negative thicknesses are unphysical.  These limits</span>
+<span class="sd">        are enforced when setting range for the fit.</span>
+
+<span class="sd">    units &quot;string&quot;</span>
+<span class="sd">        units for the parameter.  This should be a string, but</span>
+<span class="sd">        be parsable by whatever units package your application</span>
+<span class="sd">        supports.</span>
+
+<span class="sd">    tip &quot;string&quot;</span>
+<span class="sd">        parameter description, suitable for use in a tooltip</span>
+<span class="sd">    </span>
+<span class="sd">    value double</span>
+<span class="sd">        current value of the parameter, either fixed, fitted or computed</span>
+<span class="sd">    </span>
+<span class="sd">    range (low, high)</span>
+<span class="sd">        range of expected values for the parameter in the model</span>
+<span class="sd">    </span>
+<span class="sd">    expression &quot;string&quot;</span>
+<span class="sd">        expression for the parameter in the model.  This is a string</span>
+<span class="sd">        containing a formula for updating the parameter value based</span>
+<span class="sd">        on the values of other parameters in the system.  The expression</span>
+<span class="sd">        is ignored if &#39;calculated&#39; is False.</span>
+
+<span class="sd">        Note: the list of symbols available to the expression evaluator</span>
+<span class="sd">        defaults to the contents of the math module.  The caller will be</span>
+<span class="sd">        able to override this within the fitting fitting class.</span>
+<span class="sd">    </span>
+<span class="sd">    status &#39;fixed&#39;|&#39;computed&#39;|&#39;fitted&#39;</span>
+<span class="sd">        the parameter type.  Choose &#39;fixed&#39; if the values is to</span>
+<span class="sd">        remain fixed throughout the fit, even if a range and an</span>
+<span class="sd">        expression have been specified.  Choose &#39;computed&#39; if the</span>
+<span class="sd">        value of the parameter is to be computed each time the</span>
+<span class="sd">        parameters are updated.  Choose &#39;fitted&#39; if an optimization</span>
+<span class="sd">        algorithm is supposed to search the parameter space.</span>
+
+<span class="sd">    likelihood</span>
+<span class="sd">        function to return the negative log likelihood of seeing a</span>
+<span class="sd">        particular parameter value.  2*likelihood(value) will be added</span>
+<span class="sd">        to the total cost function for the particular parameter set</span>
+<span class="sd">        during the fit.  This will be on par with the probabilty</span>
+<span class="sd">        of seeing the particular theory function given the observed</span>
+<span class="sd">        datapoints when performing the fit (the residual term is</span>
+<span class="sd">        closely related to the log likelihood of the normal distribution).</span>
+<span class="sd">        </span>
+<span class="sd">        Note: we are minimizing chi^2 = sum [ ((y-f(x;p))/dy)^2 ] rather </span>
+<span class="sd">        than  -log P = sum [ ((y-f(x;p))/dy)^2/2 + log(2 pi dy^2) ],</span>
+<span class="sd">        where P is the probability of seeing f(x;p) given y,dy as the</span>
+<span class="sd">        mean and standard deviation of a normal distribution.  Because</span>
+<span class="sd">        chi^2_p = - 2 * log P_p + constant, the minima of p are the same</span>
+<span class="sd">        for chi^2 and negative log likelihood.  However, to weight the</span>
+<span class="sd">        likelihood properly when adding likelihood values to chisq, we</span>
+<span class="sd">        need the extra factor of 2 mentioned above.  The usual statistical</span>
+<span class="sd">        implications of normalized chi^2 will of course be suspect, both</span>
+<span class="sd">        because the assumption of independence between the points in</span>
+<span class="sd">        chi^2 (which definitely do not hold for the new &#39;point&#39; p_k), and</span>
+<span class="sd">        because of the additional 2 log(2 pi dp_k^2) constant, but given</span>
+<span class="sd">        the uncertainty in the estimate of the distribution parameters,</span>
+<span class="sd">        this is likely a minor point.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Protect parameter name from user modification</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="s">&quot;unknown&quot;</span>
+    <span class="k">def</span> <span class="nf">_getname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_getname</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;parameter name&quot;</span><span class="p">)</span>
+    
+    <span class="c"># Do checking on the parameter range to make sure the model stays physical</span>
+    <span class="n">_range</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_setrange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_range</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid range </span><span class="si">%s</span><span class="s"> for </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">_getrange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range</span>
+    <span class="nb">range</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_getrange</span><span class="p">,</span><span class="n">_setrange</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;parameter range&quot;</span><span class="p">)</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">limits</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">)</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s">&#39;fixed&#39;</span> <span class="c"># fixed, computed or fitted</span>
+    <span class="n">likelihood</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">tip</span> <span class="o">=</span> <span class="s">&quot;Fitting parameter&quot;</span>
+    <span class="n">deriv</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;unknown&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">):</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&quot;Unknown attribute </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="s">&quot;Parameter(&#39;</span><span class="si">%s</span><span class="s">&#39;)&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+<div class="viewcode-block" id="Parameter.summarize"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.summarize">[docs]</a>    <span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return parameter range string.</span>
+<span class="sd">        </span>
+<span class="sd">        E.g.,  &quot;       Gold .....|.... 5.2043 in [2,7]&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">range</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span>
+        <span class="n">lo</span><span class="p">,</span><span class="n">hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+        <span class="n">portion</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">-</span><span class="n">lo</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">hi</span><span class="o">-</span><span class="n">lo</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">portion</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">portion</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">elif</span> <span class="n">portion</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span> <span class="n">portion</span> <span class="o">=</span> <span class="mf">0.99999999</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">portion</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="nb">range</span><span class="p">))</span>
+        <span class="nb">range</span><span class="p">[</span><span class="n">bar</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;|&#39;</span>
+        <span class="nb">range</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%25s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%g</span><span class="s"> in [</span><span class="si">%g</span><span class="s">,</span><span class="si">%g</span><span class="s">]&quot;</span>  <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="nb">range</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">lo</span><span class="p">,</span><span class="n">hi</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Parameter.isfitted"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.isfitted">[docs]</a>    <span class="k">def</span> <span class="nf">isfitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">&#39;fitted&#39;</span></div>
+<div class="viewcode-block" id="Parameter.iscomputed"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.iscomputed">[docs]</a>    <span class="k">def</span> <span class="nf">iscomputed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">&#39;computed&#39;</span></div>
+<div class="viewcode-block" id="Parameter.isfixed"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.isfixed">[docs]</a>    <span class="k">def</span> <span class="nf">isfixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">&#39;fixed&#39;</span></div>
+<div class="viewcode-block" id="Parameter.isrestrained"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.isrestrained">[docs]</a>    <span class="k">def</span> <span class="nf">isrestrained</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span></div>
+<div class="viewcode-block" id="Parameter.isfeasible"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.isfeasible">[docs]</a>    <span class="k">def</span> <span class="nf">isfeasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return true if the value is in the range&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+<div class="viewcode-block" id="Parameter.setprefix"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.setprefix">[docs]</a>    <span class="k">def</span> <span class="nf">setprefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the full path to the parameter as used in expressions involving</span>
+<span class="sd">        the parameter name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+<div class="viewcode-block" id="Parameter.get"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the current value for a parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
+<div class="viewcode-block" id="Parameter.set"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.Parameter.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set a parameter to a value, a range or an expression.  If it is a value,</span>
+<span class="sd">        the parameter will be fixed for the fit.  If it is a range, the value</span>
+<span class="sd">        will be varying for the fit.  If it is an expression, the parameter will</span>
+<span class="sd">        be calculated from the values of other parameters in the fit.</span>
+
+<span class="sd">        Raises ValueError if the value could not be interpreted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># Expression</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s">&#39;computed&#39;</span>
+            <span class="k">return</span>
+        
+        <span class="c"># Fixed value</span>
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s">&#39;fixed&#39;</span>
+            <span class="k">return</span>
+        
+        <span class="c"># Likelihood</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="s">&#39;__call__&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">range</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s">&#39;fitted&#39;</span>
+            <span class="k">return</span>
+        
+        <span class="c"># Range</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lo</span><span class="p">,</span><span class="n">hi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">hi</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="p">(</span><span class="n">lo</span><span class="p">,</span><span class="n">hi</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s">&#39;fitted&#39;</span>
+            <span class="k">return</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span>\
+            <span class="s">&quot;parameter </span><span class="si">%s</span><span class="s"> expects value, expression or range: </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="ParameterSet"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.ParameterSet">[docs]</a><span class="k">class</span> <span class="nc">ParameterSet</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The set of parameters used to fit theory to data.</span>
+<span class="sd">    </span>
+<span class="sd">    ParameterSet forms a hierarchy of parameters.  The parameters themselves</span>
+<span class="sd">    are referred to by the path through the hierarchy, usually::</span>
+<span class="sd">    </span>
+<span class="sd">         fitname.component.parameter</span>
+<span class="sd">         </span>
+<span class="sd">    Though more or fewer levels are permitted.  Parameters are assumed to</span>
+<span class="sd">    have a unique label throughout the fit.  This is required so that</span>
+<span class="sd">    expressions tying the results of one fit to another can uniquely</span>
+<span class="sd">    reference a parameter.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">    </span>
+<span class="sd">    name</span>
+<span class="sd">        the name of the parameter set</span>
+<span class="sd">    path</span>
+<span class="sd">        the full dotted name of the parameter set</span>
+<span class="sd">    context</span>
+<span class="sd">        a dictionary providing additional context for evaluating parameters;</span>
+<span class="sd">        Note that this namespace is shared with other theory functions, so</span>
+<span class="sd">        populate it carefully.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Protect parameter set name from user modification</span>
+    <span class="k">def</span> <span class="nf">_getname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+    <span class="k">def</span> <span class="nf">_setname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span> 
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;parameter.name is protected; use fit.rename_parameter() to change it&quot;</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_getname</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="s">&quot;parameter name&quot;</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;unknown&quot;</span><span class="p">,</span> <span class="n">pars</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterSet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_byname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parts</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;byname recursion function&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">p</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ParameterSet</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">_byname</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="ParameterSet.byname"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.ParameterSet.byname">[docs]</a>    <span class="k">def</span> <span class="nf">byname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lookup parameter from dotted path&quot;&quot;&quot;</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_byname</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">p</span><span class="p">:</span> <span class="k">return</span> <span class="n">p</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;parameter </span><span class="si">%s</span><span class="s"> not in parameter set&quot;</span><span class="o">%</span><span class="n">name</span><span class="p">)</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Allow indexing by name or by number&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="nb">basestring</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">idx</span><span class="p">:</span> 
+                    <span class="k">return</span> <span class="n">p</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> is not in the parameter set&quot;</span><span class="o">%</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ParameterSet</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParameterSet.flatten"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.ParameterSet.flatten">[docs]</a>    <span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over the elements in depth first order.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">park</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c"># Yuck! I really only want to try flattening if p is a</span>
+            <span class="c"># ParameterSet but it seems we have parameter.ParameterSet</span>
+            <span class="c"># and park.parameter.ParameterSet as separate entities,</span>
+            <span class="c"># depending on how things were included.  The solution is</span>
+            <span class="c"># probably to force absolute include paths always.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">L</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">L</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        # Iterators are cute but too hard to use since you can</span>
+<span class="sd">        # only use them in a [p for p in generator()] once.</span>
+<span class="sd">        for p in self:</span>
+<span class="sd">            if isinstance(p, ParameterSet):</span>
+<span class="sd">                for subp in p.flatten(): </span>
+<span class="sd">                    yield subp</span>
+<span class="sd">            else: </span>
+<span class="sd">                yield p</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div>
+    <span class="k">def</span> <span class="nf">_fixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the subset of the parameters which are fixed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isfixed</span><span class="p">()]</span>
+    <span class="n">fixed</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_fixed</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="n">_fixed</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the subset of the paramters which are varying</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isfitted</span><span class="p">()]</span>
+    <span class="n">fitted</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_fitted</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="n">_fitted</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_computed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the subset of the parameters which are calculated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">iscomputed</span><span class="p">()]</span>
+    <span class="n">computed</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_computed</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="n">_computed</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_restrained</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the subset of the parameters which have a likelihood</span>
+<span class="sd">        function associated with them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isrestrained</span><span class="p">()]</span>
+    <span class="n">restrained</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_restrained</span><span class="p">,</span><span class="n">doc</span><span class="o">=</span><span class="n">_restrained</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParameterSet.setprefix"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.ParameterSet.setprefix">[docs]</a>    <span class="k">def</span> <span class="nf">setprefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fill in the full path name for all the parameters in the tree.</span>
+<span class="sd">        </span>
+<span class="sd">        Note: this function must be called from the root parameter set</span>
+<span class="sd">        to build proper path names.</span>
+<span class="sd">        </span>
+<span class="sd">        This is required before converting parameter expressions into</span>
+<span class="sd">        function calls.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">prefix</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># We are called from root, so we don&#39;t have a path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">+</span><span class="s">&#39;.&#39;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c">#print &quot;setting prefix for&quot;,p,prefix</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">setprefix</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParameterSet.rename"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.ParameterSet.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rename the parameter to something new.</span>
+<span class="sd">        Called from root of the parameter hierarchy, rename the particular</span>
+<span class="sd">        parameter object to something else.</span>
+
+<span class="sd">        This changes the internal name of the parameter, as well as all</span>
+<span class="sd">        expressions in which it occurs.  If the parameter is actually</span>
+<span class="sd">        a parameter set, then it renames all parameters in the set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># Must run from root for self.setprefix and self.computed to work</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">:</span>  
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">,</span><span class="s">&quot;rename must be called from root parameter set&quot;</span>
+
+        <span class="c"># Change the name of the node</span>
+        <span class="n">par</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        
+        <span class="c"># Determine which nodes (self and children) are affected</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span><span class="n">ParameterSet</span><span class="p">):</span>
+            <span class="n">changeset</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">changeset</span> <span class="o">=</span> <span class="p">[</span><span class="n">par</span><span class="p">]</span>
+        
+        <span class="c">#  Map the old names into the new names</span>
+        <span class="n">old</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">changeset</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setprefix</span><span class="p">()</span> <span class="c"># Reset the path names of all parameters</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">changeset</span><span class="p">]</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">old</span><span class="p">,</span><span class="n">new</span><span class="p">))</span>
+
+        <span class="c"># Perform the substitution into all of the expressions</span>
+        <span class="n">exprs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ParameterSet.gather_context"><a class="viewcode-back" href="../../dev/api/park.html#park.parameter.ParameterSet.gather_context">[docs]</a>    <span class="k">def</span> <span class="nf">gather_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gather all additional symbols that can be used in expressions.</span>
+<span class="sd">        </span>
+<span class="sd">        For example, if reflectometry provides a volume fraction</span>
+<span class="sd">        function volfrac(rho1,rho2,frac) to compute densities, then</span>
+<span class="sd">        this function can be added as a context dictionary to the</span>
+<span class="sd">        reflectometry parameter set.  Note that there is no guarantee</span>
+<span class="sd">        which function will be used if the same function exists in</span>
+<span class="sd">        two separate contexts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># Create a new dictionary</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="s">&#39;gather_context&#39;</span><span class="p">):</span>
+                <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">gather_context</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+</div></div>
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="c"># Check single parameter</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;a&#39;</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="c"># Check the setters</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">7</span> <span class="ow">and</span> <span class="n">a</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s">&#39;fixed&#39;</span> <span class="ow">and</span> <span class="n">a</span><span class="o">.</span><span class="n">isfixed</span><span class="p">()</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">7</span> <span class="ow">and</span> <span class="n">a</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">a</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">5</span> <span class="ow">and</span> <span class="n">a</span><span class="o">.</span><span class="n">isfitted</span><span class="p">()</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;3*M.b&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">iscomputed</span><span class="p">()</span> <span class="ow">and</span> <span class="n">a</span><span class="o">.</span><span class="n">expression</span> <span class="o">==</span> <span class="s">&#39;3*M.b&#39;</span>
+
+    <span class="c"># Check limits</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">inf</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span> 
+        <span class="n">a</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">,</span><span class="s">&quot;Failed to check range in limits&quot;</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span> <span class="k">pass</span> <span class="c"># Correct failure</span>
+    
+    <span class="c"># Check that we can&#39;t change name directly</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Q&#39;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">,</span><span class="s">&quot;Failed to protect name&quot;</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> <span class="k">pass</span> <span class="c"># Correct failure</span>
+
+    <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;a&#39;</span>  <span class="c"># Before setpath, just print name</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">setprefix</span><span class="p">(</span><span class="s">&#39;M.&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&#39;M.a&#39;</span>
+    <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;M.a&#39;</span>  <span class="c"># After setpath, print path</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">units</span> <span class="o">==</span> <span class="s">&#39;&#39;</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s">&#39;kg&#39;</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">units</span> <span class="o">==</span> <span class="s">&#39;kg&#39;</span>
+    <span class="k">assert</span> <span class="nb">repr</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="s">&quot;Parameter(&#39;a&#39;)&quot;</span>
+
+    <span class="c"># Check parameter set</span>
+    <span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">),</span><span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">)</span>
+    <span class="n">M1</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="s">&#39;M1&#39;</span><span class="p">,[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">M1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">a</span>
+    <span class="k">assert</span> <span class="n">M1</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="n">a</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="c"># one value</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;3*M1.a&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">M1</span><span class="o">.</span><span class="n">computed</span> <span class="o">==</span> <span class="p">[</span><span class="n">c</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">M1</span><span class="o">.</span><span class="n">fitted</span> <span class="o">==</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">M1</span><span class="o">.</span><span class="n">fixed</span> <span class="o">==</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">)</span>
+    <span class="n">M1</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">M1</span><span class="o">.</span><span class="n">fixed</span> <span class="o">==</span> <span class="p">[</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">]</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;e&#39;</span><span class="p">)</span>
+    <span class="n">M1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">M1</span><span class="o">.</span><span class="n">fixed</span> <span class="o">==</span> <span class="p">[</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">e</span><span class="p">]</span>
+
+    <span class="n">a2</span><span class="p">,</span><span class="n">b2</span><span class="p">,</span><span class="n">c2</span> <span class="o">=</span> <span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="s">&#39;b&#39;</span><span class="p">,</span><span class="s">&#39;c&#39;</span><span class="p">)]</span>
+    <span class="n">a2</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">M2</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="s">&#39;M2&#39;</span><span class="p">,[</span><span class="n">a2</span><span class="p">,</span><span class="n">b2</span><span class="p">,</span><span class="n">c2</span><span class="p">])</span>
+    <span class="c"># Adjust parameter in set</span>
+    <span class="n">b2</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">M2</span><span class="o">.</span><span class="n">fitted</span> <span class="o">==</span> <span class="p">[</span><span class="n">b2</span><span class="p">]</span>
+    
+    <span class="c"># Hierarchical parameter sets</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="s">&#39;root&#39;</span><span class="p">,[</span><span class="n">M1</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">M2</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">root</span><span class="o">.</span><span class="n">fixed</span> <span class="o">==</span> <span class="p">[</span><span class="n">d</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">a2</span><span class="p">,</span><span class="n">c2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">root</span><span class="o">.</span><span class="n">fitted</span> <span class="o">==</span> <span class="p">[</span><span class="n">b</span><span class="p">,</span><span class="n">b2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">root</span><span class="o">.</span><span class="n">computed</span> <span class="o">==</span> <span class="p">[</span><span class="n">c</span><span class="p">]</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">setprefix</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">a2</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&quot;M2.a&quot;</span>
+    <span class="c"># Rename individual parameter</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="s">&#39;a1&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&quot;M1.a1&quot;</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">expression</span> <span class="o">==</span> <span class="s">&quot;3*M1.a1&quot;</span>
+    <span class="c"># Rename parameter set</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">M1</span><span class="p">,</span><span class="s">&#39;m1&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&quot;m1.c&quot;</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">expression</span> <span class="o">==</span> <span class="s">&quot;3*m1.a1&quot;</span>
+
+    <span class="c"># Integration test: parameter and expression working together.</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">build_eval</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">root</span><span class="o">.</span><span class="n">gather_context</span><span class="p">())</span>
+    <span class="c">#import dis; dis.dis(fn)</span>
+    <span class="n">fn</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">3</span><span class="o">*</span><span class="n">a</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c"># Test context</span>
+    <span class="n">M2</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s">&#39;plus2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">+</span><span class="mi">2</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;plus2(M2.a)&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">computed</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">([</span><span class="n">c</span><span class="p">,</span><span class="n">c2</span><span class="p">])</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">build_eval</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">root</span><span class="o">.</span><span class="n">gather_context</span><span class="p">())</span>
+    <span class="c">#print dis.dis(fn)</span>
+    <span class="n">fn</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">a2</span><span class="o">.</span><span class="n">value</span><span class="o">+</span><span class="mi">2</span>
+
+    <span class="c"># Multilevel hierarchy</span>
+    <span class="c"># Forming M3.a.x, M3.a.y, M3.b with M3.a.y = 2*M3.b+M3.a.x</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">);</span> <span class="n">x</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">);</span> <span class="n">y</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;2*M3.b+M3.a.x&#39;</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">);</span> <span class="n">b</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">])</span>
+    <span class="n">M3</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="s">&#39;M3&#39;</span><span class="p">,[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">])</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="s">&#39;root&#39;</span><span class="p">,[</span><span class="n">M3</span><span class="p">])</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">setprefix</span><span class="p">()</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">build_eval</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">root</span><span class="o">.</span><span class="n">gather_context</span><span class="p">())</span>
+    <span class="c">#import dis; dis.dis(fn)</span>
+    <span class="n">fn</span><span class="p">()</span>
+    <span class="c">#print &quot;y-value:&quot;,y.value</span>
+    <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">35</span>
+    
+
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

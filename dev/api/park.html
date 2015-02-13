@@ -1,0 +1,2728 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park package &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="lib.macosx-10.5-x86_64-2.7" href="modules.html" />
+    <link rel="next" title="sas package" href="sas.html" />
+    <link rel="prev" title="lib.macosx-10.5-x86_64-2.7" href="modules.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.html" title="sas package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="lib.macosx-10.5-x86_64-2.7"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">lib.macosx-10.5-x86_64-2.7</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="park-package">
+<h1>park package</h1>
+<div class="section" id="submodules">
+<h2>Submodules</h2>
+</div>
+<div class="section" id="module-park.assembly">
+<span id="park-assembly-module"></span><h2>park.assembly module</h2>
+<p>An assembly is a collection of fitting functions.  This provides
+the model representation that is the basis of the park fitting engine.</p>
+<p>Models can range from very simple one dimensional theory functions
+to complex assemblies of multidimensional datasets from different
+experimental techniques, each with their own theory function and
+a common underlying physical model.</p>
+<div class="section" id="usage">
+<h3>Usage</h3>
+<p>First define the models you want to work with.  In the example
+below we will use an example of a simple multilayer system measured by
+specular reflection of xrays and neutrons.  The gold depth is the only
+fitting parameter, ranging from 10-30 A.  The interface depths are
+tied together using expressions.  In this case the expression is
+a simple copy, but any standard math functions can be used.  Some
+model developers may provide additional functions for use with the
+expression.</p>
+<p>Example models:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">reflectometry.model1d</span> <span class="kn">as</span> <span class="nn">refl</span>
+<span class="n">xray</span> <span class="o">=</span> <span class="n">refl</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s">&#39;xray&#39;</span><span class="p">)</span>
+<span class="n">xray</span><span class="o">.</span><span class="n">incident</span><span class="p">(</span><span class="s">&#39;Air&#39;</span><span class="p">,</span><span class="n">rho</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">xray</span><span class="o">.</span><span class="n">interface</span><span class="p">(</span><span class="s">&#39;iAu&#39;</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">xray</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="s">&#39;Au&#39;</span><span class="p">,</span><span class="n">rho</span><span class="o">=</span><span class="mf">124.68</span><span class="p">,</span><span class="n">depth</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">30</span><span class="p">])</span>
+<span class="n">xray</span><span class="o">.</span><span class="n">interface</span><span class="p">(</span><span class="s">&#39;iSi&#39;</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">xray</span><span class="o">.</span><span class="n">substrate</span><span class="p">(</span><span class="s">&#39;Si&#39;</span><span class="p">,</span><span class="n">rho</span><span class="o">=</span><span class="mf">20.07</span><span class="p">)</span>
+<span class="n">datax</span> <span class="o">=</span> <span class="n">refl</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s">&#39;xray.dat&#39;</span><span class="p">)</span>
+
+<span class="n">neutron</span> <span class="o">=</span> <span class="n">refl</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s">&#39;neutron&#39;</span><span class="p">)</span>
+<span class="n">neutron</span><span class="o">.</span><span class="n">incident</span><span class="p">(</span><span class="s">&#39;Air&#39;</span><span class="p">,</span><span class="n">rho</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">neutron</span><span class="o">.</span><span class="n">interface</span><span class="p">(</span><span class="s">&#39;iAu&#39;</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="s">&#39;xray.iAu&#39;</span><span class="p">)</span>
+<span class="n">neutron</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="s">&#39;Au&#39;</span><span class="p">,</span><span class="n">rho</span><span class="o">=</span><span class="mf">4.66</span><span class="p">,</span><span class="n">depth</span><span class="o">=</span><span class="s">&#39;xray.Au.depth&#39;</span><span class="p">)</span>
+<span class="n">neutron</span><span class="o">.</span><span class="n">interface</span><span class="p">(</span><span class="s">&#39;iSi&#39;</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="s">&#39;xray.iSi&#39;</span><span class="p">)</span>
+<span class="n">neutron</span><span class="o">.</span><span class="n">substrate</span><span class="p">(</span><span class="s">&#39;Si&#39;</span><span class="p">,</span><span class="n">rho</span><span class="o">=</span><span class="mf">2.07</span><span class="p">)</span>
+<span class="n">datan</span> <span class="o">=</span> <span class="n">refl</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s">&#39;neutron.dat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As you can see from the above, parameters can be set to a value if
+the parameter is fixed, to a range if the parametemr is fitted, or
+to a string expression if the parameter is calculated from other
+parameters.  See park.Parameter.set for further details.</p>
+<p>Having constructed the models, we can now create an assembly:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">park</span>
+<span class="n">assembly</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Assembly</span><span class="p">([(</span><span class="n">xray</span><span class="p">,</span><span class="n">datax</span><span class="p">),</span> <span class="p">(</span><span class="n">neutron</span><span class="p">,</span><span class="n">datan</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>Note: this would normally be done in the context of a fit
+using fit = park.Fit([(xray,datax), (neutron,datan)]), and later referenced
+using fit.assembly.</p>
+<p>Individual parts of the assembly are accessable using the
+model number 0, 1, 2... or by the model name.  In the above,
+assembly[0] and assembly[&#8216;xray&#8217;] refer to the same model.
+Assemblies have insert and append functions for adding new
+models, and &#8220;del model[idx]&#8221; for removing them.</p>
+<p>Once the assembly is created computing the values for the system
+is a matter of calling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">assembly</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+<span class="k">print</span> <span class="s">&quot;Chi**2&quot;</span><span class="p">,</span><span class="n">assembly</span><span class="o">.</span><span class="n">chisq</span>
+<span class="k">print</span> <span class="s">&quot;Reduced chi**2&quot;</span><span class="p">,</span><span class="n">assembly</span><span class="o">.</span><span class="n">chisq</span><span class="o">/</span><span class="n">assembly</span><span class="o">.</span><span class="n">degrees_of_freedom</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assembly</span><span class="o">.</span><span class="n">residuals</span><span class="p">)),</span> <span class="n">assembly</span><span class="o">.</span><span class="n">residuals</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This defines the attributes residuals, degrees_of_freedom and chisq,
+which is what the optimizer uses as the cost function to minimize.</p>
+<p>assembly.eval uses the current values for the parameters in the
+individual models.  These parameters can be changed directly
+in the model.  In the reflectometry example above, you could
+set the gold thickness using xray.layer.Au.depth=156, or
+something similar (the details are model specific).  Parameters
+can also be changed through the assembly parameter set.  In the same
+example, this would be assembly.parameterset[&#8216;xray&#8217;][&#8216;Au&#8217;][&#8216;depth&#8217;].
+See parameter set for details.</p>
+<p>In the process of modeling data, particularly with multiple
+datasets, you will sometimes want to temporarily ignore
+how well one of the datasets matches so that you
+can more quickly refine the model for the other datasets,
+or see how particular models are influencing the fit.  To
+temporarily ignore the xray data in the example above use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">assembly</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isfitted</span> <span class="o">=</span> <span class="bp">False</span>
+</pre></div>
+</div>
+<p>The model itself isn&#8217;t ignored since its parameters may be
+needed to compute the parameters for other models.  To
+reenable checking against the xray data, you would assign
+a True value instead.  More subtle weighting of the models
+can be controlled using assembly.parts[idx].weight, but
+see below for a note on model weighting.</p>
+<div class="section" id="a-note-on-model-weighting">
+<h4>A note on model weighting</h4>
+<p>Changing the weight is equivalent to scaling the error bars
+on the given model by a factor of weight/n where n is the
+number of data points.  It is better to set the correct error
+bars on your data in the first place than to adjust the weights.
+If you have the correct error bars, then you should expect
+roughly 2/3 of the data points to lie within one error bar of
+the theory curve.  If consecutive data points have largely
+overlapping errorbars, then your uncertainty is overestimated.</p>
+<p>Another case where weights are adjusted (abused?) is to
+compensate for systematic errors in the data by forcing the
+errorbars to be large enough to cover the systematic bias.
+This is a poor approach to the problem.  A better strategy
+is to capture the systematic effects in the model, and treat
+the measurement of the independent variable as an additional
+data point in the fit.  This is still not statistically sound
+as there is likely to be a large correlation between the
+uncertainty of the measurement and the values of all the
+other variables.</p>
+<p>That said, adjusting the weight on a dataset is a quick way
+of reducing its influence on the entire fit.  Please use it
+with care.</p>
+<dl class="class">
+<dt id="park.assembly.Assembly">
+<em class="property">class </em><tt class="descclassname">park.assembly.</tt><tt class="descname">Assembly</tt><big>(</big><em>models=[]</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Collection of fit models.</p>
+<p>Assembly implements the <cite>park.fit.Objective</cite> interface.</p>
+<p>See <cite>park.assembly</cite> for usage.</p>
+<p>Instance variables:</p>
+<dl class="docutils">
+<dt>residuals <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd>a vector of residuals spanning all models, with model
+weights applied as appropriate.</dd>
+<dt>degrees_of_freedom <span class="classifier-delimiter">:</span> <span class="classifier">integer</span></dt>
+<dd>length of the residuals - number of fitted parameters</dd>
+<dt>chisq <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>sum squared residuals; this is not the reduced chisq, which
+you can get using chisq/degrees_of_freedom</dd>
+</dl>
+<p>These fields are defined for the individual models as well, with
+degrees of freedom adjusted to the length of the individual data
+set.  If the model is not fitted or the weight is zero, the residual
+will not be calculated.</p>
+<p>The residuals fields are available only after the model has been
+evaluated.</p>
+<dl class="method">
+<dt id="park.assembly.Assembly.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.abort"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Interrupt the current function evaluation.</p>
+<p>Forward this to the currently executing model if possible.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.all_results">
+<tt class="descname">all_results</tt><big>(</big><em>result</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.all_results"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Extend result from the fit with the calculated parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.append">
+<tt class="descname">append</tt><big>(</big><em>fitness</em>, <em>weight=1.0</em>, <em>isfitted=True</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.append"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add a model to the end of set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fitness</strong> &#8211; the fitting model
+The fitting model can be an instance of <cite>park.assembly.Fitness</cite>,
+or a tuple of (<cite>park.model.Model</cite>,`park.data.Data1D`)</li>
+<li><strong>weight</strong> &#8211; model weighting (usually 1.0)</li>
+<li><strong>isfitted</strong> &#8211; whether model should be fit (equivalent to weight 0.)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.cov">
+<tt class="descname">cov</tt><big>(</big><em>pvec</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.cov"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.eval">
+<tt class="descname">eval</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.eval"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Recalculate the theory functions, and from them, the
+residuals and chisq.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">Call this after the parameters have been updated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.fit_parameters">
+<tt class="descname">fit_parameters</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.fit_parameters"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return an alphabetical list of the fitting parameters.</p>
+<p>This function is called once at the beginning of a fit,
+and serves as a convenient place to precalculate what
+can be precalculated such as the set of fitting parameters
+and the parameter expressions evaluator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.fresiduals">
+<tt class="descname">fresiduals</tt><big>(</big><em>pvec</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.fresiduals"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.insert">
+<tt class="descname">insert</tt><big>(</big><em>idx</em>, <em>fitness</em>, <em>weight=1.0</em>, <em>isfitted=True</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.insert"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add a model to a particular position in the set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.isfeasible">
+<tt class="descname">isfeasible</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.isfeasible"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns true if the parameter set is in a feasible region of the
+modeling space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.isfitted">
+<tt class="descname">isfitted</tt><big>(</big><em>idx</em>, <em>value=None</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.isfitted"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Query if a particular model is fitted.</p>
+<p>Set isfitted to value if value is supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>idx</strong> (<em>integer</em>) &#8211; model number</li>
+<li><strong>value</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.jacobian">
+<tt class="descname">jacobian</tt><big>(</big><em>pvec</em>, <em>step=1e-08</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.jacobian"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the derivative wrt the fit parameters at point p.</p>
+<p>Numeric derivatives are calculated based on step, where step is
+the portion of the total range for parameter j, or the portion of
+point value p_j if the range on parameter j is infinite.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.result">
+<tt class="descname">result</tt><big>(</big><em>status='step'</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.result"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Details to send back to the fitting client on an improved fit.</p>
+<p>status is &#8216;start&#8217;, &#8216;step&#8217; or &#8216;end&#8217; depending if this is the
+first result to return, an improved result, or the final result.</p>
+<p>[Not implemented]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.set_result">
+<tt class="descname">set_result</tt><big>(</big><em>result</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.set_result"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the parameters resulting from the fit into the parameter set,
+and update the calculated expression.</p>
+<p>The parameter values may be retrieved by walking the assembly.parameterset
+tree, checking each parameter for isfitted, iscomputed, or isfixed.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">assembly</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">assembly</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">flatten</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isfitted</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%g</span><span class="s"> in [</span><span class="si">%g</span><span class="s">,</span><span class="si">%g</span><span class="s">]&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">p</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">iscomputed</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> computed as </span><span class="si">%g</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This does not calculate the function or the residuals for these parameters.
+You can call assembly.eval() to do this.  The residuals will be set in
+assembly[i].residuals.  The theory and data are model specific, and can
+be found in assembly[i].fitness.data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.stderr">
+<tt class="descname">stderr</tt><big>(</big><em>pvec</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.stderr"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return parameter uncertainty.</p>
+<p>This is just the sqrt diagonal of covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Assembly.weight">
+<tt class="descname">weight</tt><big>(</big><em>idx</em>, <em>value=None</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Assembly.weight"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Query the weight on a particular model.</p>
+<p>Set weight to value if value is supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>idx <span class="classifier-delimiter">:</span> <span class="classifier">integer</span></dt>
+<dd><p class="first last">model number</p>
+</dd>
+<dt>value <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">model weight</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">model weight</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.assembly.Fitness">
+<em class="property">class </em><tt class="descclassname">park.assembly.</tt><tt class="descname">Fitness</tt><big>(</big><em>model=None</em>, <em>data=None</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Fitness"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Container for theory and data.</p>
+<p>The fit object compares theory with data.</p>
+<p>TODO: what to do with fittable metadata (e.g., footprint correction)?</p>
+<dl class="method">
+<dt id="park.assembly.Fitness.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Fitness.abort"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.assembly.Fitness.data">
+<tt class="descname">data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.assembly.Fitness.model">
+<tt class="descname">model</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.assembly.Fitness.parameterset">
+<tt class="descname">parameterset</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Fitness.residuals">
+<tt class="descname">residuals</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Fitness.residuals"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Fitness.residuals_deriv">
+<tt class="descname">residuals_deriv</tt><big>(</big><em>pars=[]</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Fitness.residuals_deriv"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.assembly.Fitness.set">
+<tt class="descname">set</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/assembly.html#Fitness.set"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set parameters in the model.</p>
+<p>User convenience function.  This allows a user with an assembly
+of models in a script to for example set the fit range for
+parameter &#8216;a&#8217; of the model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">assembly</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Raises KeyError if the parameter is not in parameterset.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="module-park.data">
+<span id="park-data-module"></span><h2>park.data module</h2>
+<p>Park 1-D data objects.</p>
+<p>The class Data1D represents simple 1-D data objects, along with
+an ascii file loader.  This format will work well for many
+uses, but it is likely that more specialized models will have
+their own data file formats.</p>
+<p>The minimal data format for park must supply the following
+methods:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>residuals(fn)</dt>
+<dd>returns the residuals vector for the model function.</dd>
+<dt>residuals_deriv(fn_deriv,par)</dt>
+<dd>returns the residuals vector for the model function, and
+for the derivatives with respect to the given parameters.</dd>
+</dl>
+</div></blockquote>
+<p>The function passed is going to be model.eval or in the case
+where derivatives are available, model.eval_deriv.  Normally
+this will take a vector of dependent variables and return the
+theory function for that vector but this is only convention.
+The fitting service only uses the parameter set and the residuals
+method from the model.</p>
+<p>The park GUI will make more demands on the interface, but the
+details are not yet resolved.</p>
+<dl class="class">
+<dt id="park.data.Data1D">
+<em class="property">class </em><tt class="descclassname">park.data.</tt><tt class="descname">Data1D</tt><big>(</big><em>filename=''</em>, <em>x=None</em>, <em>y=None</em>, <em>dx=0</em>, <em>dy=1</em><big>)</big><a class="reference internal" href="../../_modules/park/data.html#Data1D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Data representation for 1-D fitting.</p>
+<p>Attributes</p>
+<dl class="docutils">
+<dt>filename</dt>
+<dd>The source of the data.  This may be the empty string if the
+data is simulation data.</dd>
+<dt>x,y,dy</dt>
+<dd>The data values.
+x is the measurement points of data to be fitted. x must be sorted.
+y is the measured value
+dy is the measurement uncertainty.</dd>
+<dt>dx</dt>
+<dd>Resolution at the the measured points.  The resolution may be 0, 
+constant, or defined for each data point.  dx is the 1-sigma
+width of the Gaussian resolution function at point x.  Note that 
+dx_FWHM = sqrt(8 ln 2) dx_sigma, so scale dx appropriately.</dd>
+<dt>fit_x,fit_dx,fit_y,fit_dy</dt>
+<dd>The points used in evaluating the residuals.</dd>
+<dt>calc_x</dt>
+<dd>The points at which to evaluate the theory function.  This may be 
+different from the measured points for a number of reasons, such 
+as a resolution function which suggests over or under sampling of 
+the points (see below).  By default calc_x is x, but it can be set
+explicitly by the user.</dd>
+<dt>calc_y, fx</dt>
+<dd>The value of the function at the theory points, and the value of
+the function after resolution has been applied.  These values are
+computed by a call to residuals.</dd>
+</dl>
+<p>Notes on calc_x</p>
+<p>The contribution of Q to a resolution of width dQo at point Qo is:</p>
+<div class="highlight-python"><div class="highlight"><pre>p(Q) = 1/sqrt(2 pi dQo**2) exp ( (Q-Qo)**2/(2 dQo**2) )
+</pre></div>
+</div>
+<p>We are approximating the convolution at Qo using a numerical
+approximation to the integral over the measured points, with the 
+integral is limited to p(Q_i)/p(0)&gt;=0.001.</p>
+<p>Sometimes the function we are convoluting is rapidly changing.
+That means the correct convolution should uniformly sample across
+the entire width of the Gaussian.  This is not possible at the
+end points unless you calculate the theory function beyond what is
+strictly needed for the data. For a given dQ and step size,
+you need enough steps that the following is true:</p>
+<div class="highlight-python"><div class="highlight"><pre>(n*step)**2 &gt; -2 dQ**2 * ln 0.001
+</pre></div>
+</div>
+<p>The choice of sampling density is particularly important near
+critical points where the shape of the function changes.  In
+reflectometry, the function goes from flat below the critical
+edge to O(Q**4) above.  In one particular model, calculating every 
+0.005 rather than every 0.02 changed a value above the critical 
+edge by 15%.  In a fitting program, this would lead to a somewhat
+larger estimate of the critical edge for this sample.</p>
+<p>Sometimes the theory function is oscillating more rapidly than
+the instrument can resolve.  This happens for example in reflectivity
+measurements involving thick layers.  In these systems, the theory
+function should be oversampled around the measured points Q.  With 
+a single thick layer, oversampling can be limited to just one 
+period 2 pi/d.  With multiple thick layers, oscillations will 
+show interference patterns and it will be necessary to oversample 
+uniformly through the entire width of the resolution.  If this is
+not accommodated, then aliasing effects make it difficult to
+compute the correct model.</p>
+<dl class="attribute">
+<dt id="park.data.Data1D.calc_x">
+<tt class="descname">calc_x</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.calc_y">
+<tt class="descname">calc_y</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.dx">
+<tt class="descname">dx</tt><em class="property"> = 0</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.dy">
+<tt class="descname">dy</tt><em class="property"> = 1</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.fit_dx">
+<tt class="descname">fit_dx</tt><em class="property"> = 0</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.fit_dy">
+<tt class="descname">fit_dy</tt><em class="property"> = 1</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.fit_x">
+<tt class="descname">fit_x</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.fit_y">
+<tt class="descname">fit_y</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.fx">
+<tt class="descname">fx</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.data.Data1D.load">
+<tt class="descname">load</tt><big>(</big><em>filename</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/data.html#Data1D.load"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load a multicolumn datafile.</p>
+<p>Data should be in columns, with the following defaults:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">or</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">dy</span> <span class="ow">or</span> <span class="n">x</span><span class="p">,</span><span class="n">dx</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">dy</span>
+</pre></div>
+</div>
+<p>Note that this resets the selected fitting points calc_x and the
+computed results calc_y and fx.</p>
+<p>Data is sorted after loading.</p>
+<p>Any extra keyword arguments are passed to the numpy loadtxt
+function.  This allows you to select the columns you want,
+skip rows, set the column separator, change the comment character,
+amongst other things.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.data.Data1D.resample">
+<tt class="descname">resample</tt><big>(</big><em>minstep=None</em><big>)</big><a class="reference internal" href="../../_modules/park/data.html#Data1D.resample"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Over/under sampling support.</p>
+<p>Compute the calc_x points required to adequately sample
+the function y=f(x) so that the value reported for each
+measured point is supported by the resolution.  minstep
+is the minimum allowed sampling density that should be
+used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.data.Data1D.residuals">
+<tt class="descname">residuals</tt><big>(</big><em>fn</em><big>)</big><a class="reference internal" href="../../_modules/park/data.html#Data1D.residuals"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute the residuals of the data wrt to the given function.</p>
+<p>y = fn(x) should be a callable accepting a list of points at which
+to calculate the function, returning the values at those
+points.</p>
+<p>Any resolution function will be applied after the theory points
+are calculated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.data.Data1D.residuals_deriv">
+<tt class="descname">residuals_deriv</tt><big>(</big><em>fn</em>, <em>pars=[]</em><big>)</big><a class="reference internal" href="../../_modules/park/data.html#Data1D.residuals_deriv"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Compute residuals and derivatives wrt the given parameters.</p>
+<p>fdf = fn(x,pars=pars) should be a callable accepting a list 
+of points at which to calculate the function and a keyword 
+argument listing the parameters for which the derivative will
+be calculated.</p>
+<p>Returns a list of the residuals and the derivative wrt the
+parameter for each parameter.</p>
+<p>Any resolution function will be applied after the theory points
+and derivatives are calculated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.data.Data1D.select">
+<tt class="descname">select</tt><big>(</big><em>idx</em><big>)</big><a class="reference internal" href="../../_modules/park/data.html#Data1D.select"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>A selection vector for points to use in the evaluation of the 
+residuals, or None if all points are to be used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.x">
+<tt class="descname">x</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.data.Data1D.y">
+<tt class="descname">y</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-park.deps">
+<span id="park-deps-module"></span><h2>park.deps module</h2>
+<p>Functions for manipulating dependencies.</p>
+<p>Parameter values must be updated in the correct order.  If parameter A
+depends on parameter B, then parameter B must be evaluated first.</p>
+<dl class="function">
+<dt id="park.deps.order_dependencies">
+<tt class="descclassname">park.deps.</tt><tt class="descname">order_dependencies</tt><big>(</big><em>pairs</em><big>)</big><a class="reference internal" href="../../_modules/park/deps.html#order_dependencies"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Order elements from pairs so that b comes before a in the
+ordered list for all pairs (a,b).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.deps.test">
+<tt class="descclassname">park.deps.</tt><tt class="descname">test</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/deps.html#test"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-park.diffev">
+<span id="park-diffev-module"></span><h2>park.diffev module</h2>
+<dl class="class">
+<dt id="park.diffev.DE">
+<em class="property">class </em><tt class="descclassname">park.diffev.</tt><tt class="descname">DE</tt><big>(</big><em>F</em>, <em>crossover_rate</em>, <em>func</em>, <em>func_dim</em>, <em>pop</em>, <em>l_bound</em>, <em>u_bound</em>, <em>tol=1e-07</em><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Differential evolution test implementation
+Implements the Scheme_DE_rand_1 variant</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>F: float</dt>
+<dd>weighting factor which determines the magnitude of perturbation
+occurring in each generation.</dd>
+<dt>crossover_rate:  float</dt>
+<dd>In general, 0 &lt; crossover_rate &lt; 1.  Usually
+considerably lower than 1.  Convergence slows as the value
+increases, but higher crossover rates may be necessary when</dd>
+<dt>func: w = f(p)</dt>
+<dd>The function to be minimized, of the form w = f(p), where p
+is a vector of length func_dim and w is a scalar</dd>
+<dt>func_dim: int</dt>
+<dd>The dimension of the objective function</dd>
+<dt>pop: array</dt>
+<dd>The initial population.  This should be an iterable composed of
+Rank-1 numpy arrays.  The population size must be at least 4,
+preferably much greater.</dd>
+<dt>l_bound, u_bound: vector</dt>
+<dd>arrays of size func_dim representing the upper and lower bounds
+for the parameters in the solution vectors</dd>
+<dt>tol: float</dt>
+<dd>if (max(pop_values) - min(pop_values) &lt;= conv), the population
+has converged and the evolution will stop</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="park.diffev.DE.adjust_F">
+<tt class="descname">adjust_F</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.adjust_F"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Adjust F to account for stagnation of the population</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.diffev.DE.crossover">
+<tt class="descname">crossover</tt><big>(</big><em>candidate</em>, <em>i</em><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.crossover"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Perform a crossover between the candidate and the ith member of
+the previous generation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.diffev.DE.evolve">
+<tt class="descname">evolve</tt><big>(</big><em>numgens=1000</em>, <em>monitor=None</em><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.evolve"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Evolve the population for numgens generations, or until it converges.
+Returns the best vector from the run</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.diffev.DE.get_best_gene">
+<tt class="descname">get_best_gene</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.get_best_gene"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>find the most fit gene in the current population</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.diffev.DE.get_random_gene">
+<tt class="descname">get_random_gene</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.get_random_gene"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Generate a random gene within the bounds constraints.
+Used to replace out-of-bounds genes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.diffev.DE.is_converged">
+<tt class="descname">is_converged</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.is_converged"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>check for convergence</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.diffev.DE.is_within_bounds">
+<tt class="descname">is_within_bounds</tt><big>(</big><em>gene</em><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.is_within_bounds"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Determine whether the gene meets the bounds constraints</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.diffev.DE.select_participants">
+<tt class="descname">select_participants</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#DE.select_participants"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>generate r1, r2, and r3 randomly from the range [0, NP-1]
+such that they are distinct values not equal to i</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="park.diffev.diffev">
+<tt class="descclassname">park.diffev.</tt><tt class="descname">diffev</tt><big>(</big><em>fn</em>, <em>bounds</em>, <em>x0=None</em>, <em>pop_scale=4</em>, <em>crossover_rate=0.8</em>, <em>Fscale=1</em>, <em>tolerance=1e-05</em>, <em>maxiter=1000</em>, <em>monitor=None</em><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#diffev"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Run differential evolution, returning x,fx,ncalls</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.diffev.gen_pop">
+<tt class="descclassname">park.diffev.</tt><tt class="descname">gen_pop</tt><big>(</big><em>size</em>, <em>l_bound</em>, <em>u_bound</em>, <em>dimension</em><big>)</big><a class="reference internal" href="../../_modules/park/diffev.html#gen_pop"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>generate a random population of vectors within the given bounds.  dimension
+indicates the length of the vectors.  l_bound and u_bound should be vectors
+of length dimension (any iterable container should work)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.diffev.random">
+<tt class="descclassname">park.diffev.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).</dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-park.expression">
+<span id="park-expression-module"></span><h2>park.expression module</h2>
+<p>Functions for manipulating expressions.</p>
+<dl class="function">
+<dt id="park.expression.build_eval">
+<tt class="descclassname">park.expression.</tt><tt class="descname">build_eval</tt><big>(</big><em>pars</em>, <em>context={}</em><big>)</big><a class="reference internal" href="../../_modules/park/expression.html#build_eval"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Build and return a function to evaluate all parameter expressions in
+the proper order.</p>
+<dl class="docutils">
+<dt>Inputs:</dt>
+<dd>pars is a list of parameters
+context is a dictionary of additional symbols for the expressions</dd>
+<dt>Output:</dt>
+<dd>updater function</dd>
+<dt>Raises:</dt>
+<dd>AssertionError - model, parameter or function is missing
+SyntaxError - improper expression syntax
+ValueError - expressions have circular dependencies</dd>
+</dl>
+<p>This function is not terribly sophisticated, and it would be easy to
+trick.  However it handles the common cases cleanly and generates
+reasonable messages for the common errors.</p>
+<p>This code has not been fully audited for security.  While we have
+removed the builtins and the ability to import modules, there may
+be other vectors for users to perform more than simple function
+evaluations.  Unauthenticated users should not be running this code.</p>
+<p>Parameter names are assumed to contain only _.a-zA-Z0-9#[]</p>
+<p>The list of parameters is probably something like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">parset</span><span class="o">.</span><span class="n">setprefix</span><span class="p">()</span>
+<span class="n">pars</span> <span class="o">=</span> <span class="n">parset</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that math uses acos while numpy uses arccos.  To avoid confusion
+we allow both.</p>
+<p>Should try running the function to identify syntax errors before
+running it in a fit.</p>
+<p>Use help(fn) to see the code generated for the returned function fn.
+dis.dis(fn) will show the corresponding python vm instructions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.expression.find_dependencies">
+<tt class="descclassname">park.expression.</tt><tt class="descname">find_dependencies</tt><big>(</big><em>pars</em><big>)</big><a class="reference internal" href="../../_modules/park/expression.html#find_dependencies"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns a list of pair-wise dependencies from the parameter expressions.</p>
+<p>For example, if p3 = p1+p2, then find_dependencies([p1,p2,p3]) will
+return [(p3,p1),(p3,p2)].  For base expressions without dependencies,
+such as p4 = 2*pi, this should return [(p4, None)]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.expression.no_constraints">
+<tt class="descclassname">park.expression.</tt><tt class="descname">no_constraints</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/expression.html#no_constraints"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This parameter set has no constraints between the parameters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.expression.parameter_mapping">
+<tt class="descclassname">park.expression.</tt><tt class="descname">parameter_mapping</tt><big>(</big><em>pairs</em><big>)</big><a class="reference internal" href="../../_modules/park/expression.html#parameter_mapping"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Find the parameter substitution we need so that expressions can
+be evaluated without having to traverse a chain of 
+model.layer.parameter.value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.expression.substitute">
+<tt class="descclassname">park.expression.</tt><tt class="descname">substitute</tt><big>(</big><em>expr</em>, <em>mapping</em><big>)</big><a class="reference internal" href="../../_modules/park/expression.html#substitute"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Replace all occurrences of symbol s with mapping[s] for s in mapping.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.expression.symbols">
+<tt class="descclassname">park.expression.</tt><tt class="descname">symbols</tt><big>(</big><em>expr</em>, <em>symtab</em><big>)</big><a class="reference internal" href="../../_modules/park/expression.html#symbols"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Given an expression string and a symbol table, return the set of symbols
+used in the expression.  Symbols are only returned once even if they
+occur multiple times.  The return value is a set with the elements in
+no particular order.</p>
+<p>This is the first step in computing a dependency graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.expression.test">
+<tt class="descclassname">park.expression.</tt><tt class="descname">test</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/expression.html#test"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-park.fit">
+<span id="park-fit-module"></span><h2>park.fit module</h2>
+<p>Fitting service interface.</p>
+<p>A fit consists of a set of models and a fitting engine.  The models are
+collected in an assembly, which manages the parameter set and the
+constraints between them.  The models themselves are tightly coupled
+to the data that they are modeling and the data is invisible to the fit.</p>
+<p>The fitting engine can use a variety of methods depending on model.</p>
+<div class="section" id="id1">
+<h3>Usage</h3>
+<p>The fitter can be run directly on the local machine:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">park</span>
+<span class="n">M1</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Peaks</span><span class="p">(</span><span class="n">datafile</span><span class="o">=</span><span class="n">park</span><span class="o">.</span><span class="n">sampledata</span><span class="p">(</span><span class="s">&#39;peak.dat&#39;</span><span class="p">))</span>
+<span class="n">M1</span><span class="o">.</span><span class="n">add_peak</span><span class="p">(</span><span class="s">&#39;P1&#39;</span><span class="p">,</span> <span class="s">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="n">mu</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="n">M1</span><span class="p">])</span>
+<span class="k">print</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p>The default settings print results every time the fit improves, and
+print a global result when the fit is complete.  This is a suitable
+interface for a fitting script.</p>
+<p>For larger fit jobs you will want to run the fit on a remote server.
+The model setup is identical, but the fit call is different:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">service</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">FitService</span><span class="p">(</span><span class="s">&#39;server:port&#39;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="n">M1</span><span class="p">],</span> <span class="n">service</span><span class="o">=</span><span class="n">service</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p>Again, the default settings print results every time the fit improves,
+and print a global result when the fit is complete.</p>
+<p>For long running fit jobs, you want to be able to disconnect from
+the server after submitting the job, and later reconnect to fetch
+the results.  An additional email field will send notification by
+email when the fit starts and ends, and daily updates on the status
+of all fits:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">service</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">FitService</span><span class="p">(</span><span class="s">&#39;server:port&#39;</span><span class="p">)</span>
+<span class="n">service</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s">&#39;me@my.email.address&#39;</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="s">&#39;daily&#39;</span><span class="p">)</span>
+<span class="n">fit</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Fit</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="n">M1</span><span class="p">])</span>
+<span class="nb">id</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">submit_job</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">jobname</span><span class="o">=</span><span class="s">&#39;peaks&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="nb">id</span>
+</pre></div>
+</div>
+<p>The results can be retrieved either by id returned from the server,
+or by the given jobname:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">park</span>
+<span class="n">service</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">FitService</span><span class="p">(</span><span class="s">&#39;server:port&#39;</span><span class="p">,</span><span class="n">user</span><span class="o">=</span><span class="s">&#39;userid&#39;</span><span class="p">)</span>
+<span class="n">fitlist</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s">&#39;peaks&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">fit</span> <span class="ow">in</span> <span class="n">fitlist</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">fit</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The fit itself is a complicated object, including the model, the
+optimizer, and the type of uncertainty analysis to perform.</p>
+</div>
+<div class="section" id="gui-usage">
+<h3>GUI Usage</h3>
+<p>When used from a graphical user interface, a different programming
+interface is needed.  In this case, the user may want to watch
+the progress of the fit and perhaps stop it.  Also, as fits can
+take some time to complete, the user would like to be able to
+set up additional fits and run them at the same time, switching
+between them as necessary to monitor progress.</p>
+<dl class="class">
+<dt id="park.fit.FitJob">
+<em class="property">class </em><tt class="descclassname">park.fit.</tt><tt class="descname">FitJob</tt><big>(</big><em>objective=None</em>, <em>fitter=None</em>, <em>handler=None</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#FitJob"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Fit job.</p>
+<p>This implements <cite>park.job.Job</cite>.</p>
+<dl class="method">
+<dt id="park.fit.FitJob.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#FitJob.run"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.fit.Fitter">
+<em class="property">class </em><tt class="descclassname">park.fit.</tt><tt class="descname">Fitter</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#Fitter"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract interface for a fitness optimizer.</p>
+<p>A fitter has a single method, fit, which takes an objective
+function (<cite>park.fit.Objective</cite>) and a handler.</p>
+<p>For a concrete instance see <cite>park.fitmc.FitMC</cite>.</p>
+<dl class="method">
+<dt id="park.fit.Fitter.fit">
+<tt class="descname">fit</tt><big>(</big><em>fitness</em>, <em>handler</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#Fitter.fit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Global optimizer.</p>
+<p>This function should return immediately</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.fit.LocalQueue">
+<em class="property">class </em><tt class="descclassname">park.fit.</tt><tt class="descname">LocalQueue</tt><a class="reference internal" href="../../_modules/park/fit.html#LocalQueue"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Simple interface to the local job queue.  Currently supports start and
+wait.  Needs to support stop and status.  Also, needs to be a proper queue,
+and needs to allow jobs to run in separate processes according to priority,
+etc.  All the essentials of the remote queuing system without the remote
+calls.</p>
+<p>Unlike the remote queue, the local queue need not maintain persistence.</p>
+<dl class="attribute">
+<dt id="park.fit.LocalQueue.running">
+<tt class="descname">running</tt><em class="property"> = False</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.fit.LocalQueue.start">
+<tt class="descname">start</tt><big>(</big><em>job</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#LocalQueue.start"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.fit.LocalQueue.wait">
+<tt class="descname">wait</tt><big>(</big><em>interval=0.1</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#LocalQueue.wait"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Wait for the job to complete.  This is used in scripts to impose
+a synchronous interface to the fitting service.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.fit.Objective">
+<em class="property">class </em><tt class="descclassname">park.fit.</tt><tt class="descname">Objective</tt><a class="reference internal" href="../../_modules/park/fit.html#Objective"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract interface to the fitness function for the park minimizer
+classes.</p>
+<p>Park provides a specific implementation <cite>park.assembly.Assembly</cite>.</p>
+<p>TODO: add a results() method to return model specific info to the
+TODO: fit handler.</p>
+<dl class="method">
+<dt id="park.fit.Objective.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#Objective.abort"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Halts the current function evaluation, and has it return inf.
+This will be called from a separate thread.  If the function
+contains an expensive calculation, it should reset an abort
+flag before each evaluation and test it periodically.</p>
+<p>This method is optional.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fit.Objective.fit_parameters">
+<tt class="descname">fit_parameters</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#Objective.fit_parameters"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns a list of fit parameters.  Each parameter has a name,
+an initial value and a range.</p>
+<p>See <cite>park.fitresult.FitParameter</cite> for an example.</p>
+<p>On each function evaluation a new parameter set will be passed
+to the fitter, with values in the same order as the list of
+parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fit.Objective.residuals">
+<tt class="descname">residuals</tt><big>(</big><em>p</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#Objective.residuals"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Some fitters, notably Levenberg-Marquardt, operate directly on the
+residuals vector.  If the individual residuals are not available,
+then LM cannot be used.</p>
+<p>This method is optional.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fit.Objective.residuals_deriv">
+<tt class="descname">residuals_deriv</tt><big>(</big><em>p</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#Objective.residuals_deriv"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns residuals and derivatives with respect to the given
+parameters.</p>
+<p>If these are unavailable in the model, then they can be approximated
+by numerical derivatives, though it is generally better to use a
+derivative free optimizer such as coliny or cobyla which can use the
+function evaluations more efficiently.  In any case, your objective
+function is responsible for calculating these.</p>
+<p>This method is optional.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="park.fit.assembly_example">
+<tt class="descclassname">park.fit.</tt><tt class="descname">assembly_example</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#assembly_example"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="park.fit.demo">
+<tt class="descclassname">park.fit.</tt><tt class="descname">demo</tt><big>(</big><em>fitter=None</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#demo"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Multiple minima example</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.fit.demo2">
+<tt class="descclassname">park.fit.</tt><tt class="descname">demo2</tt><big>(</big><em>fitter=None</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#demo2"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="park.fit.fit">
+<tt class="descclassname">park.fit.</tt><tt class="descname">fit</tt><big>(</big><em>models=None</em>, <em>fitter=None</em>, <em>service=None</em>, <em>handler=None</em><big>)</big><a class="reference internal" href="../../_modules/park/fit.html#fit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Start a fit with a set of models.  The model set must be
+in a form accepted by <cite>park.assembly.Assembly</cite>.</p>
+<p>This is a convenience function which sets up the default
+optimizer and uses the local fitting engine to do the work.
+Progress reports are printed as they are received.</p>
+<p>The choice of fitter, service and handler can be specified
+by the caller.</p>
+<p>The default fitter is FitMC, which is a monte carlo Nelder-Mead
+simplex local optimizer with 100 random start points.</p>
+<p>The default handler does nothing.  Instead, ConsoleUpdate could
+be used to report progress during the fit.</p>
+<p>The default service is to run in a separate thread with FitThread.
+Note that this will change soon to run in a separate process on
+the local machine so that python&#8217;s global interpreter lock does
+not interfere with parallelism.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="park-fitmc-module">
+<h2>park.fitmc module</h2>
+<span class="target" id="module-park.fitmc"></span><dl class="function">
+<dt id="park.fitmc.fitmc">
+<tt class="descclassname">park.fitmc.</tt><tt class="descname">fitmc</tt><big>(</big><em>fitness</em>, <em>x0</em>, <em>bounds</em>, <em>localfit</em>, <em>n</em>, <em>handler</em><big>)</big><a class="reference internal" href="../../_modules/park/fitmc.html#fitmc"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Run a monte carlo fit.</p>
+<p>This procedure maps a local optimizer across a set of n initial points.
+The initial parameter value defined by the fitness parameters defines
+one initial point.  The remainder are randomly generated within the
+bounds of the problem.</p>
+<p>localfit is the local optimizer to use.  It should be a bounded
+optimizer following the <cite>park.fitmc.LocalFit</cite> interface.</p>
+<p>handler accepts updates to the current best set of fit parameters.
+See <cite>park.fitresult.FitHandler</cite> for details.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-park.fitresult">
+<span id="park-fitresult-module"></span><h2>park.fitresult module</h2>
+<dl class="class">
+<dt id="park.fitresult.ConsoleUpdate">
+<em class="property">class </em><tt class="descclassname">park.fitresult.</tt><tt class="descname">ConsoleUpdate</tt><big>(</big><em>quiet=False</em>, <em>progress_delta=60</em>, <em>improvement_delta=5</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#ConsoleUpdate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#park.fitresult.FitHandler" title="park.fitresult.FitHandler"><tt class="xref py py-class docutils literal"><span class="pre">park.fitresult.FitHandler</span></tt></a></p>
+<p>Print progress to the console.</p>
+<dl class="method">
+<dt id="park.fitresult.ConsoleUpdate.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#ConsoleUpdate.abort"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.ConsoleUpdate.error">
+<tt class="descname">error</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#ConsoleUpdate.error"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Model had an error; print traceback</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.ConsoleUpdate.finalize">
+<tt class="descname">finalize</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#ConsoleUpdate.finalize"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.ConsoleUpdate.improvement">
+<tt class="descname">improvement</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#ConsoleUpdate.improvement"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called when a result is observed which is better than previous
+results from the fit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.ConsoleUpdate.improvement_delta">
+<tt class="descname">improvement_delta</tt><em class="property"> = 5</em></dt>
+<dd><p>Number of seconds between improvement updates</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.ConsoleUpdate.isbetter">
+<tt class="descname">isbetter</tt><em class="property"> = False</em></dt>
+<dd><p>Record whether results improved since last update</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.ConsoleUpdate.progress">
+<tt class="descname">progress</tt><big>(</big><em>k</em>, <em>n</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#ConsoleUpdate.progress"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Report on progress.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.ConsoleUpdate.progress_delta">
+<tt class="descname">progress_delta</tt><em class="property"> = 60</em></dt>
+<dd><p>Number of seconds between progress updates</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.fitresult.FitHandler">
+<em class="property">class </em><tt class="descclassname">park.fitresult.</tt><tt class="descname">FitHandler</tt><a class="reference internal" href="../../_modules/park/fitresult.html#FitHandler"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract interface for fit thread handler.</p>
+<p>The methods in this class are called by the optimizer as the fit
+progresses.</p>
+<p>Note that it is up to the optimizer to call the fit handler correctly,
+reporting all status changes and maintaining the &#8216;done&#8217; flag.</p>
+<dl class="method">
+<dt id="park.fitresult.FitHandler.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitHandler.abort"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Fit was aborted.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitHandler.done">
+<tt class="descname">done</tt><em class="property"> = False</em></dt>
+<dd><p>True when the fit job is complete</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.FitHandler.error">
+<tt class="descname">error</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitHandler.error"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Model had an error; print traceback</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.FitHandler.finalize">
+<tt class="descname">finalize</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitHandler.finalize"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Fit is complete; best results are reported</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.FitHandler.improvement">
+<tt class="descname">improvement</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitHandler.improvement"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called when a result is observed which is better than previous
+results from the fit.</p>
+<p>result is a FitResult object, with parameters, #calls and fitness.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.FitHandler.progress">
+<tt class="descname">progress</tt><big>(</big><em>current</em>, <em>expected</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitHandler.progress"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called each cycle of the fit, reporting the current and the
+expected amount of work.   The meaning of these values is
+optimizer dependent, but they can be converted into a percent
+complete using (100*current)//expected.</p>
+<p>Progress is updated each iteration of the fit, whatever that
+means for the particular optimization algorithm.  It is called
+after any calls to improvement for the iteration so that the
+update handler can control I/O bandwidth by suppressing
+intermediate improvements until the fit is complete.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitHandler.result">
+<tt class="descname">result</tt><em class="property"> = None</em></dt>
+<dd><p>The current best result of the fit</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.fitresult.FitParameter">
+<em class="property">class </em><tt class="descclassname">park.fitresult.</tt><tt class="descname">FitParameter</tt><big>(</big><em>name</em>, <em>range</em>, <em>value</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitParameter"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Fit result for an individual parameter.</p>
+<dl class="method">
+<dt id="park.fitresult.FitParameter.summarize">
+<tt class="descname">summarize</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitParameter.summarize"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return parameter range string.</p>
+<p>E.g.,  &#8221;       Gold .....|.... 5.2043 in [2,7]&#8221;</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.fitresult.FitResult">
+<em class="property">class </em><tt class="descclassname">park.fitresult.</tt><tt class="descname">FitResult</tt><big>(</big><em>parameters</em>, <em>calls</em>, <em>fitness</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitResult"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Container for reporting fit results.</p>
+<dl class="method">
+<dt id="park.fitresult.FitResult.calc_cov">
+<tt class="descname">calc_cov</tt><big>(</big><em>fn</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitResult.calc_cov"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitResult.calls">
+<tt class="descname">calls</tt><em class="property"> = None</em></dt>
+<dd><p>Number of function calls</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitResult.cov">
+<tt class="descname">cov</tt><em class="property"> = None</em></dt>
+<dd><p>Covariance matrix</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitResult.fitness">
+<tt class="descname">fitness</tt><em class="property"> = None</em></dt>
+<dd><p>Value of the goodness of fit metric</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitResult.parameters">
+<tt class="descname">parameters</tt><em class="property"> = None</em></dt>
+<dd><p>Fit parameter list, each with name, range and value attributes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.FitResult.print_summary">
+<tt class="descname">print_summary</tt><big>(</big><em>fid=&lt;open file '&lt;stdout&gt;'</em>, <em>mode 'w' at 0x10028e150&gt;</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitResult.print_summary"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitResult.pvec">
+<tt class="descname">pvec</tt><em class="property"> = None</em></dt>
+<dd><p>Parameter vector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.FitResult.set_cov">
+<tt class="descname">set_cov</tt><big>(</big><em>cov</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitResult.set_cov"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.fitresult.FitResult.stderr">
+<tt class="descname">stderr</tt><em class="property"> = None</em></dt>
+<dd><p>Parameter uncertainties</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.fitresult.FitResult.update">
+<tt class="descname">update</tt><big>(</big><em>pvec</em>, <em>fitness</em>, <em>calls</em><big>)</big><a class="reference internal" href="../../_modules/park/fitresult.html#FitResult.update"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="park-fitservice-module">
+<h2>park.fitservice module</h2>
+</div>
+<div class="section" id="module-park.formatnum">
+<span id="park-formatnum-module"></span><h2>park.formatnum module</h2>
+<p>Format numbers nicely for printing.</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre>&gt;&gt; from danse.common.util.formatnum import *
+&gt;&gt; v,dv = 757.2356,0.01032
+&gt;&gt; print format_uncertainty_pm(v,dv)
+757.235 +/- 0.010
+&gt;&gt; format_uncertainty_compact(v,dv)
+757.235(10)
+&gt;&gt; format_uncertainty(v,dv)
+757.235(10)
+</pre></div>
+</div>
+<p>Set format_uncertainty.compact to False to use the +/-
+format by default, otherwise leave it at True for compact
+value(##) format.</p>
+<dl class="function">
+<dt id="park.formatnum.format_uncertainty_pm">
+<tt class="descclassname">park.formatnum.</tt><tt class="descname">format_uncertainty_pm</tt><big>(</big><em>value</em>, <em>uncertainty=None</em><big>)</big><a class="reference internal" href="../../_modules/park/formatnum.html#format_uncertainty_pm"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Given <em>value</em> v and <em>uncertainty</em> dv, return a string v +/- dv.</p>
+<p>The returned string uses only the number of digits warranted by
+the uncertainty in the measurement.</p>
+<p>If the uncertainty is 0 or not otherwise provided, the simple
+%g floating point format option is used.</p>
+<p>Infinite and indefinite numbers are represented as inf and NaN.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.formatnum.format_uncertainty_compact">
+<tt class="descclassname">park.formatnum.</tt><tt class="descname">format_uncertainty_compact</tt><big>(</big><em>value</em>, <em>uncertainty=None</em><big>)</big><a class="reference internal" href="../../_modules/park/formatnum.html#format_uncertainty_compact"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Given <em>value</em> v and <em>uncertainty</em> dv, return the compact
+representation v(##), where ## are the first two digits of 
+the uncertainty.</p>
+<p>The returned string uses only the number of digits warranted by
+the uncertainty in the measurement.</p>
+<p>If the uncertainty is 0 or not otherwise provided, the simple
+%g floating point format option is used.</p>
+<p>Infinite and indefinite numbers are represented as inf and NaN.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-park.message">
+<span id="park-message-module"></span><h2>park.message module</h2>
+<p>Asynchronous message streams.</p>
+<p>When you have multiple listeners to a process, some of which can connect and
+disconnect at different times, you need to dispatch the incoming messages to 
+all the listeners.  When a listener joins a running stream, they need to get 
+an immediate status update for the computation.  This is stored as the 
+stream header. Then, without dropping any messages, the listeners should 
+receive all subsequent messages in the stream in order.</p>
+<p>The message stream is multi-channelled, and indexed by a key.  Within 
+the service framework the key is likely to be the jobid associated with 
+the message stream.</p>
+<p>The contents of the message stream are expected to be monitor messages
+(see <cite>park.monitor</cite> for details), with the stream header being a
+<cite>park.monitor.Join</cite> message.  When a new listener is registered,
+the header is immediately put on the queue (if there is one), then all
+subsequent message are sent until the listener calls hangup().</p>
+<p>To attach to a message stream you need an object which accepts put().
+An asynchronous queue object is a good choice since it allows you to
+buffer the messages in one thread and pull them off as needed in another.
+You can also use a <cite>park.monitor.Monitor</cite> object to process the messages
+directly.</p>
+</div>
+<div class="section" id="module-park.model">
+<span id="park-model-module"></span><h2>park.model module</h2>
+<p>Define a park fitting model.</p>
+<div class="section" id="id2">
+<h3>Usage</h3>
+<p>The simplest sort of fitting model is something like the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">park</span>
+<span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">sigma</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Gauss</span><span class="p">(</span><span class="n">park</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;center&#39;</span><span class="p">,</span><span class="s">&#39;width&#39;</span><span class="p">,</span><span class="s">&#39;scale&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">G</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It has a function which is evaluated at a series of x values and
+a set of adjustable parameters controlling the shape of f(x).</p>
+<p>You can check your module with something like the following:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ipython -pylab
+
+from gauss import Gauss
+
+g = Gauss(center=5,width=1,scale=10)
+x = asarray([1,2,3,4,5])
+y = g(x)
+plot(x,y)
+</pre></div>
+</div>
+<p>This should produce a plot of the Gaussian peak.</p>
+<p>You will then want to try your model with some data.  Create a file
+with some dummy data, such as gauss.dat:</p>
+<div class="highlight-python"><div class="highlight"><pre># x y
+4 2
+5 6
+6 7
+7 3
+</pre></div>
+</div>
+<p>In order to match the model to data, you need to define a fitness
+object.  This shows the difference between the model and the data,
+which you can then plot or sum to create a weighted chisq value:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">f</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Fitness</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s">&#39;gauss.dat&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fit_x</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">residuals</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>The data file can have up to four columns, either x,y or x,y,dy
+or x,dx,y,dy where x,y are the measurement points and values,
+dx is the instrument resolution in x and dy is the uncertainty
+in the measurement value y.  You can pass any keyword arguments
+to data.load that are accepted by numpy.loadtxt.  For example,
+you can reorder columns or skip rows.  Additionally, you can modify
+data attributes directly x,y,dx,dy and calc_x.  See help on park.Data1D
+for details.</p>
+<p>Once you have your model debugged you can use it in a fit:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">g</span> <span class="o">=</span> <span class="n">Gauss</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="mf">7.2</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">fit</span><span class="p">((</span><span class="n">g</span><span class="p">,</span> <span class="s">&#39;gauss.dat&#39;</span><span class="p">))</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In this example, center and width are allowed to vary but scale is fixed.</p>
+<p>Existing models can be readily adapted to Park:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Gauss</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="s">&quot;Existing model&quot;</span>
+    <span class="n">center</span><span class="p">,</span><span class="n">width</span><span class="p">,</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span><span class="n">G</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">GaussAdaptor</span><span class="p">(</span><span class="n">Gauss</span><span class="p">,</span><span class="n">Model</span><span class="p">):</span>
+    <span class="s">&quot;PARK adaptor&quot;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;center&#39;</span><span class="p">,</span><span class="s">&#39;width&#39;</span><span class="p">,</span><span class="s">&#39;scale&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">Model</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">Gauss</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">GaussAdaptor</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="mf">7.2</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">fit</span><span class="p">((</span><span class="n">g</span><span class="p">,</span> <span class="s">&#39;gauss.dat&#39;</span><span class="p">))</span>
+<span class="n">result</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Models can become much more complex than the ones described above,
+including multilevel models where fitting parameters can be added
+and removed dynamically.</p>
+<p>In many cases the park optimizer will need an adaptor for pre-existing
+models.  The adaptor above relies on python properties to translate
+model.par access into model._par.get() and model._par.set() where _par
+is the internal name for par.  This technique works for simple static
+models, but will not work well for sophisticated models which have,
+for example, a dynamic parameter set where the model parameters cannot
+be set as properties.  A solution to this problem is to subclass the
+park.Parameter and override the value attribute as a property.</p>
+<p>Once models are defined they can be used in a variety of contexts, such
+as simultaneous fitting with constraints between the parameters.  With
+some care in defining the model, computationally intensive fits can
+be distributed across multiple processors.  We provide a simple user
+interface for interacting with the model parameters and managing fits.
+This can be extended with model specialized model editors which format
+the parameters in a sensible way for the model, or allow direct manipulation
+of the model structure.  The underlying fitting engine can also be
+used directly from your own user interface.</p>
+<dl class="class">
+<dt id="park.model.Model">
+<em class="property">class </em><tt class="descclassname">park.model.</tt><tt class="descname">Model</tt><big>(</big><em>*args</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/model.html#Model"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Model definition.</p>
+<p>The model manages attribute access to the fitting parameters and
+also manages the dataset.</p>
+<dl class="docutils">
+<dt>derivatives [&#8216;p1&#8217;,&#8217;p2&#8217;,...]</dt>
+<dd><p class="first">List of parameters for which the model can calculate
+derivatives.  The derivs
+The model function can compute the derivative with respect
+to this parameter.  The function model.derivs(x,[p1,p2,...])
+will return (f(x),df/dp1(x), ...).  The parameters and their
+order are determined by the fitting engine.</p>
+<p class="last">Note: This is a property of the model, not the fit.
+Numerical derivatives will be used if the parameter is
+used in an expression or if no analytic derivative is
+available for the parameter.  Automatic differentiation
+on parameter expressions is possible, but beyond the scope
+of this project.</p>
+</dd>
+<dt>eval(x)</dt>
+<dd>Evaluate the model at x.  This must be defined by the subclass.</dd>
+<dt>eval_deriv(x,pars=[])</dt>
+<dd>Evaluate the model and the derivatives at x.  This must be
+defined by the subclass.</dd>
+<dt>parameters</dt>
+<dd>The names of the model parameters.  If this is not provided, then
+the model will search the subclass for park.Parameter attributes
+and construct the list of names from that.  Any parameters in the
+list not already defined as park.Parameter attributes will be
+defined as parameters with a default of 0.</dd>
+<dt>parameterset</dt>
+<dd>The set of parameters defined by the model.  These are the
+parameters themselves, gathered into a park.ParameterSet.</dd>
+</dl>
+<p>The minimum fittng model if you choose not to subclass park.Model
+requires parameterset and a residuals() method.</p>
+<dl class="attribute">
+<dt id="park.model.Model.derivatives">
+<tt class="descname">derivatives</tt><em class="property"> = []</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.model.Model.eval">
+<tt class="descname">eval</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/model.html#Model.eval"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Evaluate the model at x.</p>
+<p>This method needs to be specialized in the model to evaluate the
+model function.  Alternatively, the model can implement is own
+version of residuals which calculates the residuals directly
+instead of calling eval.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.model.Model.eval_derivs">
+<tt class="descname">eval_derivs</tt><big>(</big><em>x</em>, <em>pars=[]</em><big>)</big><a class="reference internal" href="../../_modules/park/model.html#Model.eval_derivs"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Evaluate the model and derivatives wrt pars at x.</p>
+<p>pars is a list of the names of the parameters for which derivatives
+are desired.</p>
+<p>This method needs to be specialized in the model to evaluate the
+model function.  Alternatively, the model can implement is own
+version of residuals which calculates the residuals directly
+instead of calling eval.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.model.Model.parameters">
+<tt class="descname">parameters</tt><em class="property"> = []</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.model.Model.parameterset">
+<tt class="descname">parameterset</tt><em class="property"> = []</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.model.Model.set">
+<tt class="descname">set</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/model.html#Model.set"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the initial value for a set of parameters.</p>
+<p>E.g., model.set(width=3,center=5)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-park.monitor">
+<span id="park-monitor-module"></span><h2>park.monitor module</h2>
+<p>Asychronous execution monitoring service.</p>
+<p>Long running computations need to convey status information to the user.
+This status can take multiple forms, such as output to the console or
+activity on a GUI, or even mail to your inbox.</p>
+<p>park.monitor defines several standard message types:</p>
+<div class="highlight-python"><div class="highlight"><pre>`Start` for job start
+`Join` first message when joining an already running job
+`Progress` for job activity
+`Improvement` for partial results
+`Complete` for final result
+`Abort` when job is killed
+`Error` when job has an error
+`Log` for various debugging messages
+</pre></div>
+</div>
+<p>Individual services may have specialized message types.</p>
+<p>park.monitor also defines <cite>Monitor</cite> to process the various kinds of messages,
+and dispatch them to the various user defined handlers.</p>
+<p>For each message type, the Monitor dispatcher will look for a function
+named onMonitorQQQ where QQQ is the message type.  For example,
+onMonitorStart(self, message) will be called in response to a Start message.
+If onMonitorQQQ is not defined, then onMonitorMessage will be called.  The
+default behaviour of onMonitorMessage is to print the message on the console.</p>
+<p>Log messages are sent to the standard system logger.  See logging in the
+python standard library for details.</p>
+<p>The Monitor class has methods for onMonitorStart(message), etc.
+In panel, be sure to have methods for onMonitorStart(message), 
+onMonitorProgress(message), etc., for the kinds of monitor messages 
+the application will send.  The catch-all method is onMonitorMessage.</p>
+<p>See <cite>park.monitor</cite> for details on the message types.  Individual services
+may have additional message types.</p>
+<dl class="class">
+<dt id="park.monitor.Monitor">
+<em class="property">class </em><tt class="descclassname">park.monitor.</tt><tt class="descname">Monitor</tt><a class="reference internal" href="../../_modules/park/monitor.html#Monitor"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Messages that are received during the processing of the job.</p>
+<p>Standard message types:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sb">`Start`</span><span class="p">,</span> <span class="sb">`Progress`</span><span class="p">,</span> <span class="sb">`Improvement`</span><span class="p">,</span> <span class="sb">`Complete`</span><span class="p">,</span> <span class="sb">`Error`</span><span class="p">,</span> <span class="sb">`Abort`</span><span class="p">,</span> <span class="sb">`Log`</span>
+</pre></div>
+</div>
+<p>Specific job types may have their own monitor messages.</p>
+<p>The messages themselves should all produce nicely formatted results
+in response to str(message).</p>
+<p>The message dispatch calls on&lt;Class&gt;(message) if the on&lt;Class&gt;
+method exists for the message type.  If not, then dispatch
+calls otherwise(message).  By default onLog(message) submits the
+log record to the logger.</p>
+<p>Subclass Monitor to define your own behaviours.</p>
+<dl class="method">
+<dt id="park.monitor.Monitor.onMonitorLog">
+<tt class="descname">onMonitorLog</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="../../_modules/park/monitor.html#Monitor.onMonitorLog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called when the job sends a logging record.</p>
+<p>The logging record contains a normal python logging record.</p>
+<p>The default behaviour is to tie into the application logging
+system using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Logging levels are set in the job controller.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.monitor.Monitor.onMonitorMessage">
+<tt class="descname">onMonitorMessage</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="../../_modules/park/monitor.html#Monitor.onMonitorMessage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>What to do if the message handler is not found.</p>
+<p>Default is to ignore the message.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.monitor.Monitor.put">
+<tt class="descname">put</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="../../_modules/park/monitor.html#Monitor.put"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called from thread when new message has arrived.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-park.parameter">
+<span id="park-parameter-module"></span><h2>park.parameter module</h2>
+<p>Parameters and parameter sets.</p>
+<p>Parameter defines an individual parameter, and ParameterSet groups them
+into a hierarchy.</p>
+<p>Individual models need to provide a parameter set with the correct
+properties, either by using park.ParameterSet in their model definition,
+or by providing a wrapper which can translate assignment to parameter.value
+into the appropriate change in the wrapped model.  See wrapper.py for
+an example.</p>
+<dl class="class">
+<dt id="park.parameter.Parameter">
+<em class="property">class </em><tt class="descclassname">park.parameter.</tt><tt class="descname">Parameter</tt><big>(</big><em>name='unknown'</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A parameter is a box for communicating with the fitting service.
+Parameters can have a number of properties,</p>
+<p>Parameters have a number of properties:</p>
+<dl class="docutils">
+<dt>name &#8220;string&#8221;</dt>
+<dd><p class="first">name of the parameter within the parameter set.</p>
+<p class="last">The name is read only.  You can rename a parameter but only 
+in the context of the parameter set which contains it, using
+parameterset.rename(par,name).  This will change all expressions
+containing the named parameter.</p>
+</dd>
+<dt>path</dt>
+<dd>dotted name of the parameter within the set of models.  The
+dotted name is automatically generated by the parameter set
+before expressions are parsed and evaluated.  There are
+some operations on parameter sets (such as renaming the
+layer containing a parameter) which will force an adjustment
+of all the underlying parameter names, as well as any
+expressions in which they are referenced.</dd>
+<dt>limits (low, high)</dt>
+<dd>hard limits on the range of allowed parameter values, dictated
+by physics rather than by knowledge of the particular system.
+For example, thickness parameters would have limits (0,inf)
+because negative thicknesses are unphysical.  These limits
+are enforced when setting range for the fit.</dd>
+<dt>units &#8220;string&#8221;</dt>
+<dd>units for the parameter.  This should be a string, but
+be parsable by whatever units package your application
+supports.</dd>
+<dt>tip &#8220;string&#8221;</dt>
+<dd>parameter description, suitable for use in a tooltip</dd>
+<dt>value double</dt>
+<dd>current value of the parameter, either fixed, fitted or computed</dd>
+<dt>range (low, high)</dt>
+<dd>range of expected values for the parameter in the model</dd>
+<dt>expression &#8220;string&#8221;</dt>
+<dd><p class="first">expression for the parameter in the model.  This is a string
+containing a formula for updating the parameter value based
+on the values of other parameters in the system.  The expression
+is ignored if &#8216;calculated&#8217; is False.</p>
+<p class="last">Note: the list of symbols available to the expression evaluator
+defaults to the contents of the math module.  The caller will be
+able to override this within the fitting fitting class.</p>
+</dd>
+<dt>status &#8216;fixed&#8217;|&#8217;computed&#8217;|&#8217;fitted&#8217;</dt>
+<dd>the parameter type.  Choose &#8216;fixed&#8217; if the values is to
+remain fixed throughout the fit, even if a range and an
+expression have been specified.  Choose &#8216;computed&#8217; if the
+value of the parameter is to be computed each time the
+parameters are updated.  Choose &#8216;fitted&#8217; if an optimization
+algorithm is supposed to search the parameter space.</dd>
+<dt>likelihood</dt>
+<dd><p class="first">function to return the negative log likelihood of seeing a
+particular parameter value.  2*likelihood(value) will be added
+to the total cost function for the particular parameter set
+during the fit.  This will be on par with the probabilty
+of seeing the particular theory function given the observed
+datapoints when performing the fit (the residual term is
+closely related to the log likelihood of the normal distribution).</p>
+<p class="last">Note: we are minimizing chi^2 = sum [ ((y-f(x;p))/dy)^2 ] rather 
+than  -log P = sum [ ((y-f(x;p))/dy)^2/2 + log(2 pi dy^2) ],
+where P is the probability of seeing f(x;p) given y,dy as the
+mean and standard deviation of a normal distribution.  Because
+chi^2_p = - 2 * log P_p + constant, the minima of p are the same
+for chi^2 and negative log likelihood.  However, to weight the
+likelihood properly when adding likelihood values to chisq, we
+need the extra factor of 2 mentioned above.  The usual statistical
+implications of normalized chi^2 will of course be suspect, both
+because the assumption of independence between the points in
+chi^2 (which definitely do not hold for the new &#8216;point&#8217; p_k), and
+because of the additional 2 log(2 pi dp_k^2) constant, but given
+the uncertainty in the estimate of the distribution parameters,
+this is likely a minor point.</p>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="park.parameter.Parameter.deriv">
+<tt class="descname">deriv</tt><em class="property"> = False</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.expression">
+<tt class="descname">expression</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.get">
+<tt class="descname">get</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.get"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the current value for a parameter.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.iscomputed">
+<tt class="descname">iscomputed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.iscomputed"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.isfeasible">
+<tt class="descname">isfeasible</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.isfeasible"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return true if the value is in the range</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.isfitted">
+<tt class="descname">isfitted</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.isfitted"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.isfixed">
+<tt class="descname">isfixed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.isfixed"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.isrestrained">
+<tt class="descname">isrestrained</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.isrestrained"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.likelihood">
+<tt class="descname">likelihood</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.limits">
+<tt class="descname">limits</tt><em class="property"> = (-inf, inf)</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.name">
+<tt class="descname">name</tt></dt>
+<dd><p>parameter name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.path">
+<tt class="descname">path</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.range">
+<tt class="descname">range</tt></dt>
+<dd><p>parameter range</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.set">
+<tt class="descname">set</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.set"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set a parameter to a value, a range or an expression.  If it is a value,
+the parameter will be fixed for the fit.  If it is a range, the value
+will be varying for the fit.  If it is an expression, the parameter will
+be calculated from the values of other parameters in the fit.</p>
+<p>Raises ValueError if the value could not be interpreted.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.setprefix">
+<tt class="descname">setprefix</tt><big>(</big><em>prefix</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.setprefix"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the full path to the parameter as used in expressions involving
+the parameter name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.status">
+<tt class="descname">status</tt><em class="property"> = 'fixed'</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.Parameter.summarize">
+<tt class="descname">summarize</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#Parameter.summarize"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return parameter range string.</p>
+<p>E.g.,  &#8221;       Gold .....|.... 5.2043 in [2,7]&#8221;</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.tip">
+<tt class="descname">tip</tt><em class="property"> = 'Fitting parameter'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.units">
+<tt class="descname">units</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.Parameter.value">
+<tt class="descname">value</tt><em class="property"> = 0.0</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.parameter.ParameterSet">
+<em class="property">class </em><tt class="descclassname">park.parameter.</tt><tt class="descname">ParameterSet</tt><big>(</big><em>name='unknown'</em>, <em>pars=[]</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#ParameterSet"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">list</span></tt></p>
+<p>The set of parameters used to fit theory to data.</p>
+<p>ParameterSet forms a hierarchy of parameters.  The parameters themselves
+are referred to by the path through the hierarchy, usually:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fitname</span><span class="o">.</span><span class="n">component</span><span class="o">.</span><span class="n">parameter</span>
+</pre></div>
+</div>
+<p>Though more or fewer levels are permitted.  Parameters are assumed to
+have a unique label throughout the fit.  This is required so that
+expressions tying the results of one fit to another can uniquely
+reference a parameter.</p>
+<p>Attributes:</p>
+<dl class="docutils">
+<dt>name</dt>
+<dd>the name of the parameter set</dd>
+<dt>path</dt>
+<dd>the full dotted name of the parameter set</dd>
+<dt>context</dt>
+<dd>a dictionary providing additional context for evaluating parameters;
+Note that this namespace is shared with other theory functions, so
+populate it carefully.</dd>
+</dl>
+<dl class="method">
+<dt id="park.parameter.ParameterSet.byname">
+<tt class="descname">byname</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#ParameterSet.byname"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Lookup parameter from dotted path</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.ParameterSet.computed">
+<tt class="descname">computed</tt></dt>
+<dd><p>Return the subset of the parameters which are calculated</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.ParameterSet.fitted">
+<tt class="descname">fitted</tt></dt>
+<dd><p>Return the subset of the paramters which are varying</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.ParameterSet.fixed">
+<tt class="descname">fixed</tt></dt>
+<dd><p>Return the subset of the parameters which are fixed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.ParameterSet.flatten">
+<tt class="descname">flatten</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#ParameterSet.flatten"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Iterate over the elements in depth first order.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.ParameterSet.gather_context">
+<tt class="descname">gather_context</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#ParameterSet.gather_context"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Gather all additional symbols that can be used in expressions.</p>
+<p>For example, if reflectometry provides a volume fraction
+function volfrac(rho1,rho2,frac) to compute densities, then
+this function can be added as a context dictionary to the
+reflectometry parameter set.  Note that there is no guarantee
+which function will be used if the same function exists in
+two separate contexts.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.ParameterSet.name">
+<tt class="descname">name</tt></dt>
+<dd><p>parameter name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.ParameterSet.path">
+<tt class="descname">path</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.ParameterSet.rename">
+<tt class="descname">rename</tt><big>(</big><em>par</em>, <em>name</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#ParameterSet.rename"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Rename the parameter to something new.
+Called from root of the parameter hierarchy, rename the particular
+parameter object to something else.</p>
+<p>This changes the internal name of the parameter, as well as all
+expressions in which it occurs.  If the parameter is actually
+a parameter set, then it renames all parameters in the set.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parameter.ParameterSet.restrained">
+<tt class="descname">restrained</tt></dt>
+<dd><p>Return the subset of the parameters which have a likelihood
+function associated with them.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parameter.ParameterSet.setprefix">
+<tt class="descname">setprefix</tt><big>(</big><em>prefix=None</em><big>)</big><a class="reference internal" href="../../_modules/park/parameter.html#ParameterSet.setprefix"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Fill in the full path name for all the parameters in the tree.</p>
+<p>Note: this function must be called from the root parameter set
+to build proper path names.</p>
+<p>This is required before converting parameter expressions into
+function calls.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-park.parkde">
+<span id="park-parkde-module"></span><h2>park.parkde module</h2>
+<dl class="class">
+<dt id="park.parkde.DiffEv">
+<em class="property">class </em><tt class="descclassname">park.parkde.</tt><tt class="descname">DiffEv</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/parkde.html#DiffEv"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#park.fit.Fitter" title="park.fit.Fitter"><tt class="xref py py-class docutils literal"><span class="pre">park.fit.Fitter</span></tt></a></p>
+<p>Differential evolution optimizer</p>
+<p>This implements <cite>park.fit.Fitter</cite>.</p>
+<dl class="attribute">
+<dt id="park.parkde.DiffEv.Fscale">
+<tt class="descname">Fscale</tt><em class="property"> = 0.5</em></dt>
+<dd><p>Step size along difference vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parkde.DiffEv.crossover_rate">
+<tt class="descname">crossover_rate</tt><em class="property"> = 0.9</em></dt>
+<dd><p>Amount of mixing in population</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parkde.DiffEv.improvement">
+<tt class="descname">improvement</tt><big>(</big><em>x</em>, <em>fx</em>, <em>ncalls=-1</em><big>)</big><a class="reference internal" href="../../_modules/park/parkde.html#DiffEv.improvement"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parkde.DiffEv.maxiter">
+<tt class="descname">maxiter</tt><em class="property"> = 1000</em></dt>
+<dd><p>Maximum number of iterations</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.parkde.DiffEv.pop_scale">
+<tt class="descname">pop_scale</tt><em class="property"> = 4</em></dt>
+<dd><p>Number of active points per dimension</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.parkde.DiffEv.progress">
+<tt class="descname">progress</tt><big>(</big><em>k</em>, <em>n</em><big>)</big><a class="reference internal" href="../../_modules/park/parkde.html#DiffEv.progress"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.parkde.DiffEv.tolerance">
+<tt class="descname">tolerance</tt><em class="property"> = 1e-05</em></dt>
+<dd><p>Fit tolerance</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="park-parksnob-module">
+<h2>park.parksnob module</h2>
+</div>
+<div class="section" id="module-park.peaks">
+<span id="park-peaks-module"></span><h2>park.peaks module</h2>
+<p>A park model implementing a multipeak fitter.</p>
+<p><strong>* WARNING *</strong> this example was used to inform the design process,
+and has not yet been updated to correspond to the current implementation.
+Do not use this as a tutorial.</p>
+<p>This is an example model showing how to put together a multi-part
+fit objective function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">group main:</th><td class="field-body">Peaks</td>
+</tr>
+<tr class="field-even field"><th class="field-name">group peaks:</th><td class="field-body">Gaussian, Lorentzian, Voigt</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">group backgrounds:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Constant, Quadratic, Linear</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="park.peaks.Constant">
+<em class="property">class </em><tt class="descclassname">park.peaks.</tt><tt class="descname">Constant</tt><big>(</big><em>name</em>, <em>C=0</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Constant"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Constant background: C</p>
+<dl class="method">
+<dt id="park.peaks.Constant.dC">
+<tt class="descname">dC</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Constant.dC"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.peaks.Constant.name">
+<tt class="descname">name</tt><em class="property"> = 'Background: constant'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.peaks.Gaussian">
+<em class="property">class </em><tt class="descclassname">park.peaks.</tt><tt class="descname">Gaussian</tt><big>(</big><em>name</em>, <em>scale=1.0</em>, <em>center=0</em>, <em>sigma=1</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Gaussian"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Gaussian peak: scale exp ( -0.5 (x-center)**2 / sigma**2 )</p>
+<dl class="method">
+<dt id="park.peaks.Gaussian.dcenter">
+<tt class="descname">dcenter</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Gaussian.dcenter"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Gaussian.dscale">
+<tt class="descname">dscale</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Gaussian.dscale"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Gaussian.dsigma">
+<tt class="descname">dsigma</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Gaussian.dsigma"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.peaks.Linear">
+<em class="property">class </em><tt class="descclassname">park.peaks.</tt><tt class="descname">Linear</tt><big>(</big><em>name</em>, <em>B=0</em>, <em>C=0</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Linear"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Linear background: B x**2 + C</p>
+<dl class="method">
+<dt id="park.peaks.Linear.dB">
+<tt class="descname">dB</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Linear.dB"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Linear.dC">
+<tt class="descname">dC</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Linear.dC"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.peaks.Linear.name">
+<tt class="descname">name</tt><em class="property"> = 'Background: linear'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.peaks.Lorentzian">
+<em class="property">class </em><tt class="descclassname">park.peaks.</tt><tt class="descname">Lorentzian</tt><big>(</big><em>name</em>, <em>scale=1.0</em>, <em>center=0</em>, <em>gamma=1</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Lorentzian"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Lorentzian peak (HWHM): scale/pi  gamma/((x-center)**2 + gamma**2)</p>
+<dl class="method">
+<dt id="park.peaks.Lorentzian.dcenter">
+<tt class="descname">dcenter</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Lorentzian.dcenter"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Lorentzian.dgamma">
+<tt class="descname">dgamma</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Lorentzian.dgamma"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Lorentzian.dscale">
+<tt class="descname">dscale</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Lorentzian.dscale"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.peaks.Peaks">
+<em class="property">class </em><tt class="descclassname">park.peaks.</tt><tt class="descname">Peaks</tt><big>(</big><em>datafile=None</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Peaks"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#park.model.Model" title="park.model.Model"><tt class="xref py py-class docutils literal"><span class="pre">park.model.Model</span></tt></a></p>
+<p>Peak fitter</p>
+<dl class="method">
+<dt id="park.peaks.Peaks.add_peak">
+<tt class="descname">add_peak</tt><big>(</big><em>type</em>, <em>name=None</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Peaks.add_peak"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add a peak to the model.</p>
+<p>The name of the peak is used to distinguish it from other peaks 
+in the model, and appears as part of the parameter name in
+constraint expressions.  For example, if name is &#8216;P3&#8217; and this
+is part of model &#8216;M1&#8217; then the sigma parameter of a gaussian
+peak would be &#8216;M1.P3.sigma&#8217;.</p>
+<p>The peak can be specified either by peak type and initial arguments
+or by the peak itself, which is a function of x with a parameters 
+attribute.</p>
+<dl class="docutils">
+<dt>Available peak types include:</dt>
+<dd><dl class="first last docutils">
+<dt>gaussian(scale=1, center=0, sigma=1) </dt>
+<dd>= scale exp ( -0.5 (x-center)**2 / sigma**2 )</dd>
+<dt>lorentzian(scale=1, center=0, gamma=1) </dt>
+<dd>= scale/pi gamma / ((x-center)**2 + gamma**2))</dd>
+<dt>voigt(scale=1, center=0, sigma=1, gamma=1)</dt>
+<dd>= scale (lorentzian(mu,gamma) * gaussian(mu,sigma))(x-center)
+where * represents convolution</dd>
+</dl>
+</dd>
+<dt>Available background functions include:</dt>
+<dd><dl class="first last docutils">
+<dt>constant(C=0)</dt>
+<dd>= C</dd>
+<dt>slope(C=0, B=1)</dt>
+<dd>= B x + C</dd>
+<dt>quadratic(A=1, B=0, C=0)</dt>
+<dd>= A x**2 + B x + C</dd>
+</dl>
+</dd>
+</dl>
+<p>Additional peak types can be registered.  The complete dictionary
+of available types is in Peaks.peak_types.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Peaks.eval">
+<tt class="descname">eval</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Peaks.eval"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the raw theory value at x, unconvoluted and unweighted.</p>
+<p>The residuals will be calculated by park.Model.residuals by
+calling</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="park.peaks.Peaks.parameters">
+<tt class="descname">parameters</tt><em class="property"> = []</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.peaks.Peaks.parameterset">
+<tt class="descname">parameterset</tt><em class="property"> = []</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.peaks.Peaks.peak_types">
+<tt class="descname">peak_types</tt><em class="property"> = {'Constant': &lt;class 'park.peaks.Constant'&gt;, 'Linear': &lt;class 'park.peaks.Linear'&gt;, 'Gaussian': &lt;class 'park.peaks.Gaussian'&gt;, 'Quadratic': &lt;class 'park.peaks.Quadratic'&gt;, 'Voigt': &lt;class 'park.peaks.Voigt'&gt;, 'Lorentzian': &lt;class 'park.peaks.Lorentzian'&gt;}</em></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="park.peaks.Peaks.register_peak_generator">
+<em class="property">classmethod </em><tt class="descname">register_peak_generator</tt><big>(</big><em>type</em>, <em>factory</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Peaks.register_peak_generator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Register a new peak generator.  This will return a callable
+object with a parameter set that can be used in the peak
+fitting class.</p>
+<p>The individual peak functions a number of attributes:</p>
+<dl class="docutils">
+<dt>__name__</dt>
+<dd>the name to be displayed in the list of peaks; the
+default is __class__.__name__</dd>
+<dt>__factory__</dt>
+<dd>the name of a factory function in the python
+namespace which returns a new peak.  These parameters
+will be set from the stored parameter list when the
+peak model is reloaded.  This can be omitted if it
+is simply the module and name of the class.</dd>
+<dt>__doc__</dt>
+<dd>the tool tip to be displayed with the peak</dd>
+<dt>__call__(x)</dt>
+<dd>evaluate the peak function at x</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Peaks.remove_peak">
+<tt class="descname">remove_peak</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Peaks.remove_peak"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove the named peak from the model.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.peaks.Quadratic">
+<em class="property">class </em><tt class="descclassname">park.peaks.</tt><tt class="descname">Quadratic</tt><big>(</big><em>name</em>, <em>A=1</em>, <em>B=0</em>, <em>C=0</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Quadratic"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Quadratic background: A x**2 + B x + C</p>
+<dl class="method">
+<dt id="park.peaks.Quadratic.dA">
+<tt class="descname">dA</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Quadratic.dA"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Quadratic.dB">
+<tt class="descname">dB</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Quadratic.dB"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="park.peaks.Quadratic.dC">
+<tt class="descname">dC</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Quadratic.dC"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="park.peaks.Quadratic.name">
+<tt class="descname">name</tt><em class="property"> = 'Background: quadratic'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.peaks.Voigt">
+<em class="property">class </em><tt class="descclassname">park.peaks.</tt><tt class="descname">Voigt</tt><big>(</big><em>name</em>, <em>scale=1</em>, <em>center=0</em>, <em>sigma=1</em>, <em>gamma=1</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#Voigt"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Voigt peak (HWHM,sigma): A [G(sigma) * L(gamma)](x-center)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.peaks.init">
+<tt class="descclassname">park.peaks.</tt><tt class="descname">init</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#init"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Register peak types with the Peaks model.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.peaks.test">
+<tt class="descclassname">park.peaks.</tt><tt class="descname">test</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#test"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="park.peaks.voigt">
+<tt class="descclassname">park.peaks.</tt><tt class="descname">voigt</tt><big>(</big><em>x</em>, <em>sigma</em>, <em>gamma</em><big>)</big><a class="reference internal" href="../../_modules/park/peaks.html#voigt"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the voigt function, which is the convolution of a Lorentz
+function with a Gaussian.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt>gamma <span class="classifier-delimiter">:</span> <span class="classifier">real</span></dt>
+<dd><p class="first last">The half-width half-maximum of the Lorentzian</p>
+</dd>
+<dt>sigma <span class="classifier-delimiter">:</span> <span class="classifier">real</span></dt>
+<dd><p class="first last">The 1-sigma width of the Gaussian, which is one standard deviation.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Ref: W.I.F. David, J. Appl. Cryst. (1986). 19, 63-64</p>
+<p>Note: adjusted to use stddev and HWHM rather than FWHM parameters</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-park.pmap">
+<span id="park-pmap-module"></span><h2>park.pmap module</h2>
+<p>Parallel map-reduce implementation using threads.</p>
+<dl class="class">
+<dt id="park.pmap.Collector">
+<em class="property">class </em><tt class="descclassname">park.pmap.</tt><tt class="descname">Collector</tt><a class="reference internal" href="../../_modules/park/pmap.html#Collector"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract interface to map-reduce accumulator function.</p>
+<dl class="method">
+<dt id="park.pmap.Collector.error">
+<tt class="descname">error</tt><big>(</big><em>part</em>, <em>msg</em><big>)</big><a class="reference internal" href="../../_modules/park/pmap.html#Collector.error"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Exception seen on executing map or reduce.  The collector
+can adjust the accumulated result appropriately to reflect
+the error.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.pmap.Collector.finalize">
+<tt class="descname">finalize</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/pmap.html#Collector.finalize"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called when all parts have been accumulated</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="park.pmap.Mapper">
+<em class="property">class </em><tt class="descclassname">park.pmap.</tt><tt class="descname">Mapper</tt><a class="reference internal" href="../../_modules/park/pmap.html#Mapper"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract interface to map-reduce mapper function.</p>
+<dl class="method">
+<dt id="park.pmap.Mapper.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/pmap.html#Mapper.abort"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Stop the mapper</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="park.pmap.main">
+<tt class="descclassname">park.pmap.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/park/pmap.html#main"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="park.pmap.pmap">
+<tt class="descclassname">park.pmap.</tt><tt class="descname">pmap</tt><big>(</big><em>mapper</em>, <em>inputs</em><big>)</big><a class="reference internal" href="../../_modules/park/pmap.html#pmap"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Apply function mapper to all inputs.</p>
+<p>This is the serial version of a parallel iterator, yielding the next 
+sequence value as soon as it is available.  There is no guarantee 
+that the order of the inputs will be preserved in the parallel
+version, so don&#8217;t depend on it!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.pmap.pmapreduce">
+<tt class="descclassname">park.pmap.</tt><tt class="descname">pmapreduce</tt><big>(</big><em>mapper</em>, <em>collector</em>, <em>inputs</em><big>)</big><a class="reference internal" href="../../_modules/park/pmap.html#pmapreduce"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Apply function mapper to inputs, accumulating the results in collector.</p>
+<p>Collector is a function which accepts the result of mapper(item) for 
+each item of inputs.  There is no guarantee that the outputs will be
+received in order.</p>
+<p>The map is executed in a separate thread so the function returns
+to the caller immediately.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="park.pmap.preduce">
+<tt class="descclassname">park.pmap.</tt><tt class="descname">preduce</tt><big>(</big><em>collector</em>, <em>outputs</em><big>)</big><a class="reference internal" href="../../_modules/park/pmap.html#preduce"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Collect all outputs, calling collector(item) for each item in the sequence.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="park.pmap.profile_mapper">
+<tt class="descclassname">park.pmap.</tt><tt class="descname">profile_mapper</tt><em class="property"> = False</em></dt>
+<dd><p>True if the mapper cost should be profiled.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="park-rangemap-module">
+<h2>park.rangemap module</h2>
+</div>
+<div class="section" id="park-serial-module">
+<h2>park.serial module</h2>
+</div>
+<div class="section" id="module-park.setup">
+<span id="park-setup-module"></span><h2>park.setup module</h2>
+<dl class="function">
+<dt id="park.setup.configuration">
+<tt class="descclassname">park.setup.</tt><tt class="descname">configuration</tt><big>(</big><em>parent_package=''</em>, <em>top_path=None</em><big>)</big><a class="reference internal" href="../../_modules/park/setup.html#configuration"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-park.simplex">
+<span id="park-simplex-module"></span><h2>park.simplex module</h2>
+<p>Downhill simplex optimizer.</p>
+<dl class="function">
+<dt id="park.simplex.simplex">
+<tt class="descclassname">park.simplex.</tt><tt class="descname">simplex</tt><big>(</big><em>f</em>, <em>x0=None</em>, <em>bounds=None</em>, <em>radius=0.05</em>, <em>xtol=0.0001</em>, <em>ftol=0.0001</em>, <em>maxiter=None</em>, <em>update_handler=None</em>, <em>abort_test=&lt;function dont_abort at 0x105341500&gt;</em><big>)</big><a class="reference internal" href="../../_modules/park/simplex.html#simplex"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Minimize a function using Nelder-Mead downhill simplex algorithm.</p>
+<p>This optimizer is also known as Amoeba (from Numerical Recipes) and
+the Nealder-Mead simplex algorithm.  This is not the simplex algorithm
+for solving constrained linear systems.</p>
+<p>Downhill simplex is a robust derivative free algorithm for finding
+minima.  It proceeds by choosing a set of points (the simplex) forming
+an n-dimensional triangle, and transforming that triangle so that the
+worst vertex is improved, either by stretching, shrinking or reflecting
+it about the center of the triangle.  This algorithm is not known for
+its speed, but for its simplicity and robustness, and is a good algorithm
+to start your problem with.</p>
+<p><em>Parameters</em>:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">callable f(x,*args)</span></dt>
+<dd>The objective function to be minimized.</dd>
+<dt>x0 <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Initial guess.</dd>
+<dt>bounds <span class="classifier-delimiter">:</span> <span class="classifier">(ndarray,ndarray) or None</span></dt>
+<dd>Bounds on the parameter values for the function.</dd>
+<dt>radius: float</dt>
+<dd>Size of the initial simplex.  For bounded parameters (those
+which have finite lower and upper bounds), radius is clipped
+to a value in (0,0.5] representing the portion of the 
+range to use as the size of the initial simplex.</dd>
+</dl>
+</div></blockquote>
+<p><em>Returns</em>: Result (<cite>park.simplex.Result</cite>)</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>x <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>Parameter that minimizes function.</dd>
+<dt>fx <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Value of function at minimum: <tt class="docutils literal"><span class="pre">fopt</span> <span class="pre">=</span> <span class="pre">func(xopt)</span></tt>.</dd>
+<dt>iters <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>Number of iterations performed.</dd>
+<dt>calls <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>Number of function calls made.</dd>
+<dt>success <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>True if fit completed successfully.</dd>
+</dl>
+</div></blockquote>
+<p><em>Other Parameters</em>:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>xtol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Relative error in xopt acceptable for convergence.</dd>
+<dt>ftol <span class="classifier-delimiter">:</span> <span class="classifier">number</span></dt>
+<dd>Relative error in func(xopt) acceptable for convergence.</dd>
+<dt>maxiter <span class="classifier-delimiter">:</span> <span class="classifier">int=200*N</span></dt>
+<dd>Maximum number of iterations to perform.  Defaults</dd>
+<dt>update_handler <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd>Called after each iteration, as callback(xk,fxk), where xk
+is the current parameter vector and fxk is the function value.
+Returns True if the fit should continue.</dd>
+</dl>
+</div></blockquote>
+<p><em>Notes</em></p>
+<blockquote>
+<div>Uses a Nelder-Mead simplex algorithm to find the minimum of
+function of one or more variables.</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-park.version">
+<span id="park-version-module"></span><h2>park.version module</h2>
+<p>version and package information about PARK.</p>
+</div>
+<div class="section" id="module-park.wxmonitor">
+<span id="park-wxmonitor-module"></span><h2>park.wxmonitor module</h2>
+<p>Asynchronous monitoring service for wx applications.</p>
+<p>Define a monitor using park.wxmonitor.wxMonitor(panel) where panel is
+the window which will receive the monitor updates.</p>
+<p>In panel, be sure to have methods for onMonitorStart(message), 
+onMonitorProgress(message), etc., for the kinds of monitor messages 
+the application will send.  The catch-all method is onMonitorMessage,
+which by default will print the messages on the console.  If you 
+don&#8217;t catch onMonitorLog messages then the log messages will be 
+sent to the standard python logger.</p>
+<p>See <cite>park.monitor</cite> for details on the message types.</p>
+<div class="section" id="example">
+<h3>Example</h3>
+<p>The following defines a panel which responds to monitor messages:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">wx</span>
+
+<span class="k">class</span> <span class="nc">Panel</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">TextCtrl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">TE_MULTILINE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Gauge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">sizer</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">LEFT</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">LEFT</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetSizer</span><span class="p">(</span><span class="n">sizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s">&#39;starting value&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">onMonitorMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">onMonitorStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">onMonitorProgress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">message</span><span class="o">.</span><span class="n">complete</span><span class="o">/</span><span class="n">message</span><span class="o">.</span><span class="n">total</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">onMonitorComplete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can put this panel in a simple app:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">app</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">PySimpleApp</span><span class="p">()</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Test Monitor&#39;</span><span class="p">)</span>
+<span class="n">panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">frame</span><span class="o">.</span><span class="n">Show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Next we attach attach the monitor to this panel and feed some messages from
+another thread:</p>
+<div class="highlight-python"><div class="highlight"><pre>import time,thread
+import park.wxmonitor, park.monitor
+from park.monitor import Start, Progress, Improvement, Complete
+monitor = park.wxmonitor.wxMonitor(panel)
+msgs = [Start(), Progress(1,10), Progress(3,10), 
+        Improvement(&#39;Better!&#39;), Progerss(6,10), Complete(&#39;Best!&#39;)]:
+def message_stream(monitor,msgs):
+    time.sleep(1)
+    for message in msgs:
+      monitor.put(message)
+      time.sleep(1)
+thread.start_new_thread(message_stream, (monitor,msgs))
+app.MainLoop()
+</pre></div>
+</div>
+<p>You should see the progress bar jump from 10% to 30% to 60% then all the way 
+to the end.</p>
+<dl class="function">
+<dt id="park.wxmonitor.demo">
+<tt class="descclassname">park.wxmonitor.</tt><tt class="descname">demo</tt><big>(</big><em>rate=0</em><big>)</big><a class="reference internal" href="../../_modules/park/wxmonitor.html#demo"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="park.wxmonitor.wxMonitor">
+<em class="property">class </em><tt class="descclassname">park.wxmonitor.</tt><tt class="descname">wxMonitor</tt><big>(</big><em>win</em><big>)</big><a class="reference internal" href="../../_modules/park/wxmonitor.html#wxMonitor"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#park.monitor.Monitor" title="park.monitor.Monitor"><tt class="xref py py-class docutils literal"><span class="pre">park.monitor.Monitor</span></tt></a></p>
+<p>Attach a job monitor to a panel.</p>
+<p>The monitor will perform callbacks to onMonitorStart(message),
+onMonitorProgress(message), etc. if the associated method is
+defined.  If the type specific method is not defined, then the
+monitor will call onMonitorMessage(message).  Otherwise the
+message is dropped.</p>
+<p>See <cite>park.monitor</cite> for a description of the usual messages.</p>
+<dl class="method">
+<dt id="park.wxmonitor.wxMonitor.dispatch">
+<tt class="descname">dispatch</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/park/wxmonitor.html#wxMonitor.dispatch"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Dispatch the event from the asynchronous monitor.  This is running
+in the GUI thread.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.wxmonitor.wxMonitor.onMonitorLog">
+<tt class="descname">onMonitorLog</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="../../_modules/park/wxmonitor.html#wxMonitor.onMonitorLog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called when the job sends a logging record.</p>
+<p>The logging record contains a normal python logging record.</p>
+<p>The default behaviour is to tie into the application logging
+system using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Logging levels are set in the job controller.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.wxmonitor.wxMonitor.onMonitorMessage">
+<tt class="descname">onMonitorMessage</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="../../_modules/park/wxmonitor.html#wxMonitor.onMonitorMessage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Generic message handler: do nothing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="park.wxmonitor.wxMonitor.put">
+<tt class="descname">put</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="../../_modules/park/wxmonitor.html#wxMonitor.put"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Intercept an event received from an asynchronous monitor.  This is
+running in the asynchronous thread.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-park">
+<span id="module-contents"></span><h2>Module contents</h2>
+<p>PARK fitting service.</p>
+<p>The PARK fitting service is a set of python packages to support
+fitting in datasets.  Using common python infrastructure such
+as scipy optimizers, numpy arrays, and matplotlib plotting, park
+allows you to define models, associate them with datasets and
+simultaneously fit them.  Park provides a simple job queue to
+manage multiple fits using separate processes or running across
+the network on separate machines.</p>
+<div class="section" id="installation">
+<h3>Installation</h3>
+<p>The latest version of Park is available from 
+<a class="reference external" href="http://www.reflectometry.org/danse/park">http://www.reflectometry.org/danse/park</a>.</p>
+<p>Currently this is supplied as source from a zip file.  You can
+also retrieve the latest version from svn:</p>
+<div class="highlight-python"><div class="highlight"><pre>svn co svn://danse.us/park/branches/park-1.2
+</pre></div>
+</div>
+<p>If you are installing from source, you will need a python
+environment with numpy and scipy.  For the GUI version, you
+will also need matplotlib and wx.</p>
+<p>You will need a C compiler to build the resolution convolution 
+function.  On Windows this may require installing MinGW and
+adding distutils.cfg to your distutils directory:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">build</span><span class="p">]</span>
+<span class="n">compiler</span> <span class="o">=</span> <span class="n">mingw</span>
+</pre></div>
+</div>
+<p>Once you have the required supporting packages, use the following
+to build and install:</p>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>Usage</h3>
+<p>To get started with park, you will need to first define the
+models that you are using.  These can be very basic models, 
+listing all possible fitting parameters.  When setting up the 
+fit later, you will be able to combine models, using
+parameter expressions to relate the values in one model with
+those in another.  See <cite>park.model</cite> for details.</p>
+<p>Once your models are constructed you can use them in a fit.
+See <cite>park.fit</cite> for details.</p>
+<p>Important classes and functions:
+<cite>park.model.Model</cite>, <cite>park.parameter.ParameterSet</cite>, <cite>park.fit.Fit</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">group models:</th><td class="field-body">model, assembly, parameter, data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">group examples:</th><td class="field-body">peaks</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">group optimizer:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">fit, fitresult, fitmc, simplex</td>
+</tr>
+<tr class="field-even field"><th class="field-name">group support:</th><td class="field-body">expression, deps, version, setup, serial</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">group server:</th><td class="field-body">fitservice</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">park package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-park.assembly">park.assembly module</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#a-note-on-model-weighting">A note on model weighting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-park.data">park.data module</a></li>
+<li><a class="reference internal" href="#module-park.deps">park.deps module</a></li>
+<li><a class="reference internal" href="#module-park.diffev">park.diffev module</a></li>
+<li><a class="reference internal" href="#module-park.expression">park.expression module</a></li>
+<li><a class="reference internal" href="#module-park.fit">park.fit module</a><ul>
+<li><a class="reference internal" href="#id1">Usage</a></li>
+<li><a class="reference internal" href="#gui-usage">GUI Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#park-fitmc-module">park.fitmc module</a></li>
+<li><a class="reference internal" href="#module-park.fitresult">park.fitresult module</a></li>
+<li><a class="reference internal" href="#park-fitservice-module">park.fitservice module</a></li>
+<li><a class="reference internal" href="#module-park.formatnum">park.formatnum module</a></li>
+<li><a class="reference internal" href="#module-park.message">park.message module</a></li>
+<li><a class="reference internal" href="#module-park.model">park.model module</a><ul>
+<li><a class="reference internal" href="#id2">Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-park.monitor">park.monitor module</a></li>
+<li><a class="reference internal" href="#module-park.parameter">park.parameter module</a></li>
+<li><a class="reference internal" href="#module-park.parkde">park.parkde module</a></li>
+<li><a class="reference internal" href="#park-parksnob-module">park.parksnob module</a></li>
+<li><a class="reference internal" href="#module-park.peaks">park.peaks module</a></li>
+<li><a class="reference internal" href="#module-park.pmap">park.pmap module</a></li>
+<li><a class="reference internal" href="#park-rangemap-module">park.rangemap module</a></li>
+<li><a class="reference internal" href="#park-serial-module">park.serial module</a></li>
+<li><a class="reference internal" href="#module-park.setup">park.setup module</a></li>
+<li><a class="reference internal" href="#module-park.simplex">park.simplex module</a></li>
+<li><a class="reference internal" href="#module-park.version">park.version module</a></li>
+<li><a class="reference internal" href="#module-park.wxmonitor">park.wxmonitor module</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-park">Module contents</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#id3">Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">lib.macosx-10.5-x86_64-2.7</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sas.html"
+                        title="next chapter">sas package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/dev/api/park.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.html" title="sas package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="lib.macosx-10.5-x86_64-2.7"
+             >previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

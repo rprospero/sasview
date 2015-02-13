@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sas.sasview package &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="sas package" href="sas.html" />
+    <link rel="prev" title="sas.pr.core package" href="sas.pr.core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.pr.core.html" title="sas.pr.core package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" accesskey="U">sas package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sas-sasview-package">
+<h1>sas.sasview package</h1>
+<div class="section" id="submodules">
+<h2>Submodules</h2>
+</div>
+<div class="section" id="module-sas.sasview.custom_config">
+<span id="sas-sasview-custom-config-module"></span><h2>sas.sasview.custom_config module</h2>
+<p>Application appearance custom configuration</p>
+</div>
+<div class="section" id="module-sas.sasview.installer_generator">
+<span id="sas-sasview-installer-generator-module"></span><h2>sas.sasview.installer_generator module</h2>
+<p>This module generates .iss file according to the local config of
+the current application. Please make sure a file named &#8220;local_config.py&#8221;
+exists in the current directory. Edit local_config.py according to your needs.</p>
+<dl class="function">
+<dt id="sas.sasview.installer_generator.find_extension">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">find_extension</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#find_extension"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Describe the extensions that can be read by the current application</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.generate_installer">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">generate_installer</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#generate_installer"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_code">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_code</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_code"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Code that checks the existing path and snaviewpath 
+in the environmental viriables/PATH</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_dirs">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_dirs</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_dirs"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Define Dir permission</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_file">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_file</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_file"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>copy some data files</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_icon">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_icon</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_icon"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Create application icon</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_language">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_language</tt><big>(</big><em>language=['english'], msfile='compiler:Default.isl'</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_language"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>define the language of the application</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_registry">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_registry</tt><big>(</big><em>data_extension=None</em>, <em>app_extension=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_registry"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>create file association for windows.
+Allow open file on double click</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_run">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_run</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_run"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>execute some file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_tasks">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_tasks</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_tasks"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>create desktop icon</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.installer_generator.write_uninstalldelete">
+<tt class="descclassname">sas.sasview.installer_generator.</tt><tt class="descname">write_uninstalldelete</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/installer_generator.html#write_uninstalldelete"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Define uninstalldelete</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.sasview.local_config">
+<span id="sas-sasview-local-config-module"></span><h2>sas.sasview.local_config module</h2>
+<p>Application settings</p>
+<dl class="function">
+<dt id="sas.sasview.local_config.printEVT">
+<tt class="descclassname">sas.sasview.local_config.</tt><tt class="descname">printEVT</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/local_config.html#printEVT"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sas.sasview.sasview">
+<span id="sas-sasview-sasview-module"></span><h2>sas.sasview.sasview module</h2>
+<dl class="class">
+<dt id="sas.sasview.sasview.SasView">
+<em class="property">class </em><tt class="descclassname">sas.sasview.sasview.</tt><tt class="descname">SasView</tt><a class="reference internal" href="../../_modules/sas/sasview/sasview.html#SasView"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="sas.sasview.sasview.SasViewApp">
+<em class="property">class </em><tt class="descclassname">sas.sasview.sasview.</tt><tt class="descname">SasViewApp</tt><big>(</big><em>redirect=False</em>, <em>filename=None</em>, <em>useBestVisual=False</em>, <em>clearSigInt=True</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/sasview.html#SasViewApp"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.guiframe.html#sas.guiframe.gui_manager.ViewApp" title="sas.guiframe.gui_manager.ViewApp"><tt class="xref py py-class docutils literal"><span class="pre">sas.guiframe.gui_manager.ViewApp</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.sasview.sasview.run">
+<tt class="descclassname">sas.sasview.sasview.</tt><tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/sasview.html#run"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="sas-sasview-setup-exe-module">
+<h2>sas.sasview.setup_exe module</h2>
+</div>
+<div class="section" id="sas-sasview-setup-mac-module">
+<h2>sas.sasview.setup_mac module</h2>
+</div>
+<div class="section" id="module-sas.sasview.welcome_panel">
+<span id="sas-sasview-welcome-panel-module"></span><h2>sas.sasview.welcome_panel module</h2>
+<p>Welcome page</p>
+<dl class="class">
+<dt id="sas.sasview.welcome_panel.ViewApp">
+<em class="property">class </em><tt class="descclassname">sas.sasview.welcome_panel.</tt><tt class="descname">ViewApp</tt><big>(</big><em>redirect=False</em>, <em>filename=None</em>, <em>useBestVisual=False</em>, <em>clearSigInt=True</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#ViewApp"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._core.App</span></tt></p>
+<p>Test application</p>
+<dl class="method">
+<dt id="sas.sasview.welcome_panel.ViewApp.OnInit">
+<tt class="descname">OnInit</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#ViewApp.OnInit"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.sasview.welcome_panel.WelcomeFrame">
+<em class="property">class </em><tt class="descclassname">sas.sasview.welcome_panel.</tt><tt class="descname">WelcomeFrame</tt><big>(</big><em>parent</em>, <em>id</em>, <em>title</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomeFrame"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Frame</span></tt></p>
+<p>Test frame</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.sasview.welcome_panel.WelcomePage">
+<em class="property">class </em><tt class="descclassname">sas.sasview.welcome_panel.</tt><tt class="descname">WelcomePage</tt><big>(</big><em>parent</em>, <em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx.lib.scrolledpanel.ScrolledPanel</span></tt></p>
+<p>Panel created like about box  as a welcome page
+Shows product name, current version, authors, and link to the product page.</p>
+<dl class="attribute">
+<dt id="sas.sasview.welcome_panel.WelcomePage.CENTER_PANE">
+<tt class="descname">CENTER_PANE</tt><em class="property"> = True</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.sasview.welcome_panel.WelcomePage.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>list=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePage.set_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.sasview.welcome_panel.WelcomePage.window_caption">
+<tt class="descname">window_caption</tt><em class="property"> = 'Welcome panel'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.sasview.welcome_panel.WelcomePage.window_name">
+<tt class="descname">window_name</tt><em class="property"> = 'default'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.sasview.welcome_panel.WelcomePanel">
+<em class="property">class </em><tt class="descclassname">sas.sasview.welcome_panel.</tt><tt class="descname">WelcomePanel</tt><big>(</big><em>parent</em>, <em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePanel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx.aui.AuiNotebook</span></tt>, <a class="reference internal" href="sas.guiframe.html#sas.guiframe.panel_base.PanelBase" title="sas.guiframe.panel_base.PanelBase"><tt class="xref py py-class docutils literal"><span class="pre">sas.guiframe.panel_base.PanelBase</span></tt></a></p>
+<p>Panel created like about box  as a welcome page
+Shows product name, current version, authors, and link to the product page.</p>
+<dl class="attribute">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.CENTER_PANE">
+<tt class="descname">CENTER_PANE</tt><em class="property"> = True</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.get_frame">
+<tt class="descname">get_frame</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePanel.get_frame"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.on_close_page">
+<tt class="descname">on_close_page</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePanel.on_close_page"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>list=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePanel.set_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.set_frame">
+<tt class="descname">set_frame</tt><big>(</big><em>frame</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePanel.set_frame"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.set_manager">
+<tt class="descname">set_manager</tt><big>(</big><em>manager</em><big>)</big><a class="reference internal" href="../../_modules/sas/sasview/welcome_panel.html#WelcomePanel.set_manager"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>the manager of the panel in this case the application itself</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.window_caption">
+<tt class="descname">window_caption</tt><em class="property"> = 'Welcome panel'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.sasview.welcome_panel.WelcomePanel.window_name">
+<tt class="descname">window_name</tt><em class="property"> = 'default'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.sasview">
+<span id="module-contents"></span><h2>Module contents</h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sas.sasview package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sas.sasview.custom_config">sas.sasview.custom_config module</a></li>
+<li><a class="reference internal" href="#module-sas.sasview.installer_generator">sas.sasview.installer_generator module</a></li>
+<li><a class="reference internal" href="#module-sas.sasview.local_config">sas.sasview.local_config module</a></li>
+<li><a class="reference internal" href="#module-sas.sasview.sasview">sas.sasview.sasview module</a></li>
+<li><a class="reference internal" href="#sas-sasview-setup-exe-module">sas.sasview.setup_exe module</a></li>
+<li><a class="reference internal" href="#sas-sasview-setup-mac-module">sas.sasview.setup_mac module</a></li>
+<li><a class="reference internal" href="#module-sas.sasview.welcome_panel">sas.sasview.welcome_panel module</a></li>
+<li><a class="reference internal" href="#module-sas.sasview">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sas.pr.core.html"
+                        title="previous chapter">sas.pr.core package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/dev/api/sas.sasview.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.pr.core.html" title="sas.pr.core package"
+             >previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" >sas package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

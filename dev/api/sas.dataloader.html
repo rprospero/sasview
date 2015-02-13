@@ -1,0 +1,1322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sas.dataloader package &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="sas package" href="sas.html" />
+    <link rel="next" title="sas.dataloader.readers package" href="sas.dataloader.readers.html" />
+    <link rel="prev" title="sas.data_util package" href="sas.data_util.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.dataloader.readers.html" title="sas.dataloader.readers package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sas.data_util.html" title="sas.data_util package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" accesskey="U">sas package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sas-dataloader-package">
+<h1>sas.dataloader package</h1>
+<div class="section" id="subpackages">
+<h2>Subpackages</h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sas.dataloader.readers.html">sas.dataloader.readers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.IgorReader">sas.dataloader.readers.IgorReader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.abs_reader">sas.dataloader.readers.abs_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.ascii_reader">sas.dataloader.readers.ascii_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.associations">sas.dataloader.readers.associations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.cansas_constants">sas.dataloader.readers.cansas_constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.cansas_reader">sas.dataloader.readers.cansas_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.danse_reader">sas.dataloader.readers.danse_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.hfir1d_reader">sas.dataloader.readers.hfir1d_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.nexus_reader">sas.dataloader.readers.nexus_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.red2d_reader">sas.dataloader.readers.red2d_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.tiff_reader">sas.dataloader.readers.tiff_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers.xml_reader">sas.dataloader.readers.xml_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sas.dataloader.readers.html#module-sas.dataloader.readers">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules</h2>
+</div>
+<div class="section" id="module-sas.dataloader.data_info">
+<span id="sas-dataloader-data-info-module"></span><h2>sas.dataloader.data_info module</h2>
+<p>Module that contains classes to hold information read from
+reduced data files.</p>
+<p>A good description of the data members can be found in
+the CanSAS 1D XML data format:</p>
+<p><a class="reference external" href="http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation">http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation</a></p>
+<dl class="class">
+<dt id="sas.dataloader.data_info.Aperture">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Aperture</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Aperture"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="attribute">
+<dt id="sas.dataloader.data_info.Aperture.distance">
+<tt class="descname">distance</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Aperture.distance_unit">
+<tt class="descname">distance_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Aperture.name">
+<tt class="descname">name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Aperture.size">
+<tt class="descname">size</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Aperture.size_name">
+<tt class="descname">size_name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Aperture.size_unit">
+<tt class="descname">size_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Aperture.type">
+<tt class="descname">type</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Collimation">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Collimation</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Collimation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class to hold collimation information</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Collimation.aperture">
+<tt class="descname">aperture</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Collimation.length">
+<tt class="descname">length</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Collimation.length_unit">
+<tt class="descname">length_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Collimation.name">
+<tt class="descname">name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Data1D">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Data1D</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Data1D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.dataloader.data_info.plottable_1D" title="sas.dataloader.data_info.plottable_1D"><tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.data_info.plottable_1D</span></tt></a>, <a class="reference internal" href="#sas.dataloader.data_info.DataInfo" title="sas.dataloader.data_info.DataInfo"><tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.data_info.DataInfo</span></tt></a></p>
+<p>1D data class</p>
+<dl class="method">
+<dt id="sas.dataloader.data_info.Data1D.clone_without_data">
+<tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Data1D.clone_without_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Clone the current object, without copying the data (which
+will be filled out by a subsequent operation).
+The data arrays will be initialized to zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>length</strong> &#8211; length of the data array to be initialized</li>
+<li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.Data1D.is_slit_smeared">
+<tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Data1D.is_slit_smeared"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Check whether the data has slit smearing information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Data1D.x_unit">
+<tt class="descname">x_unit</tt><em class="property"> = '1/A'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Data1D.y_unit">
+<tt class="descname">y_unit</tt><em class="property"> = '1/cm'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Data2D">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Data2D</tt><big>(</big><em>data=None</em>, <em>err_data=None</em>, <em>qx_data=None</em>, <em>qy_data=None</em>, <em>q_data=None</em>, <em>mask=None</em>, <em>dqx_data=None</em>, <em>dqy_data=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Data2D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.dataloader.data_info.plottable_2D" title="sas.dataloader.data_info.plottable_2D"><tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.data_info.plottable_2D</span></tt></a>, <a class="reference internal" href="#sas.dataloader.data_info.DataInfo" title="sas.dataloader.data_info.DataInfo"><tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.data_info.DataInfo</span></tt></a></p>
+<p>2D data class</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Data2D.I_unit">
+<tt class="descname">I_unit</tt><em class="property"> = '1/cm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Data2D.Q_unit">
+<tt class="descname">Q_unit</tt><em class="property"> = '1/A'</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.Data2D.clone_without_data">
+<tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Data2D.clone_without_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Clone the current object, without copying the data (which
+will be filled out by a subsequent operation).
+The data arrays will be initialized to zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>length</strong> &#8211; length of the data array to be initialized</li>
+<li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Data2D.x_bins">
+<tt class="descname">x_bins</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Data2D.y_bins">
+<tt class="descname">y_bins</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.DataInfo">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">DataInfo</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#DataInfo"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class to hold the data read from a file.
+It includes four blocks of data for the
+instrument description, the sample description,
+the data itself and any other meta data.</p>
+<dl class="method">
+<dt id="sas.dataloader.data_info.DataInfo.add_notes">
+<tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#DataInfo.add_notes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add notes to datainfo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.DataInfo.append_empty_process">
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#DataInfo.append_empty_process"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.collimation">
+<tt class="descname">collimation</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.detector">
+<tt class="descname">detector</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.errors">
+<tt class="descname">errors</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.instrument">
+<tt class="descname">instrument</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.meta_data">
+<tt class="descname">meta_data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.process">
+<tt class="descname">process</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.run">
+<tt class="descname">run</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.run_name">
+<tt class="descname">run_name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.sample">
+<tt class="descname">sample</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.source">
+<tt class="descname">source</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.title">
+<tt class="descname">title</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.DataInfo.trans_spectrum">
+<tt class="descname">trans_spectrum</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Detector">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Detector</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Detector"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class to hold detector information</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.beam_center">
+<tt class="descname">beam_center</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.beam_center_unit">
+<tt class="descname">beam_center_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.distance">
+<tt class="descname">distance</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.distance_unit">
+<tt class="descname">distance_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.name">
+<tt class="descname">name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.offset">
+<tt class="descname">offset</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.offset_unit">
+<tt class="descname">offset_unit</tt><em class="property"> = 'm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.orientation">
+<tt class="descname">orientation</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.orientation_unit">
+<tt class="descname">orientation_unit</tt><em class="property"> = 'degree'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.pixel_size">
+<tt class="descname">pixel_size</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.pixel_size_unit">
+<tt class="descname">pixel_size_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.slit_length">
+<tt class="descname">slit_length</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Detector.slit_length_unit">
+<tt class="descname">slit_length_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Process">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Process</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Process"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class that holds information about the processes
+performed on the data.</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Process.date">
+<tt class="descname">date</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Process.description">
+<tt class="descname">description</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Process.name">
+<tt class="descname">name</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Process.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Process.term">
+<tt class="descname">term</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Sample">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Sample</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Sample"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class to hold the sample description</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.ID">
+<tt class="descname">ID</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.details">
+<tt class="descname">details</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.name">
+<tt class="descname">name</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.orientation">
+<tt class="descname">orientation</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.orientation_unit">
+<tt class="descname">orientation_unit</tt><em class="property"> = 'degree'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.position">
+<tt class="descname">position</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.position_unit">
+<tt class="descname">position_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.temperature">
+<tt class="descname">temperature</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.temperature_unit">
+<tt class="descname">temperature_unit</tt><em class="property"> = 'C'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.thickness">
+<tt class="descname">thickness</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.thickness_unit">
+<tt class="descname">thickness_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Sample.transmission">
+<tt class="descname">transmission</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Source">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Source</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Source"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class to hold source information</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.beam_shape">
+<tt class="descname">beam_shape</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.beam_size">
+<tt class="descname">beam_size</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.beam_size_name">
+<tt class="descname">beam_size_name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.beam_size_unit">
+<tt class="descname">beam_size_unit</tt><em class="property"> = 'mm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.name">
+<tt class="descname">name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.radiation">
+<tt class="descname">radiation</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength">
+<tt class="descname">wavelength</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength_max">
+<tt class="descname">wavelength_max</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength_max_unit">
+<tt class="descname">wavelength_max_unit</tt><em class="property"> = 'nm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength_min">
+<tt class="descname">wavelength_min</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength_min_unit">
+<tt class="descname">wavelength_min_unit</tt><em class="property"> = 'nm'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength_spread">
+<tt class="descname">wavelength_spread</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength_spread_unit">
+<tt class="descname">wavelength_spread_unit</tt><em class="property"> = 'percent'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Source.wavelength_unit">
+<tt class="descname">wavelength_unit</tt><em class="property"> = 'A'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">TransmissionSpectrum</tt><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#TransmissionSpectrum"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class that holds information about transmission spectrum
+for white beams and spallation sources.</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.name">
+<tt class="descname">name</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.timestamp">
+<tt class="descname">timestamp</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.transmission">
+<tt class="descname">transmission</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.transmission_deviation">
+<tt class="descname">transmission_deviation</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.transmission_deviation_unit">
+<tt class="descname">transmission_deviation_unit</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.transmission_unit">
+<tt class="descname">transmission_unit</tt><em class="property"> = ''</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.wavelength">
+<tt class="descname">wavelength</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.TransmissionSpectrum.wavelength_unit">
+<tt class="descname">wavelength_unit</tt><em class="property"> = 'A'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.Vector">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">Vector</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>z=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#Vector"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Vector class to hold multi-dimensional objects</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Vector.x">
+<tt class="descname">x</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Vector.y">
+<tt class="descname">y</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.Vector.z">
+<tt class="descname">z</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.plottable_1D">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">plottable_1D</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em>, <em>dxl=None</em>, <em>dxw=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#plottable_1D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Data1D is a place holder for 1D plottables.</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_1D.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_1D.dxl">
+<tt class="descname">dxl</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_1D.dxw">
+<tt class="descname">dxw</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_1D.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_1D.x">
+<tt class="descname">x</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.plottable_1D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#plottable_1D.xaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set the x axis label and unit</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_1D.y">
+<tt class="descname">y</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.plottable_1D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#plottable_1D.yaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set the y axis label and unit</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.data_info.plottable_2D">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.data_info.</tt><tt class="descname">plottable_2D</tt><big>(</big><em>data=None</em>, <em>err_data=None</em>, <em>qx_data=None</em>, <em>qy_data=None</em>, <em>q_data=None</em>, <em>mask=None</em>, <em>dqx_data=None</em>, <em>dqy_data=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#plottable_2D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Data2D is a place holder for 2D plottables.</p>
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.data">
+<tt class="descname">data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.dqx_data">
+<tt class="descname">dqx_data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.dqy_data">
+<tt class="descname">dqy_data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.err_data">
+<tt class="descname">err_data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.mask">
+<tt class="descname">mask</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.q_data">
+<tt class="descname">q_data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.qx_data">
+<tt class="descname">qx_data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.qy_data">
+<tt class="descname">qy_data</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.plottable_2D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#plottable_2D.xaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set the x axis label and unit</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.xmax">
+<tt class="descname">xmax</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.xmin">
+<tt class="descname">xmin</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.plottable_2D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#plottable_2D.yaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set the y axis label and unit</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.ymax">
+<tt class="descname">ymax</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.dataloader.data_info.plottable_2D.ymin">
+<tt class="descname">ymin</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.data_info.plottable_2D.zaxis">
+<tt class="descname">zaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/data_info.html#plottable_2D.zaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set the z axis label and unit</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.dataloader.loader">
+<span id="sas-dataloader-loader-module"></span><h2>sas.dataloader.loader module</h2>
+<p>File handler to support different file extensions.
+Uses reflectometry&#8217;s registry utility.</p>
+<p>The default readers are found in the &#8216;readers&#8217; sub-module
+and registered by default at initialization time.</p>
+<p>To add a new default reader, one must register it in
+the register_readers method found in readers/__init__.py.</p>
+<p>A utility method (find_plugins) is available to inspect
+a directory (for instance, a user plug-in directory) and
+look for new readers/writers.</p>
+<dl class="class">
+<dt id="sas.dataloader.loader.Loader">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.loader.</tt><tt class="descname">Loader</tt><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Loader"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Utility class to use the Registry as a singleton.</p>
+<dl class="method">
+<dt id="sas.dataloader.loader.Loader.associate_file_reader">
+<tt class="descname">associate_file_reader</tt><big>(</big><em>ext</em>, <em>loader</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Loader.associate_file_reader"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Append a reader object to readers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; reader object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Loader.associate_file_type">
+<tt class="descname">associate_file_type</tt><big>(</big><em>ext</em>, <em>module</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Loader.associate_file_type"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Look into a module to find whether it contains a
+Reader class. If so, append it to readers and (potentially)
+to the list of writers for the given extension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; module object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Loader.find_plugins">
+<tt class="descname">find_plugins</tt><big>(</big><em>dir</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Loader.find_plugins"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Find plugins in a given directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dir</strong> &#8211; directory to look into to find new readers/writers</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Loader.get_wildcards">
+<tt class="descname">get_wildcards</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Loader.get_wildcards"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Loader.load">
+<tt class="descname">load</tt><big>(</big><em>file</em>, <em>format=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Loader.load"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> &#8211; file name (path)</li>
+<li><strong>format</strong> &#8211; specified format to use (optional)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">DataInfo object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Loader.save">
+<tt class="descname">save</tt><big>(</big><em>file</em>, <em>data</em>, <em>format</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Loader.save"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Save a DataInfo object to file
+:param file: file name (path)
+:param data: DataInfo object
+:param format: format to write the data in</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.loader.Registry">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.loader.</tt><tt class="descname">Registry</tt><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Registry"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.data_util.html#sas.data_util.registry.ExtensionRegistry" title="sas.data_util.registry.ExtensionRegistry"><tt class="xref py py-class docutils literal"><span class="pre">sas.data_util.registry.ExtensionRegistry</span></tt></a></p>
+<p>Registry class for file format extensions.
+Readers and writers are supported.</p>
+<dl class="method">
+<dt id="sas.dataloader.loader.Registry.associate_file_reader">
+<tt class="descname">associate_file_reader</tt><big>(</big><em>ext</em>, <em>loader</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Registry.associate_file_reader"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Append a reader object to readers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; reader object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Registry.associate_file_type">
+<tt class="descname">associate_file_type</tt><big>(</big><em>ext</em>, <em>module</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Registry.associate_file_type"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Look into a module to find whether it contains a
+Reader class. If so, APPEND it to readers and (potentially)
+to the list of writers for the given extension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; module object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Registry.find_plugins">
+<tt class="descname">find_plugins</tt><big>(</big><em>dir</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Registry.find_plugins"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Find readers in a given directory. This method
+can be used to inspect user plug-in directories to
+find new readers/writers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dir</strong> &#8211; directory to search into</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">number of readers found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Registry.load">
+<tt class="descname">load</tt><big>(</big><em>path</em>, <em>format=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Registry.load"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Call the loader for the file type of path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> &#8211; file path</li>
+<li><strong>format</strong> &#8211; explicit extension, to force the use
+of a particular reader</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Defaults to the ascii (multi-column) reader
+if no reader was registered for the file&#8217;s
+extension.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Registry.lookup_writers">
+<tt class="descname">lookup_writers</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Registry.lookup_writers"><span class="viewcode-link">[source]</span></a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the loader associated with the file type of path.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">if file type is not known.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.dataloader.loader.Registry.save">
+<tt class="descname">save</tt><big>(</big><em>path</em>, <em>data</em>, <em>format=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/loader.html#Registry.save"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Call the writer for the file type of path.</p>
+<p>Raises ValueError if no writer is available.
+Raises KeyError if format is not available.</p>
+<p>May raise a writer-defined exception if writer fails.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.dataloader.manipulations">
+<span id="sas-dataloader-manipulations-module"></span><h2>sas.dataloader.manipulations module</h2>
+<p>Data manipulations for 2D data sets.
+Using the meta data information, various types of averaging
+are performed in Q-space</p>
+<dl class="class">
+<dt id="sas.dataloader.manipulations.Boxavg">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">Boxavg</tt><big>(</big><em>x_min=0.0</em>, <em>x_max=0.0</em>, <em>y_min=0.0</em>, <em>y_max=0.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#Boxavg"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.dataloader.manipulations.Boxsum" title="sas.dataloader.manipulations.Boxsum"><tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.manipulations.Boxsum</span></tt></a></p>
+<p>Perform the average of counts in a 2D region of interest.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.Boxcut">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">Boxcut</tt><big>(</big><em>x_min=0.0</em>, <em>x_max=0.0</em>, <em>y_min=0.0</em>, <em>y_max=0.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#Boxcut"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Find a rectangular 2D region of interest.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.Boxsum">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">Boxsum</tt><big>(</big><em>x_min=0.0</em>, <em>x_max=0.0</em>, <em>y_min=0.0</em>, <em>y_max=0.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#Boxsum"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Perform the sum of counts in a 2D region of interest.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.CircularAverage">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">CircularAverage</tt><big>(</big><em>r_min=0.0</em>, <em>r_max=0.0</em>, <em>bin_width=0.0005</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#CircularAverage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Perform circular averaging on 2D data</p>
+<p>The data returned is the distribution of counts
+as a function of Q</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.Ring">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">Ring</tt><big>(</big><em>r_min=0</em>, <em>r_max=0</em>, <em>center_x=0</em>, <em>center_y=0</em>, <em>nbins=20</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#Ring"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Defines a ring on a 2D data set.
+The ring is defined by r_min, r_max, and
+the position of the center of the ring.</p>
+<p>The data returned is the distribution of counts
+around the ring as a function of phi.</p>
+<p>Phi_min and phi_max should be defined between 0 and 2*pi
+in anti-clockwise starting from the x- axis on the left-hand side</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.Ringcut">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">Ringcut</tt><big>(</big><em>r_min=0</em>, <em>r_max=0</em>, <em>center_x=0</em>, <em>center_y=0</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#Ringcut"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Defines a ring on a 2D data set.
+The ring is defined by r_min, r_max, and
+the position of the center of the ring.</p>
+<p>The data returned is the region inside the ring</p>
+<p>Phi_min and phi_max should be defined between 0 and 2*pi
+in anti-clockwise starting from the x- axis on the left-hand side</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.SectorPhi">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">SectorPhi</tt><big>(</big><em>r_min</em>, <em>r_max</em>, <em>phi_min=0</em>, <em>phi_max=6.283185307179586</em>, <em>nbins=20</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#SectorPhi"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.manipulations._Sector</span></tt></p>
+<p>Sector average as a function of phi.
+I(phi) is return and the data is averaged over Q.</p>
+<p>A sector is defined by r_min, r_max, phi_min, phi_max.
+The number of bin in phi also has to be defined.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.SectorQ">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">SectorQ</tt><big>(</big><em>r_min</em>, <em>r_max</em>, <em>phi_min=0</em>, <em>phi_max=6.283185307179586</em>, <em>nbins=20</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#SectorQ"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.manipulations._Sector</span></tt></p>
+<p>Sector average as a function of Q for both symatric wings.
+I(Q) is return and the data is averaged over phi.</p>
+<p>A sector is defined by r_min, r_max, phi_min, phi_max.
+r_min, r_max, phi_min, phi_max &gt;0.
+The number of bin in Q also has to be defined.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.Sectorcut">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">Sectorcut</tt><big>(</big><em>phi_min=0</em>, <em>phi_max=3.141592653589793</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#Sectorcut"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Defines a sector (major + minor) region on a 2D data set.
+The sector is defined by phi_min, phi_max,
+where phi_min and phi_max are defined by the right
+and left lines wrt central line.</p>
+<p>Phi_min and phi_max are given in units of radian
+and (phi_max-phi_min) should not be larger than pi</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.SlabX">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">SlabX</tt><big>(</big><em>x_min=0.0</em>, <em>x_max=0.0</em>, <em>y_min=0.0</em>, <em>y_max=0.0</em>, <em>bin_width=0.001</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#SlabX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.manipulations._Slab</span></tt></p>
+<p>Compute average I(Qx) for a region of interest</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.dataloader.manipulations.SlabY">
+<em class="property">class </em><tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">SlabY</tt><big>(</big><em>x_min=0.0</em>, <em>x_max=0.0</em>, <em>y_min=0.0</em>, <em>y_max=0.0</em>, <em>bin_width=0.001</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#SlabY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.manipulations._Slab</span></tt></p>
+<p>Compute average I(Qy) for a region of interest</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.dataloader.manipulations.flip_phi">
+<tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">flip_phi</tt><big>(</big><em>phi</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#flip_phi"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Correct phi to within the 0 &lt;= to &lt;= 2pi range</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">phi in &gt;=0 and &lt;=2Pi</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.dataloader.manipulations.get_intercept">
+<tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">get_intercept</tt><big>(</big><em>q</em>, <em>q_0</em>, <em>q_1</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#get_intercept"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the fraction of the side at which the
+q-value intercept the pixel, None otherwise.
+The values returned is the fraction ON THE SIDE
+OF THE LOWEST Q.</p>
+<div class="highlight-python"><div class="highlight"><pre>    A           B
++-----------+--------+    &lt;--- pixel size
+0                    1
+Q_0 -------- Q ----- Q_1   &lt;--- equivalent Q range
+if Q_1 &gt; Q_0, A is returned
+if Q_1 &lt; Q_0, B is returned
+if Q is outside the range of [Q_0, Q_1], None is returned
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.dataloader.manipulations.get_pixel_fraction">
+<tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">get_pixel_fraction</tt><big>(</big><em>qmax</em>, <em>q_00</em>, <em>q_01</em>, <em>q_10</em>, <em>q_11</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#get_pixel_fraction"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the fraction of the pixel defined by
+the four corners (q_00, q_01, q_10, q_11) that
+has q &lt; qmax.:</p>
+<div class="highlight-python"><div class="highlight"><pre>        q_01                q_11
+y=1         +--------------+
+            |              |
+            |              |
+            |              |
+y=0         +--------------+
+        q_00                q_10
+
+            x=0            x=1
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.dataloader.manipulations.get_pixel_fraction_square">
+<tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">get_pixel_fraction_square</tt><big>(</big><em>x</em>, <em>xmin</em>, <em>xmax</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#get_pixel_fraction_square"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the fraction of the length
+from xmin to x.:</p>
+<div class="highlight-python"><div class="highlight"><pre>    A            B
++-----------+---------+
+xmin        x         xmax
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; x-value</li>
+<li><strong>xmin</strong> &#8211; minimum x for the length considered</li>
+<li><strong>xmax</strong> &#8211; minimum x for the length considered</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(x-xmin)/(xmax-xmin) when xmin &lt; x &lt; xmax</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.dataloader.manipulations.get_q">
+<tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">get_q</tt><big>(</big><em>dx</em>, <em>dy</em>, <em>det_dist</em>, <em>wavelength</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#get_q"><span class="viewcode-link">[source]</span></a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dx</strong> &#8211; x-distance from beam center [mm]</li>
+<li><strong>dy</strong> &#8211; y-distance from beam center [mm]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">q-value at the given position</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.dataloader.manipulations.get_q_compo">
+<tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">get_q_compo</tt><big>(</big><em>dx</em>, <em>dy</em>, <em>det_dist</em>, <em>wavelength</em>, <em>compo=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#get_q_compo"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This reduces tiny error at very large q.
+Implementation of this func is not started yet.&lt;&#8211;ToDo</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.dataloader.manipulations.reader2D_converter">
+<tt class="descclassname">sas.dataloader.manipulations.</tt><tt class="descname">reader2D_converter</tt><big>(</big><em>data2d=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/dataloader/manipulations.html#reader2D_converter"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>convert old 2d format opened by IhorReader or danse_reader
+to new Data2D format</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data2d</strong> &#8211; 2d array of Data2D object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">1d arrays of Data2D object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.dataloader">
+<span id="module-contents"></span><h2>Module contents</h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sas.dataloader package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sas.dataloader.data_info">sas.dataloader.data_info module</a></li>
+<li><a class="reference internal" href="#module-sas.dataloader.loader">sas.dataloader.loader module</a></li>
+<li><a class="reference internal" href="#module-sas.dataloader.manipulations">sas.dataloader.manipulations module</a></li>
+<li><a class="reference internal" href="#module-sas.dataloader">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sas.data_util.html"
+                        title="previous chapter">sas.data_util package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sas.dataloader.readers.html"
+                        title="next chapter">sas.dataloader.readers package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/dev/api/sas.dataloader.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.dataloader.readers.html" title="sas.dataloader.readers package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sas.data_util.html" title="sas.data_util package"
+             >previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" >sas package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

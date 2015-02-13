@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.pmap &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.pmap</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Parallel map-reduce implementation using threads.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">thread</span>
+
+<div class="viewcode-block" id="Collector"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.Collector">[docs]</a><span class="k">class</span> <span class="nc">Collector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract interface to map-reduce accumulator function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Receive next part, storing it in the accumulated result&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Collector.finalize"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.Collector.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when all parts have been accumulated&quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="Collector.error"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.Collector.error">[docs]</a>    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Exception seen on executing map or reduce.  The collector</span>
+<span class="sd">        can adjust the accumulated result appropriately to reflect</span>
+<span class="sd">        the error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div></div>
+<div class="viewcode-block" id="Mapper"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.Mapper">[docs]</a><span class="k">class</span> <span class="nc">Mapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract interface to map-reduce mapper function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate part&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Mapper.abort"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.Mapper.abort">[docs]</a>    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop the mapper&quot;&quot;&quot;</span>
+</div></div>
+<div class="viewcode-block" id="pmap"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.pmap">[docs]</a><span class="k">def</span> <span class="nf">pmap</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply function mapper to all inputs.</span>
+<span class="sd">    </span>
+<span class="sd">    This is the serial version of a parallel iterator, yielding the next </span>
+<span class="sd">    sequence value as soon as it is available.  There is no guarantee </span>
+<span class="sd">    that the order of the inputs will be preserved in the parallel</span>
+<span class="sd">    version, so don&#39;t depend on it!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">mapper</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="preduce"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.preduce">[docs]</a><span class="k">def</span> <span class="nf">preduce</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collect all outputs, calling collector(item) for each item in the sequence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+        <span class="n">collector</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">collector</span>
+</div>
+<span class="k">def</span> <span class="nf">_pmapreduce_thread</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">preduce</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="n">pmap</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span><span class="n">inputs</span><span class="p">))</span>
+        <span class="n">collector</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+        <span class="n">fn</span><span class="o">.</span><span class="n">abort</span><span class="p">()</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">interrupt_main</span><span class="p">()</span>
+    <span class="c">#except:</span>
+    <span class="c">#    raise</span>
+    <span class="c">#    msg = traceback.format_exc()</span>
+    <span class="c">#    collector.error(msg)</span>
+
+<span class="k">def</span> <span class="nf">_pmapreduce_profile</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">cProfile</span><span class="o">,</span> <span class="nn">pstats</span><span class="o">,</span> <span class="nn">os</span>
+    <span class="k">def</span> <span class="nf">mapr</span><span class="p">():</span>
+        <span class="n">_pmapreduce_thread</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+    <span class="n">cProfile</span><span class="o">.</span><span class="n">runctx</span><span class="p">(</span><span class="s">&#39;mapr()&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">mapr</span><span class="o">=</span><span class="n">mapr</span><span class="p">),</span> <span class="p">{},</span> <span class="s">&#39;mapr.out&#39;</span><span class="p">)</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">pstats</span><span class="o">.</span><span class="n">Stats</span><span class="p">(</span><span class="s">&#39;mapr.out&#39;</span><span class="p">)</span>
+    <span class="c">#stats.sort_stats(&#39;time&#39;)</span>
+    <span class="n">stats</span><span class="o">.</span><span class="n">sort_stats</span><span class="p">(</span><span class="s">&#39;calls&#39;</span><span class="p">)</span>
+    <span class="n">stats</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="s">&#39;mapr.out&#39;</span><span class="p">)</span>
+
+<span class="n">profile_mapper</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="sd">&quot;&quot;&quot;True if the mapper cost should be profiled.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="pmapreduce"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.pmapreduce">[docs]</a><span class="k">def</span> <span class="nf">pmapreduce</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply function mapper to inputs, accumulating the results in collector.</span>
+<span class="sd">    </span>
+<span class="sd">    Collector is a function which accepts the result of mapper(item) for </span>
+<span class="sd">    each item of inputs.  There is no guarantee that the outputs will be</span>
+<span class="sd">    received in order.</span>
+<span class="sd">    </span>
+<span class="sd">    The map is executed in a separate thread so the function returns</span>
+<span class="sd">    to the caller immediately.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">profile_mapper</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">_pmapreduce_profile</span> <span class="k">if</span> <span class="n">profile_mapper</span> <span class="k">else</span> <span class="n">_pmapreduce_thread</span>        
+    <span class="n">thread</span><span class="o">.</span><span class="n">start_new_thread</span><span class="p">(</span><span class="n">fn</span><span class="p">,(</span><span class="n">mapper</span><span class="p">,</span><span class="n">collector</span><span class="p">,</span> <span class="n">inputs</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../dev/api/park.html#park.pmap.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">time</span><span class="o">,</span><span class="nn">numpy</span>
+    <span class="k">class</span> <span class="nc">TestCollector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;collecting&quot;</span><span class="p">,</span><span class="n">part</span><span class="p">,</span><span class="s">&#39;for&#39;</span><span class="p">,</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">print</span> <span class="s">&quot;finalizing&quot;</span>
+        <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">print</span> <span class="s">&quot;aborting&quot;</span>
+        <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;error&quot;</span><span class="p">,</span><span class="n">msg</span>
+    
+    <span class="k">class</span> <span class="nc">TestMapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> 
+            <span class="k">print</span> <span class="s">&quot;mapping&quot;</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="s">&#39;for&#39;</span><span class="p">,</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;x is 8&#39;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+    <span class="n">collector1</span> <span class="o">=</span> <span class="n">TestCollector</span><span class="p">()</span>
+    <span class="n">collector2</span> <span class="o">=</span> <span class="n">TestCollector</span><span class="p">()</span>
+    <span class="n">pmapreduce</span><span class="p">(</span><span class="n">TestMapper</span><span class="p">(),</span> <span class="n">collector1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+    <span class="n">pmapreduce</span><span class="p">(</span><span class="n">TestMapper</span><span class="p">(),</span> <span class="n">collector2</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">collector1</span><span class="o">.</span><span class="n">done</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">collector2</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span> <span class="n">main</span><span class="p">()</span>
+
+    
+<span class="n">_</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s"># The choice of job to do next is complicated.</span>
+<span class="s"># 1. Strongly prefer a job of the same type as is already running</span>
+<span class="s"># on the node.  If this job requires significant resources (e.g.,</span>
+<span class="s"># a large file transfer) increase that preference.</span>
+<span class="s"># 2. Strongly prefer sending a user&#39;s own job to their own machine.</span>
+<span class="s"># That way at least they can make progress even if the cluster is busy.</span>
+<span class="s"># 3. Try to start each job as soon as possible.  That way if there are</span>
+<span class="s"># errors, then the user gets feedback early in the process.</span>
+<span class="s"># 4. Try to balance the load across users.  Rather than first come</span>
+<span class="s"># first serve, jobs use round robin amongst users.</span>
+<span class="s"># 5. Prefer high priority jobs.</span>
+
+
+<span class="s">def map(apply,collect,items,priority=1):</span>
+<span class="s">    mapper = MapJob(apply, items, collect, priority)</span>
+<span class="s">    </span>
+<span class="s">class MapJob(object):</span>
+<span class="s">    &quot;&quot;&quot;</span>
+<span class="s">    Keep track of which jobs have been submitted and which are complete</span>
+<span class="s">    &quot;&quot;&quot;</span>
+<span class="s">    def __init__(self, workfn, worklist, manager, priority):</span>
+<span class="s">        self.workfn = workfn</span>
+<span class="s">        self.worklist = worklist</span>
+<span class="s">        self.manager = manager</span>
+<span class="s">        self.priority = priority</span>
+<span class="s">        self._priority_edge = 0</span>
+<span class="s">    def next_work(self):</span>
+<span class="s">        </span>
+
+<span class="s">class MapServer(object):</span>
+<span class="s">    &quot;&quot;&quot;</span>
+<span class="s">    Keep track of work units.</span>
+<span class="s">    &quot;&quot;&quot;</span>
+<span class="s">    def __init__(self):</span>
+<span class="s">        self.workingset = {}</span>
+<span class="s">        </span>
+<span class="s">    def add_work(self, workfn, worklist, manager, priority):</span>
+<span class="s">        &quot;&quot;&quot;</span>
+<span class="s">        Add a new work list to distributed to worker objects.  The manager</span>
+<span class="s">        gathers the results of the work.  Work is assigned from the queue</span>
+<span class="s">        based on priority.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+<span class="s">        job = MapJob(workfn, worklist, manager, priority)</span>
+
+<span class="s">        # add work to the queue in priority order</span>
+<span class="s">        for i,job in enumerate(self.jobs):</span>
+<span class="s">            if job.priority &lt; priority: break</span>
+<span class="s">        self.jobs.insert(i,job)</span>
+<span class="s">            </span>
+<span class="s">        # Create an entry in a persistent store for each job to</span>
+<span class="s">        # capture completed work units and to recover from server</span>
+<span class="s">        # reboot.</span>
+
+<span class="s">        # Assign _priority_edge to cumsum(priority)/total_priority.</span>
+<span class="s">        # This allows us to select the next job according to priority</span>
+<span class="s">        # with a random number generator.</span>
+<span class="s">        # NOTE: scalability is a bit of a concern --- the lookup</span>
+<span class="s">        # operation is linear in the number of active jobs.  This</span>
+<span class="s">        # can be mitigated by limiting the number of active jobs.</span>
+<span class="s">        total_priority = 0.</span>
+<span class="s">        for job in self.jobs: total_priority += job.priority</span>
+<span class="s">        edge = 0.</span>
+<span class="s">        for job in self.jobs:</span>
+<span class="s">            edge += job.priority/total_priority</span>
+<span class="s">            self.job._priority_edge = edge</span>
+<span class="s">        </span>
+<span class="s">    </span>
+<span class="s">    def register(self, pool=None):</span>
+<span class="s">        &quot;&quot;&quot;</span>
+<span class="s">        Called by a worker when they are registering for work.</span>
+<span class="s">        </span>
+<span class="s">        Returns the next piece of work.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+<span class="s">        P = numpy.random.rand()</span>
+<span class="s">        for job in self.jobs:</span>
+<span class="s">            if P &lt; j._priority_edge:</span>
+<span class="s">                return job.new_work()</span>
+
+<span class="s">        return NoWork</span>
+
+<span class="s">    def update(self, jobid, result):</span>
+<span class="s">        &quot;&quot;&quot;</span>
+<span class="s">        Called by a worker when the work unit is complete.</span>
+<span class="s">        </span>
+<span class="s">        Returns the next piece of work.</span>
+<span class="s">        &quot;&quot;&quot;</span>
+<span class="s">        current_job = self.lookup(jobid)</span>
+<span class="s">        current_job.reduce(result)</span>
+<span class="s">        if numpy.random.rand() &lt; current_job.switch_probability:</span>
+<span class="s">            return current_job.next_work()</span>
+<span class="s">        </span>
+<span class="s">        P = numpy.random.rand()</span>
+<span class="s">        for job in self.jobs:</span>
+<span class="s">            if P &lt; job._priority_edge:</span>
+<span class="s">                if job == current_job:</span>
+<span class="s">                    return curent_job.next_work()</span>
+<span class="s">                else:</span>
+<span class="s">                    return job.new_work()</span>
+<span class="s">        </span>
+<span class="s">        return NoWork</span>
+<span class="s">&#39;&#39;&#39;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

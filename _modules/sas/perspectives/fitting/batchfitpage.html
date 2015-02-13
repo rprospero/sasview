@@ -1,0 +1,485 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sas.perspectives.fitting.batchfitpage &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="sas.perspectives.fitting" href="../fitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../fitting.html" accesskey="U">sas.perspectives.fitting</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for sas.perspectives.fitting.batchfitpage</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">Batch panel</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">wx</span>
+<span class="kn">import</span> <span class="nn">wx.lib.newevent</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">sas.guiframe.events</span> <span class="kn">import</span> <span class="n">StatusEvent</span>    
+<span class="kn">from</span> <span class="nn">sas.guiframe.events</span> <span class="kn">import</span> <span class="n">NewPlotEvent</span>  
+
+<span class="p">(</span><span class="n">Chi2UpdateEvent</span><span class="p">,</span> <span class="n">EVT_CHI2_UPDATE</span><span class="p">)</span>   <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">newevent</span><span class="o">.</span><span class="n">NewEvent</span><span class="p">()</span>
+<span class="n">_BOX_WIDTH</span> <span class="o">=</span> <span class="mi">76</span>
+<span class="n">_DATA_BOX_WIDTH</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="n">SMEAR_SIZE_L</span> <span class="o">=</span> <span class="mf">0.00</span>
+<span class="n">SMEAR_SIZE_H</span> <span class="o">=</span> <span class="mf">0.00</span>
+
+<span class="kn">from</span> <span class="nn">sas.perspectives.fitting.basepage</span> <span class="kn">import</span> <span class="n">PageInfoEvent</span>
+<span class="kn">from</span> <span class="nn">sas.models.qsmearing</span> <span class="kn">import</span> <span class="n">smear_selection</span>
+<span class="kn">from</span> <span class="nn">sas.perspectives.fitting.fitpage</span> <span class="kn">import</span> <span class="n">FitPage</span>
+
+<div class="viewcode-block" id="BatchFitPage"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.batchfitpage.BatchFitPage">[docs]</a><span class="k">class</span> <span class="nc">BatchFitPage</span><span class="p">(</span><span class="n">FitPage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Batch Page</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">window_name</span> <span class="o">=</span> <span class="s">&quot;BatchFit&quot;</span>
+    <span class="n">window_caption</span>  <span class="o">=</span> <span class="s">&quot;BatchFit&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Initialization of the Panel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">FitPage</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_name</span> <span class="o">=</span> <span class="s">&quot;BatchFit&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_caption</span>  <span class="o">=</span> <span class="s">&quot;BatchFit&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_save_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_bookmark_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_fill_range_sizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fill the sizer containing the plotting range</span>
+<span class="sd">        add  access to npts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_2Ddata</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c"># Check if data is 2D</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span>  <span class="s">&quot;Data2D&quot;</span> <span class="ow">or</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">enable2D</span><span class="p">:</span>
+            <span class="n">is_2Ddata</span> <span class="o">=</span> <span class="bp">True</span>
+            
+        <span class="n">title</span> <span class="o">=</span> <span class="s">&quot;Fitting&quot;</span>     
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_smear_info</span><span class="p">()</span>
+        
+        <span class="c">#Sizers</span>
+        <span class="n">box_description_range</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">StaticBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">title</span><span class="p">))</span>
+        <span class="n">boxsizer_range</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">StaticBoxSizer</span><span class="p">(</span><span class="n">box_description_range</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>      
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizer_set_smearer</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>
+        <span class="c">#sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizer_new_smear</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizer_set_masking</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">)</span>
+        <span class="n">sizer_chi2</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>
+
+        <span class="n">sizer_fit</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">GridSizer</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="c">#Fit button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btFit</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">NewId</span><span class="p">(),</span> <span class="s">&#39;Fit&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">88</span><span class="p">,</span> <span class="mi">25</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_bt_colour</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">btFit</span><span class="o">.</span><span class="n">GetDefaultAttributes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btFit</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">EVT_BUTTON</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_onFit</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">btFit</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btFit</span><span class="o">.</span><span class="n">SetToolTipString</span><span class="p">(</span><span class="s">&quot;Start fitting.&quot;</span><span class="p">)</span>
+
+        <span class="c"># Update and Draw button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_button</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">NewId</span><span class="p">(),</span> <span class="s">&#39;Compute&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">88</span><span class="p">,</span> <span class="mi">24</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_button</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">EVT_BUTTON</span><span class="p">,</span> \
+                              <span class="bp">self</span><span class="o">.</span><span class="n">_onDraw</span><span class="p">,</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">draw_button</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_button</span><span class="o">.</span><span class="n">SetToolTipString</span><span class="p">(</span><span class="s">&quot;Compute and Draw.&quot;</span><span class="p">)</span>  
+        <span class="n">sizer_fit</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">draw_button</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">sizer_fit</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btFit</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> 
+        <span class="n">sizer_chi2</span><span class="o">.</span><span class="n">Add</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="c"># get smear_selection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_smearer</span> <span class="o">=</span> <span class="n">smear_selection</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="p">)</span>
+        <span class="n">boxsizer_range</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizer_set_masking</span><span class="p">)</span>
+         <span class="c">#2D data? default</span>
+        <span class="n">is_2Ddata</span> <span class="o">=</span> <span class="bp">False</span>
+        
+        <span class="c">#check if it is 2D data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span>  <span class="s">&quot;Data2D&quot;</span> <span class="ow">or</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">enable2D</span><span class="p">:</span>
+            <span class="n">is_2Ddata</span> <span class="o">=</span> <span class="bp">True</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizer5</span><span class="o">.</span><span class="n">Clear</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+     
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmin</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModelTextCtrl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">_BOX_WIDTH</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> 
+                                          <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">TE_PROCESS_ENTER</span><span class="p">,</span> 
+                                    <span class="n">text_enter_callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_onQrangeEnter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmin</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmin_x</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmin</span><span class="o">.</span><span class="n">SetToolTipString</span><span class="p">(</span><span class="s">&quot;Minimun value of Q in linear scale.&quot;</span><span class="p">)</span>
+     
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmax</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ModelTextCtrl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">_BOX_WIDTH</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> 
+                                          <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">TE_PROCESS_ENTER</span><span class="p">,</span> 
+                                        <span class="n">text_enter_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_onQrangeEnter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax_x</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="o">.</span><span class="n">SetToolTipString</span><span class="p">(</span><span class="s">&quot;Maximum value of Q in linear scale.&quot;</span><span class="p">)</span>
+        
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">NewId</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_qrange</span> <span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="s">&#39;Reset&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">77</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+      
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_qrange</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">EVT_BUTTON</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_reset_clicked</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_qrange</span><span class="o">.</span><span class="n">SetToolTipString</span><span class="p">(</span>\
+                                    <span class="s">&quot;Reset Q range to the default values&quot;</span><span class="p">)</span>
+     
+        <span class="n">sizer_horizontal</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">)</span>
+        <span class="n">sizer</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">GridSizer</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">NewId</span><span class="p">(),</span><span class="s">&#39;Editor&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">88</span><span class="p">,</span> <span class="mi">23</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">EVT_BUTTON</span><span class="p">,</span> 
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_onMask</span><span class="p">,</span><span class="nb">id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">SetToolTipString</span><span class="p">(</span><span class="s">&quot;Edit Mask.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">EditMask_title</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">StaticText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39; Masking(2D)&#39;</span><span class="p">)</span>
+
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">StaticText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Q range&#39;</span><span class="p">))</span>     
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">StaticText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39; Min[1/A]&#39;</span><span class="p">))</span>
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">StaticText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39; Max[1/A]&#39;</span><span class="p">))</span>
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EditMask_title</span><span class="p">)</span>
+ 
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_qrange</span><span class="p">)</span>   
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmin</span><span class="p">)</span>
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="p">)</span>
+
+        <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="p">)</span>
+        <span class="n">boxsizer_range</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">sizer_chi2</span><span class="p">)</span> 
+        <span class="n">boxsizer_range</span><span class="o">.</span><span class="n">Add</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="n">boxsizer_range</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">sizer</span><span class="p">)</span>
+        
+        <span class="n">boxsizer_range</span><span class="o">.</span><span class="n">Add</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+        <span class="n">boxsizer_range</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">sizer_fit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_2Ddata</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">Enable</span><span class="p">()</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">EditMask_title</span><span class="o">.</span><span class="n">Enable</span><span class="p">()</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">Disable</span><span class="p">()</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">EditMask_title</span><span class="o">.</span><span class="n">Disable</span><span class="p">()</span>
+
+        <span class="c">## save state</span>
+        <span class="c">#self.save_current_state()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizer5</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">boxsizer_range</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">ALL</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sizer5</span><span class="o">.</span><span class="n">Layout</span><span class="p">()</span>
+       
+    <span class="k">def</span> <span class="nf">_on_select_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        call back for model selection</span>
+<span class="sd">        &quot;&quot;&quot;</span>  
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Show</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_select_model_helper</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_model_param_sizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>                   
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_bookmark_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_keep</span><span class="o">.</span><span class="n">Enable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_save_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_disp</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disable_disp</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_dispers_sizer</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">structurecombobox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structurebox</span><span class="o">.</span><span class="n">GetCurrentSelection</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">formfactorcombobox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formfactorbox</span><span class="o">.</span><span class="n">GetCurrentSelection</span><span class="p">()</span>
+      
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_copy_flag</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_paste_flag</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_bookmark_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_keep</span><span class="o">.</span><span class="n">Enable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                
+            <span class="n">temp_smear</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="c">## event to post model to fit to fitting plugins</span>
+            <span class="p">(</span><span class="n">ModelEventbox</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">newevent</span><span class="o">.</span><span class="n">NewEvent</span><span class="p">()</span>
+         
+            <span class="c">## set smearing value whether or not </span>
+            <span class="c">#    the data contain the smearing info</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="n">ModelEventbox</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> 
+                                        <span class="n">smearer</span><span class="o">=</span><span class="n">temp_smear</span><span class="p">,</span> 
+                                        <span class="n">qmin</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmin_x</span><span class="p">),</span>
+                                        <span class="n">uid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                                     <span class="n">qmax</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax_x</span><span class="p">))</span> 
+   
+            <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">_on_model_panel</span><span class="p">(</span><span class="n">evt</span><span class="o">=</span><span class="n">evt</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mbox_description</span><span class="o">.</span><span class="n">SetLabel</span><span class="p">(</span><span class="s">&quot;Model [</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span>
+
+            
+        <span class="k">if</span> <span class="n">event</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c">## post state to fit panel</span>
+            <span class="n">new_event</span> <span class="o">=</span> <span class="n">PageInfoEvent</span><span class="p">(</span><span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">wx</span><span class="o">.</span><span class="n">PostEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">new_event</span><span class="p">)</span> 
+            <span class="c">#update list of plugins if new plugin is available</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin_rbutton</span><span class="o">.</span><span class="n">GetValue</span><span class="p">():</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">update_model_list</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">temp</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model_list_box</span> <span class="o">=</span> <span class="n">temp</span>
+                    <span class="n">current_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formfactorbox</span><span class="o">.</span><span class="n">GetValue</span><span class="p">()</span>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formfactorbox</span><span class="o">.</span><span class="n">GetSelection</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_show_combox_helper</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">formfactorbox</span><span class="o">.</span><span class="n">SetSelection</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">formfactorbox</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="n">current_val</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_onDraw</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_draw_model</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetupScrolling</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Show</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>   
+        
+    <span class="k">def</span> <span class="nf">_update_paramv_on_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        make sure that update param values just before the fitting</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#flag for qmin qmax check values</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitrange</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">is_modified</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>           
+            <span class="c">##Check the values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_value_enter</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fittable_param</span><span class="p">,</span> <span class="n">is_modified</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_value_enter</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_param</span><span class="p">,</span> <span class="n">is_modified</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_value_enter</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">is_modified</span><span class="p">)</span>
+
+            <span class="c"># If qmin and qmax have been modified, update qmin and qmax and </span>
+             <span class="c"># Here we should check whether the boundaries have been modified.</span>
+            <span class="c"># If qmin and qmax have been modified, update qmin and qmax and </span>
+            <span class="c"># set the is_modified flag to True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_qrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitrange</span><span class="p">:</span>
+                <span class="n">tempmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmin</span><span class="o">.</span><span class="n">GetValue</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">tempmin</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qmin_x</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">qmin_x</span> <span class="o">=</span> <span class="n">tempmin</span>
+                <span class="n">tempmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="o">.</span><span class="n">GetValue</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">tempmax</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qmax_x</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">qmax_x</span> <span class="o">=</span> <span class="n">tempmax</span>
+                <span class="k">if</span> <span class="n">tempmax</span> <span class="o">==</span> <span class="n">tempmin</span><span class="p">:</span>
+                    <span class="n">flag</span> <span class="o">=</span> <span class="bp">False</span>    
+                <span class="c">#temp_smearer = None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_2D</span><span class="p">():</span>
+                    <span class="c"># only 2D case set mask  </span>
+                    <span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_Npts</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">flag</span>
+            <span class="k">else</span><span class="p">:</span> <span class="n">flag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">flag</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c">#For invalid q range, disable the mask editor and fit button, vs.    </span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitrange</span><span class="p">:</span>
+            <span class="c">#self.btFit.Disable()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_2D</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">Disable</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c">#self.btFit.Enable(True)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_2D</span><span class="p">()</span> <span class="ow">and</span>  <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">Enable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;Cannot Plot or Fit :Must select a &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s">&quot; model or Fitting range is not valid!!!  &quot;</span>
+            <span class="n">wx</span><span class="o">.</span><span class="n">PostEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">StatusEvent</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">msg</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_current_state</span><span class="p">()</span>
+   
+        <span class="k">return</span> <span class="n">flag</span>  
+<div class="viewcode-block" id="BatchFitPage.save_current_state"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.batchfitpage.BatchFitPage.save_current_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_current_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Currently no save option implemented for batch page</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span> </div>
+<div class="viewcode-block" id="BatchFitPage.save_current_state_fit"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.batchfitpage.BatchFitPage.save_current_state_fit">[docs]</a>    <span class="k">def</span> <span class="nf">save_current_state_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Currently no save option implemented for batch page</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+<div class="viewcode-block" id="BatchFitPage.set_data"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.batchfitpage.BatchFitPage.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        reset the current data </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#id = None</span>
+        <span class="n">group_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c">#id = data.id</span>
+            <span class="n">group_id</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">group_id</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">data_min</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">data_max</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="n">data_name</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_bookmark_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_keep</span><span class="o">.</span><span class="n">Enable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_save_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_bookmark_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_keep</span><span class="o">.</span><span class="n">Enable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_save_flag</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_preview_flag</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+  
+            <span class="bp">self</span><span class="o">.</span><span class="n">formfactorbox</span><span class="o">.</span><span class="n">Enable</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structurebox</span><span class="o">.</span><span class="n">Enable</span><span class="p">()</span>
+            <span class="n">data_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">name</span>
+            <span class="c">#set maximum range for x in linear scale</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="s">&quot;data&quot;</span><span class="p">):</span> <span class="c">#Display only for 1D data fit</span>
+                <span class="c"># Minimum value of data   </span>
+                <span class="n">data_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="c"># Maximum value of data  </span>
+                <span class="n">data_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">Disable</span><span class="p">()</span>  
+                <span class="bp">self</span><span class="o">.</span><span class="n">EditMask_title</span><span class="o">.</span><span class="n">Disable</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                
+                <span class="c">## Minimum value of data </span>
+                <span class="n">data_min</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xmin</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">xmax</span><span class="p">))</span> 
+                <span class="n">y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ymin</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ymax</span><span class="p">))</span>
+                <span class="c">## Maximum value of data  </span>
+                <span class="n">data_max</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">btEditMask</span><span class="o">.</span><span class="n">Enable</span><span class="p">()</span>  
+                <span class="bp">self</span><span class="o">.</span><span class="n">EditMask_title</span><span class="o">.</span><span class="n">Enable</span><span class="p">()</span> 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataSource</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="n">data_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmin_x</span> <span class="o">=</span> <span class="n">data_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmax_x</span> <span class="o">=</span> <span class="n">data_max</span>
+        <span class="c">#self.minimum_q.SetValue(str(data_min))</span>
+        <span class="c">#self.maximum_q.SetValue(str(data_max))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmin</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_min</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_max</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmin</span><span class="o">.</span><span class="n">SetBackgroundColour</span><span class="p">(</span><span class="s">&quot;white&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qmax</span><span class="o">.</span><span class="n">SetBackgroundColour</span><span class="p">(</span><span class="s">&quot;white&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">qmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qmin_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">qmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qmax_x</span>
+        
+        <span class="c">#update model plot with new data information</span>
+        <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
+            <span class="c">#set model view button</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;Data2D&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enable2D</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_view</span><span class="o">.</span><span class="n">SetLabel</span><span class="p">(</span><span class="s">&quot;2D Mode&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enable2D</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_view</span><span class="o">.</span><span class="n">SetLabel</span><span class="p">(</span><span class="s">&quot;1D Mode&quot;</span><span class="p">)</span>
+                
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_view</span><span class="o">.</span><span class="n">Disable</span><span class="p">()</span>
+            
+            <span class="n">wx</span><span class="o">.</span><span class="n">PostEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> 
+                             <span class="n">NewPlotEvent</span><span class="p">(</span><span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
+                                               <span class="n">action</span><span class="o">=</span><span class="s">&quot;delete&quot;</span><span class="p">))</span>
+            <span class="c">#plot the current selected data</span>
+            <span class="n">wx</span><span class="o">.</span><span class="n">PostEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">NewPlotEvent</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> 
+                                                    <span class="n">title</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">title</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="n">uid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                                     <span class="n">data_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_list</span><span class="p">,</span>
+                                      <span class="n">caption</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">window_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_draw_model</span><span class="p">()</span>
+    
+
+        </div></div>
+<div class="viewcode-block" id="BGTextCtrl"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.batchfitpage.BGTextCtrl">[docs]</a><span class="k">class</span> <span class="nc">BGTextCtrl</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">TextCtrl</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Text control used to display outputs.</span>
+<span class="sd">    No editing allowed. The background is </span>
+<span class="sd">    grayed out. User can&#39;t select text.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">wx</span><span class="o">.</span><span class="n">TextCtrl</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetEditable</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetBackgroundColour</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetParent</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">GetBackgroundColour</span><span class="p">())</span>
+        
+        <span class="c"># Bind to mouse event to avoid text highlighting</span>
+        <span class="c"># The event will be skipped once the call-back</span>
+        <span class="c"># is called.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">EVT_MOUSE_EVENTS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_click</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prevent further handling of the mouse event</span>
+<span class="sd">        by not calling Skip().</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">pass</span>
+ </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../fitting.html" >sas.perspectives.fitting</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

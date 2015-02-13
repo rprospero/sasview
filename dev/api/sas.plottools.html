@@ -1,0 +1,2494 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sas.plottools package &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="sas package" href="sas.html" />
+    <link rel="next" title="sas.pr package" href="sas.pr.html" />
+    <link rel="prev" title="sas.perspectives.pr package" href="sas.perspectives.pr.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.pr.html" title="sas.pr package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sas.perspectives.pr.html" title="sas.perspectives.pr package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" accesskey="U">sas package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sas-plottools-package">
+<h1>sas.plottools package</h1>
+<div class="section" id="submodules">
+<h2>Submodules</h2>
+</div>
+<div class="section" id="module-sas.plottools.BaseInteractor">
+<span id="sas-plottools-baseinteractor-module"></span><h2>sas.plottools.BaseInteractor module</h2>
+</div>
+<div class="section" id="module-sas.plottools.LabelDialog">
+<span id="sas-plottools-labeldialog-module"></span><h2>sas.plottools.LabelDialog module</h2>
+<dl class="class">
+<dt id="sas.plottools.LabelDialog.LabelDialog">
+<em class="property">class </em><tt class="descclassname">sas.plottools.LabelDialog.</tt><tt class="descname">LabelDialog</tt><big>(</big><em>parent</em>, <em>id</em>, <em>title</em>, <em>label</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/LabelDialog.html#LabelDialog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.LabelDialog.LabelDialog.getText">
+<tt class="descname">getText</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/LabelDialog.html#LabelDialog.getText"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.LineModel">
+<span id="sas-plottools-linemodel-module"></span><h2>sas.plottools.LineModel module</h2>
+<p>Provide Line function (y= A + Bx)</p>
+<dl class="class">
+<dt id="sas.plottools.LineModel.LineModel">
+<em class="property">class </em><tt class="descclassname">sas.plottools.LineModel.</tt><tt class="descname">LineModel</tt><a class="reference internal" href="../../_modules/sas/plottools/LineModel.html#LineModel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class that evaluates a linear model.</p>
+<p>f(x) = A + Bx</p>
+<p>List of default parameters:
+A = 0.0
+B = 0.0</p>
+<dl class="method">
+<dt id="sas.plottools.LineModel.LineModel.getParam">
+<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/LineModel.html#LineModel.getParam"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.LineModel.LineModel.run">
+<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/LineModel.html#LineModel.run"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Evaluate the model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; simple value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(Line value)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.LineModel.LineModel.runXY">
+<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/LineModel.html#LineModel.runXY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Evaluate the model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; simple value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Line value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.LineModel.LineModel.setParam">
+<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/LineModel.html#LineModel.setParam"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.PlotPanel">
+<span id="sas-plottools-plotpanel-module"></span><h2>sas.plottools.PlotPanel module</h2>
+<dl class="function">
+<dt id="sas.plottools.PlotPanel.CopyImage">
+<tt class="descclassname">sas.plottools.PlotPanel.</tt><tt class="descname">CopyImage</tt><big>(</big><em>canvas</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#CopyImage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>0: matplotlib plot
+1: wx.lib.plot
+2: other</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.PlotPanel.NoRepaintCanvas">
+<em class="property">class </em><tt class="descclassname">sas.plottools.PlotPanel.</tt><tt class="descname">NoRepaintCanvas</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#NoRepaintCanvas"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">matplotlib.backends.backend_wxagg.FigureCanvasWxAgg</span></tt></p>
+<p>We subclass FigureCanvasWxAgg, overriding the _onPaint method, so that
+the draw method is only called for the first two paint events. After that,
+the canvas will only be redrawn when it is resized.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.PlotPanel.PlotPanel">
+<em class="property">class </em><tt class="descclassname">sas.plottools.PlotPanel.</tt><tt class="descname">PlotPanel</tt><big>(</big><em>parent</em>, <em>id=-1</em>, <em>xtransform=None</em>, <em>ytransform=None</em>, <em>scale='log_{10}'</em>, <em>color=None</em>, <em>dpi=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Panel</span></tt></p>
+<p>The PlotPanel has a Figure and a Canvas. OnSize events simply set a 
+flag, and the actually redrawing of the
+figure is triggered by an Idle event.</p>
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.ChangeLegendLoc">
+<tt class="descname">ChangeLegendLoc</tt><big>(</big><em>label</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.ChangeLegendLoc"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Changes legend loc based on user input</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.OnCopyFigureMenu">
+<tt class="descname">OnCopyFigureMenu</tt><big>(</big><em>evt</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.OnCopyFigureMenu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Copy the current figure to clipboard</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.On_Paint">
+<tt class="descname">On_Paint</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.On_Paint"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.SetColor">
+<tt class="descname">SetColor</tt><big>(</big><em>rgbtuple</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.SetColor"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set figure and canvas colours to be the same</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.add_toolbar">
+<tt class="descname">add_toolbar</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.add_toolbar"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>add toolbar</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.clear"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reset the plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.curve">
+<tt class="descname">curve</tt><big>(</big><em>x</em>, <em>y</em>, <em>dy=None</em>, <em>color=0</em>, <em>symbol=0</em>, <em>label=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.curve"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Draw a line on a graph, possibly with confidence intervals.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.cusor_line">
+<tt class="descname">cusor_line</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.cusor_line"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.draw">
+<tt class="descname">draw</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.draw"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Where the actual drawing happens</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.get_loc_label">
+<tt class="descname">get_loc_label</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.get_loc_label"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Associates label to a specific legend location</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.get_xscale">
+<tt class="descname">get_xscale</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.get_xscale"><span class="viewcode-link">[source]</span></a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">x-axis scale</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.get_yscale">
+<tt class="descname">get_yscale</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.get_yscale"><span class="viewcode-link">[source]</span></a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Y-axis scale</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.image">
+<tt class="descname">image</tt><big>(</big><em>data</em>, <em>qx_data</em>, <em>qy_data</em>, <em>xmin</em>, <em>xmax</em>, <em>ymin</em>, <em>ymax</em>, <em>zmin</em>, <em>zmax</em>, <em>color=0</em>, <em>symbol=0</em>, <em>markersize=0</em>, <em>label='data2D'</em>, <em>cmap=&lt;matplotlib.colors.LinearSegmentedColormap object at 0x10cd9a5d0&gt;</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.image"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Render the current data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.interactive_curve">
+<tt class="descname">interactive_curve</tt><big>(</big><em>x</em>, <em>y</em>, <em>dy=None</em>, <em>name=''</em>, <em>color=0</em>, <em>symbol=0</em>, <em>zorder=1</em>, <em>id=None</em>, <em>label=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.interactive_curve"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Draw markers with error bars</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.interactive_points">
+<tt class="descname">interactive_points</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em>, <em>name=''</em>, <em>color=0</em>, <em>symbol=0</em>, <em>markersize=5</em>, <em>zorder=1</em>, <em>id=None</em>, <em>label=None</em>, <em>hide_error=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.interactive_points"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Draw markers with error bars</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.PlotPanel.PlotPanel.is_zoomed">
+<tt class="descname">is_zoomed</tt><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.is_zoomed"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.legend_picker">
+<tt class="descname">legend_picker</tt><big>(</big><em>legend</em>, <em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.legend_picker"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Pick up the legend patch</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.linear_plottable_fit">
+<tt class="descname">linear_plottable_fit</tt><big>(</big><em>plot</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.linear_plottable_fit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>when clicking on linear Fit on context menu, display Fitting Dialog</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>plot</strong> &#8211; PlotPanel owning the graph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onChangeCaption">
+<tt class="descname">onChangeCaption</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onChangeCaption"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onChangeLegendLoc">
+<tt class="descname">onChangeLegendLoc</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onChangeLegendLoc"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Changes legend loc based on user input</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onContextMenu">
+<tt class="descname">onContextMenu</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onContextMenu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Default context menu for a plot panel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onFitDisplay">
+<tt class="descname">onFitDisplay</tt><big>(</big><em>tempx</em>, <em>tempy</em>, <em>xminView</em>, <em>xmaxView</em>, <em>xmin</em>, <em>xmax</em>, <em>func</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onFitDisplay"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add a new plottable into the graph .In this case this plottable
+will be used to fit some data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tempx</strong> &#8211; The x data of fit line</li>
+<li><strong>tempy</strong> &#8211; The y data of fit line</li>
+<li><strong>xminView</strong> &#8211; the lower bound of fitting range</li>
+<li><strong>xminView</strong> &#8211; the upper bound of  fitting range</li>
+<li><strong>xmin</strong> &#8211; the lowest value of data to fit to the line</li>
+<li><strong>xmax</strong> &#8211; the highest value of data to fit to the line</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onFitting">
+<tt class="descname">onFitting</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onFitting"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>when clicking on linear Fit on context menu , display Fitting Dialog</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onGridOnOff">
+<tt class="descname">onGridOnOff</tt><big>(</big><em>gridon_off</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onGridOnOff"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Allows ON/OFF Grid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onLeftDown">
+<tt class="descname">onLeftDown</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onLeftDown"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>left button down and ready to drag</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onLeftUp">
+<tt class="descname">onLeftUp</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onLeftUp"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Dragging is done</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onLegend">
+<tt class="descname">onLegend</tt><big>(</big><em>legOnOff</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onLegend"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Toggles whether legend is visible/not visible</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onMouseMotion">
+<tt class="descname">onMouseMotion</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onMouseMotion"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>check if the left button is press and the mouse in moving.
+computer delta for x and y coordinates and then calls draghelper
+to perform the drag</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onPick">
+<tt class="descname">onPick</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onPick"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>On pick legend</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onPrint">
+<tt class="descname">onPrint</tt><big>(</big><em>event=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onPrint"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onPrinterPreview">
+<tt class="descname">onPrinterPreview</tt><big>(</big><em>event=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onPrinterPreview"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onPrinterSetup">
+<tt class="descname">onPrinterSetup</tt><big>(</big><em>event=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onPrinterSetup"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onResetGraph">
+<tt class="descname">onResetGraph</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onResetGraph"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reset the graph by plotting the full range of data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onSaveImage">
+<tt class="descname">onSaveImage</tt><big>(</big><em>evt</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onSaveImage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Implement save image</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onToolContextMenu">
+<tt class="descname">onToolContextMenu</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onToolContextMenu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>ContextMenu from toolbar</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; toolbar event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.onWheel">
+<tt class="descname">onWheel</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.onWheel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Process mouse wheel as zoom events</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; Wheel event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.on_kill_focus">
+<tt class="descname">on_kill_focus</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.on_kill_focus"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reset the panel color</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.on_set_focus">
+<tt class="descname">on_set_focus</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.on_set_focus"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Send to the parenet the current panel on focus</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.plottable_selected">
+<tt class="descname">plottable_selected</tt><big>(</big><em>id</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.plottable_selected"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Called to register a plottable as selected</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.points">
+<tt class="descname">points</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em>, <em>color=0</em>, <em>symbol=0</em>, <em>marker_size=5</em>, <em>label=None</em>, <em>id=None</em>, <em>hide_error=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.points"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Draw markers with error bars</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.properties">
+<tt class="descname">properties</tt><big>(</big><em>prop</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.properties"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set some properties of the graph.
+The set of properties is not yet determined.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.remove_legend">
+<tt class="descname">remove_legend</tt><big>(</big><em>ax=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.remove_legend"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove legend for ax or the current axes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.render">
+<tt class="descname">render</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Commit the plot after all objects are drawn</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.resetFitView">
+<tt class="descname">resetFitView</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.resetFitView"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>For fit Dialog initial display</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.returnTrans">
+<tt class="descname">returnTrans</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.returnTrans"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return values and labels used by Fit Dialog</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.schedule_full_draw">
+<tt class="descname">schedule_full_draw</tt><big>(</big><em>func='append'</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.schedule_full_draw"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Put self in schedule to full redraw list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.setTrans">
+<tt class="descname">setTrans</tt><big>(</big><em>xtrans</em>, <em>ytrans</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.setTrans"><span class="viewcode-link">[source]</span></a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xtrans</strong> &#8211; set x transformation on Property dialog</li>
+<li><strong>ytrans</strong> &#8211; set y transformation on Property dialog</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.set_legend_alpha">
+<tt class="descname">set_legend_alpha</tt><big>(</big><em>alpha=1</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.set_legend_alpha"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set legend alpha</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.set_resizing">
+<tt class="descname">set_resizing</tt><big>(</big><em>resizing=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.set_resizing"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the resizing (True/False)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.set_selected_from_menu">
+<tt class="descname">set_selected_from_menu</tt><big>(</big><em>menu</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.set_selected_from_menu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set selected_plottable from context menu selection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>menu</strong> &#8211; context menu item</li>
+<li><strong>id</strong> &#8211; menu item id</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.set_xscale">
+<tt class="descname">set_xscale</tt><big>(</big><em>scale='linear'</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.set_xscale"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the scale on x-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scale</strong> &#8211; the scale of x-axis</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.set_yscale">
+<tt class="descname">set_yscale</tt><big>(</big><em>scale='linear'</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.set_yscale"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the scale on Y-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scale</strong> &#8211; the scale of y-axis</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>units</em>, <em>font=None</em>, <em>color='black'</em>, <em>t_font=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.xaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>xaxis label and units.</p>
+<p>Axis labels know about units.</p>
+<p>We need to do this so that we can detect when axes are not
+commesurate.  Currently this is ignored other than for formatting
+purposes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PlotPanel.PlotPanel.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>units</em>, <em>font=None</em>, <em>color='black'</em>, <em>t_font=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#PlotPanel.yaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>yaxis label and units.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.PlotPanel.show_tree">
+<tt class="descclassname">sas.plottools.PlotPanel.</tt><tt class="descname">show_tree</tt><big>(</big><em>obj</em>, <em>d=0</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PlotPanel.html#show_tree"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Handy function for displaying a tree of graph objects</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.PropertyDialog">
+<span id="sas-plottools-propertydialog-module"></span><h2>sas.plottools.PropertyDialog module</h2>
+<dl class="class">
+<dt id="sas.plottools.PropertyDialog.Properties">
+<em class="property">class </em><tt class="descclassname">sas.plottools.PropertyDialog.</tt><tt class="descname">Properties</tt><big>(</big><em>parent</em>, <em>id=-1</em>, <em>title='Select the scale of the graph'</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PropertyDialog.html#Properties"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.PropertyDialog.Properties.getValues">
+<tt class="descname">getValues</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PropertyDialog.html#Properties.getValues"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.PropertyDialog.Properties.setValues">
+<tt class="descname">setValues</tt><big>(</big><em>x</em>, <em>y</em>, <em>view</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/PropertyDialog.html#Properties.setValues"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.SimpleFont">
+<span id="sas-plottools-simplefont-module"></span><h2>sas.plottools.SimpleFont module</h2>
+<p>This software was developed by Institut Laue-Langevin as part of
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE).</p>
+<p>Copyright 2012 Institut Laue-Langevin</p>
+<dl class="class">
+<dt id="sas.plottools.SimpleFont.SimpleFont">
+<em class="property">class </em><tt class="descclassname">sas.plottools.SimpleFont.</tt><tt class="descname">SimpleFont</tt><big>(</big><em>parent</em>, <em>id</em>, <em>title</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SimpleFont.html#SimpleFont"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.SimpleFont.SimpleFont.InitUI">
+<tt class="descname">InitUI</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SimpleFont.html#SimpleFont.InitUI"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.SimpleFont.SimpleFont.get_font">
+<tt class="descname">get_font</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SimpleFont.html#SimpleFont.get_font"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.SimpleFont.SimpleFont.get_ticklabel_check">
+<tt class="descname">get_ticklabel_check</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SimpleFont.html#SimpleFont.get_ticklabel_check"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get tick label check value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.SimpleFont.SimpleFont.set_default_font">
+<tt class="descname">set_default_font</tt><big>(</big><em>font</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SimpleFont.html#SimpleFont.set_default_font"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.SimpleFont.SimpleFont.set_ticklabel_check">
+<tt class="descname">set_ticklabel_check</tt><big>(</big><em>check=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SimpleFont.html#SimpleFont.set_ticklabel_check"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set tick label check value</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.SizeDialog">
+<span id="sas-plottools-sizedialog-module"></span><h2>sas.plottools.SizeDialog module</h2>
+<dl class="class">
+<dt id="sas.plottools.SizeDialog.SizeDialog">
+<em class="property">class </em><tt class="descclassname">sas.plottools.SizeDialog.</tt><tt class="descname">SizeDialog</tt><big>(</big><em>parent</em>, <em>id</em>, <em>title</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SizeDialog.html#SizeDialog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.SizeDialog.SizeDialog.getText">
+<tt class="descname">getText</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/SizeDialog.html#SizeDialog.getText"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get text typed</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.TextDialog">
+<span id="sas-plottools-textdialog-module"></span><h2>sas.plottools.TextDialog module</h2>
+<dl class="class">
+<dt id="sas.plottools.TextDialog.TextDialog">
+<em class="property">class </em><tt class="descclassname">sas.plottools.TextDialog.</tt><tt class="descname">TextDialog</tt><big>(</big><em>parent</em>, <em>id</em>, <em>title</em>, <em>label=''</em>, <em>unit=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getColor">
+<tt class="descname">getColor</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getColor"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns font size for the text box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getFamily">
+<tt class="descname">getFamily</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getFamily"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns font family for the text box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getSize">
+<tt class="descname">getSize</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getSize"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns font size for the text box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getStyle">
+<tt class="descname">getStyle</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getStyle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns font tyle for the text box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getText">
+<tt class="descname">getText</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getText"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns text string as input by user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getTickLabel">
+<tt class="descname">getTickLabel</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getTickLabel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bool for use on tick label</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getUnit">
+<tt class="descname">getUnit</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getUnit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns unit string as input by user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getWeight">
+<tt class="descname">getWeight</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getWeight"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns font weight for the text box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getX">
+<tt class="descname">getX</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns x coordinate of text box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.getY">
+<tt class="descname">getY</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.getY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns y coordinate of text box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.on_color">
+<tt class="descname">on_color</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.on_color"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the color</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.on_family">
+<tt class="descname">on_family</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.on_family"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the family</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.on_size">
+<tt class="descname">on_size</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.on_size"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.on_style">
+<tt class="descname">on_style</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.on_style"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the style</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.on_tick_label">
+<tt class="descname">on_tick_label</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.on_tick_label"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the font for tick label</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.TextDialog.TextDialog.on_weight">
+<tt class="descname">on_weight</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/TextDialog.html#TextDialog.on_weight"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the weight</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.arrow3d">
+<span id="sas-plottools-arrow3d-module"></span><h2>sas.plottools.arrow3d module</h2>
+<p>Module that draws multiple arrows in 3D coordinates</p>
+<dl class="class">
+<dt id="sas.plottools.arrow3d.Arrow3D">
+<em class="property">class </em><tt class="descclassname">sas.plottools.arrow3d.</tt><tt class="descname">Arrow3D</tt><big>(</big><em>base</em>, <em>xs</em>, <em>ys</em>, <em>zs</em>, <em>colors</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/arrow3d.html#Arrow3D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">matplotlib.patches.FancyArrowPatch</span></tt></p>
+<p>Draw 3D arrow</p>
+<dl class="method">
+<dt id="sas.plottools.arrow3d.Arrow3D.draw">
+<tt class="descname">draw</tt><big>(</big><em>renderer</em>, <em>rasterized=True</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/arrow3d.html#Arrow3D.draw"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Drawing actually happens here</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.arrow3d.Arrow3D.onLeftDown">
+<tt class="descname">onLeftDown</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/arrow3d.html#Arrow3D.onLeftDown"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.arrow3d.Arrow3D.onLeftUp">
+<tt class="descname">onLeftUp</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/arrow3d.html#Arrow3D.onLeftUp"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.binder">
+<span id="sas-plottools-binder-module"></span><h2>sas.plottools.binder module</h2>
+<p>Extension to MPL to support the binding of artists to key/mouse events.</p>
+<dl class="class">
+<dt id="sas.plottools.binder.BindArtist">
+<em class="property">class </em><tt class="descclassname">sas.plottools.binder.</tt><tt class="descname">BindArtist</tt><big>(</big><em>figure</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/binder.html#BindArtist"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="attribute">
+<dt id="sas.plottools.binder.BindArtist.alt">
+<tt class="descname">alt</tt><em class="property"> = False</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.binder.BindArtist.clear">
+<tt class="descname">clear</tt><big>(</big><em>h1</em>, <em>h2</em>, <em>...</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/binder.html#BindArtist.clear"><span class="viewcode-link">[source]</span></a></dt>
+<dd><blockquote>
+<div>Remove connections for artists h1, h2, ...</div></blockquote>
+<p>Use clearall() to reset all connections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.binder.BindArtist.clearall">
+<tt class="descname">clearall</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/binder.html#BindArtist.clearall"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Clear connections to all artists.</p>
+<p>Use clear(h1,h2,...) to reset specific artists.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.binder.BindArtist.control">
+<tt class="descname">control</tt><em class="property"> = False</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.binder.BindArtist.dclick_threshhold">
+<tt class="descname">dclick_threshhold</tt><em class="property"> = 0.25</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.binder.BindArtist.disconnect">
+<tt class="descname">disconnect</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/binder.html#BindArtist.disconnect"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>In case we need to disconnect from the canvas...</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.binder.BindArtist.events">
+<tt class="descname">events</tt><em class="property"> = ['enter', 'leave', 'motion', 'click', 'dclick', 'drag', 'release', 'scroll', 'key', 'keyup']</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.binder.BindArtist.meta">
+<tt class="descname">meta</tt><em class="property"> = False</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.binder.BindArtist.shift">
+<tt class="descname">shift</tt><em class="property"> = False</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.binder.BindArtist.trigger">
+<tt class="descname">trigger</tt><big>(</big><em>actor</em>, <em>action</em>, <em>ev</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/binder.html#BindArtist.trigger"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Trigger a particular event for the artist.  Fallback to axes,
+to figure, and to &#8216;all&#8217; if the event is not processed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.binder.Selection">
+<em class="property">class </em><tt class="descclassname">sas.plottools.binder.</tt><tt class="descname">Selection</tt><big>(</big><em>artist=None</em>, <em>prop={}</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/binder.html#Selection"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Store and compare selections.</p>
+<dl class="attribute">
+<dt id="sas.plottools.binder.Selection.artist">
+<tt class="descname">artist</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.binder.Selection.prop">
+<tt class="descname">prop</tt><em class="property"> = {}</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.canvas">
+<span id="sas-plottools-canvas-module"></span><h2>sas.plottools.canvas module</h2>
+<p>This module implements a faster canvas for plotting.
+it ovewrites some matplolib methods to allow printing on sys.platform==&#8217;win32&#8217;</p>
+<dl class="class">
+<dt id="sas.plottools.canvas.FigureCanvas">
+<em class="property">class </em><tt class="descclassname">sas.plottools.canvas.</tt><tt class="descname">FigureCanvas</tt><big>(</big><em>*args</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#FigureCanvas"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">matplotlib.backends.backend_wxagg.FigureCanvasWxAgg</span></tt></p>
+<p>Add features to the wx agg canvas for better support of AUI and
+faster plotting.</p>
+<dl class="method">
+<dt id="sas.plottools.canvas.FigureCanvas.draw">
+<tt class="descname">draw</tt><big>(</big><em>drawDC=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#FigureCanvas.draw"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Render the figure using agg.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.canvas.FigureCanvas.draw_idle">
+<tt class="descname">draw_idle</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#FigureCanvas.draw_idle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Render after a delay if no other render requests have been made.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.canvas.FigureCanvas.scroll_event">
+<tt class="descname">scroll_event</tt><big>(</big><em>x</em>, <em>y</em>, <em>step=1</em>, <em>guiEvent=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#FigureCanvas.scroll_event"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Backend derived classes should call this function on any
+scroll wheel event.  x,y are the canvas coords: 0,0 is lower,
+left.  button and key are as defined in MouseEvent</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.canvas.FigureCanvas.set_panel">
+<tt class="descname">set_panel</tt><big>(</big><em>panel</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#FigureCanvas.set_panel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set axes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.canvas.FigureCanvas.set_resizing">
+<tt class="descname">set_resizing</tt><big>(</big><em>resizing=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#FigureCanvas.set_resizing"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Setting the resizing</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.canvas.OnPrintPage">
+<tt class="descclassname">sas.plottools.canvas.</tt><tt class="descname">OnPrintPage</tt><big>(</big><em>self</em>, <em>page</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#OnPrintPage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>override printPage of matplotlib</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.canvas.draw_image">
+<tt class="descclassname">sas.plottools.canvas.</tt><tt class="descname">draw_image</tt><big>(</big><em>self</em>, <em>x</em>, <em>y</em>, <em>im</em>, <em>bbox</em>, <em>clippath=None</em>, <em>clippath_trans=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#draw_image"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Draw the image instance into the current axes;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; is the distance in pixels from the left hand side of the canvas.</li>
+<li><strong>y</strong> &#8211; the distance from the origin.  That is, if origin is
+upper, y is the distance from top.  If origin is lower, y
+is the distance from bottom</li>
+<li><strong>im</strong> &#8211; the class`matplotlib._image.Image` instance</li>
+<li><strong>bbox</strong> &#8211; a class <cite>matplotlib.transforms.Bbox</cite> instance for clipping, or
+None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.canvas.select">
+<tt class="descclassname">sas.plottools.canvas.</tt><tt class="descname">select</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#select"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.canvas.unselect">
+<tt class="descclassname">sas.plottools.canvas.</tt><tt class="descname">unselect</tt><big>(</big><em>self</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/canvas.html#unselect"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.config">
+<span id="sas-plottools-config-module"></span><h2>sas.plottools.config module</h2>
+<p>Configure plotter for plottools.</p>
+<p>This must be imported first in __init__.py for plottools.</p>
+<p>If your application uses matplotlib outside plottools, then
+please do the following at the start of your application:</p>
+<blockquote>
+<div># Select matplotlib version and backend
+import sas.plottools.config</div></blockquote>
+<p>Note that plottools requires particular versions of matplotlib
+and a particular backend.  As of this writing it is the WXAgg
+backend for matplotlib&gt;=0.98.</p>
+<p>The plottools package uses pkg_resources if available to select
+the correct version of matplotlib.  If you need multiple matplotlib
+versions in your path, be sure to use &#8220;easy_install -m&#8221; for all
+of them.  If a version is installed without &#8220;-m&#8221; that does not
+meet the requirements, then pkg_resources.require() will fail,
+even if you have installed a suitable version with &#8220;-m&#8221;.  In this
+case you will need to fix up your site-packages directory,
+probably by removing site-packages/matplotlib and the associated
+egg file for that version, and reinstalling with &#8220;-m&#8221;.  You may
+also need to edit site-packages/easy-install.pth.</p>
+</div>
+<div class="section" id="module-sas.plottools.fitDialog">
+<span id="sas-plottools-fitdialog-module"></span><h2>sas.plottools.fitDialog module</h2>
+<dl class="class">
+<dt id="sas.plottools.fitDialog.LinearFit">
+<em class="property">class </em><tt class="descclassname">sas.plottools.fitDialog.</tt><tt class="descname">LinearFit</tt><big>(</big><em>parent</em>, <em>plottable</em>, <em>push_data</em>, <em>transform</em>, <em>title</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.fitDialog.LinearFit.checkFitValues">
+<tt class="descname">checkFitValues</tt><big>(</big><em>item</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit.checkFitValues"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Check the validity of input values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.LinearFit.floatForwardTransform">
+<tt class="descname">floatForwardTransform</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit.floatForwardTransform"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>transform a float.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.LinearFit.floatInvTransform">
+<tt class="descname">floatInvTransform</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit.floatInvTransform"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>transform a float.It is use to determine the x.View min and x.View
+max for values not in x</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.LinearFit.floatTransform">
+<tt class="descname">floatTransform</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit.floatTransform"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>transform a float.It is use to determine the x.
+View min and x.View max for values
+not in x</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.LinearFit.register_close">
+<tt class="descname">register_close</tt><big>(</big><em>owner</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit.register_close"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Method to register the close event to a parent
+window that needs notification when the dialog
+is closed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>owner</strong> &#8211; parent window</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.LinearFit.setFitRange">
+<tt class="descname">setFitRange</tt><big>(</big><em>xmin</em>, <em>xmax</em>, <em>xminTrans</em>, <em>xmaxTrans</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit.setFitRange"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set fit parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.LinearFit.set_fit_region">
+<tt class="descname">set_fit_region</tt><big>(</big><em>xmin</em>, <em>xmax</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#LinearFit.set_fit_region"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the fit region
+:param xmin: minimum x-value to be included in fit
+:param xmax: maximum x-value to be included in fit</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.fitDialog.MyApp">
+<em class="property">class </em><tt class="descclassname">sas.plottools.fitDialog.</tt><tt class="descname">MyApp</tt><big>(</big><em>redirect=False</em>, <em>filename=None</em>, <em>useBestVisual=False</em>, <em>clearSigInt=True</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#MyApp"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._core.App</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.fitDialog.MyApp.OnInit">
+<tt class="descname">OnInit</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#MyApp.OnInit"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.MyApp.onFitDisplay">
+<tt class="descname">onFitDisplay</tt><big>(</big><em>tempx</em>, <em>tempy</em>, <em>xminView</em>, <em>xmaxView</em>, <em>xmin</em>, <em>xmax</em>, <em>func</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#MyApp.onFitDisplay"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.fitDialog.MyApp.returnTrans">
+<tt class="descname">returnTrans</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#MyApp.returnTrans"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.fitDialog.format_number">
+<tt class="descclassname">sas.plottools.fitDialog.</tt><tt class="descname">format_number</tt><big>(</big><em>value</em>, <em>high=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fitDialog.html#format_number"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return a float in a standardized, human-readable formatted string</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.fittings">
+<span id="sas-plottools-fittings-module"></span><h2>sas.plottools.fittings module</h2>
+<dl class="class">
+<dt id="sas.plottools.fittings.Parameter">
+<em class="property">class </em><tt class="descclassname">sas.plottools.fittings.</tt><tt class="descname">Parameter</tt><big>(</big><em>model</em>, <em>name</em>, <em>value=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fittings.html#Parameter"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class to handle model parameters</p>
+<dl class="method">
+<dt id="sas.plottools.fittings.Parameter.set">
+<tt class="descname">set</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fittings.html#Parameter.set"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the value of the parameter</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.fittings.calcCommandline">
+<tt class="descclassname">sas.plottools.fittings.</tt><tt class="descname">calcCommandline</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fittings.html#calcCommandline"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.fittings.sasfit">
+<tt class="descclassname">sas.plottools.fittings.</tt><tt class="descname">sasfit</tt><big>(</big><em>model</em>, <em>pars</em>, <em>x</em>, <em>y</em>, <em>err_y</em>, <em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/fittings.html#sasfit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Fit function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; sas model object</li>
+<li><strong>pars</strong> &#8211; list of parameters</li>
+<li><strong>x</strong> &#8211; vector of x data</li>
+<li><strong>y</strong> &#8211; vector of y data</li>
+<li><strong>err_y</strong> &#8211; vector of y errors</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.plottable_interactor">
+<span id="sas-plottools-plottable-interactor-module"></span><h2>sas.plottools.plottable_interactor module</h2>
+<p>This module allows more interaction with the plot</p>
+<dl class="class">
+<dt id="sas.plottools.plottable_interactor.PointInteractor">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottable_interactor.</tt><tt class="descname">PointInteractor</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=3</em>, <em>id=''</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.BaseInteractor._BaseInteractor</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.plottable_interactor.PointInteractor.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor.clear"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottable_interactor.PointInteractor.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor.connect_markers"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Connect markers to callbacks</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottable_interactor.PointInteractor.curve">
+<tt class="descname">curve</tt><big>(</big><em>x</em>, <em>y</em>, <em>dy=None</em>, <em>color=0</em>, <em>symbol=0</em>, <em>zorder=10</em>, <em>label=None</em>, <em>width=2.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor.curve"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottable_interactor.PointInteractor.points">
+<tt class="descname">points</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em>, <em>color=0</em>, <em>symbol=0</em>, <em>zorder=1</em>, <em>markersize=5</em>, <em>label=None</em>, <em>hide_error=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor.points"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottable_interactor.PointInteractor.step">
+<tt class="descname">step</tt><big>(</big><em>x</em>, <em>y</em>, <em>dy=None</em>, <em>color=0</em>, <em>symbol=0</em>, <em>zorder=1</em>, <em>label=None</em>, <em>width=2.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor.step"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottable_interactor.PointInteractor.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor.update"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Update</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottable_interactor.PointInteractor.vline">
+<tt class="descname">vline</tt><big>(</big><em>x</em>, <em>y</em>, <em>dy=None</em>, <em>color=0</em>, <em>symbol=0</em>, <em>zorder=1</em>, <em>label=None</em>, <em>width=2.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottable_interactor.html#PointInteractor.vline"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.plottables">
+<span id="sas-plottools-plottables-module"></span><h2>sas.plottools.plottables module</h2>
+<p>Prototype plottable object support.</p>
+<p>The main point of this prototype is to provide a clean separation between
+the style (plotter details: color, grids, widgets, etc.) and substance
+(application details: which information to plot).  Programmers should not be
+dictating line colours and plotting symbols.</p>
+<p>Unlike the problem of style in CSS or Word, where most paragraphs look
+the same, each line on a graph has to be distinguishable from its neighbours.
+Our solution is to provide parametric styles, in which a number of
+different classes of object (e.g., reflectometry data, reflectometry
+theory) representing multiple graph primitives cycle through a colour
+palette provided by the underlying plotter.</p>
+<p>A full treatment would provide perceptual dimensions of prominence and
+distinctiveness rather than a simple colour number.</p>
+<dl class="class">
+<dt id="sas.plottools.plottables.Chisq">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Chisq</tt><big>(</big><em>chisq=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Chisq"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.plottools.plottables.Plottable" title="sas.plottools.plottables.Plottable"><tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.plottables.Plottable</span></tt></a></p>
+<p>Chisq plottable plots the chisq</p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Chisq.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Chisq.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Chisq.setChisq">
+<tt class="descname">setChisq</tt><big>(</big><em>chisq</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Chisq.setChisq"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the chisq value.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Data1D">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Data1D</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data1D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.plottools.plottables.Plottable" title="sas.plottools.plottables.Plottable"><tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.plottables.Plottable</span></tt></a></p>
+<p>Data plottable: scatter plot of x,y with errors in x and y.</p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Data1D.changed">
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data1D.changed"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="sas.plottools.plottables.Data1D.labels">
+<em class="property">classmethod </em><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data1D.labels"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Build a label mostly unique within a collection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Data1D.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data1D.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Renders the plottable on the graph</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Data2D">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Data2D</tt><big>(</big><em>image=None</em>, <em>qx_data=None</em>, <em>qy_data=None</em>, <em>err_image=None</em>, <em>xmin=None</em>, <em>xmax=None</em>, <em>ymin=None</em>, <em>ymax=None</em>, <em>zmin=None</em>, <em>zmax=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.plottools.plottables.Plottable" title="sas.plottools.plottables.Plottable"><tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.plottables.Plottable</span></tt></a></p>
+<p>2D data class for image plotting</p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Data2D.changed">
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.changed"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="sas.plottools.plottables.Data2D.labels">
+<em class="property">classmethod </em><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.labels"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Build a label mostly unique within a collection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Data2D.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Renders the plottable on the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Data2D.setValues">
+<tt class="descname">setValues</tt><big>(</big><em>datainfo=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.setValues"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use datainfo object to initialize data2D</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datainfo</strong> &#8211; object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Data2D.set_zrange">
+<tt class="descname">set_zrange</tt><big>(</big><em>zmin=None</em>, <em>zmax=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.set_zrange"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Data2D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.xaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set x-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> &#8211; x-axis label</li>
+<li><strong>unit</strong> &#8211; x-axis unit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Data2D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.yaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set y-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> &#8211; y-axis label</li>
+<li><strong>unit</strong> &#8211; y-axis unit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Data2D.zaxis">
+<tt class="descname">zaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Data2D.zaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>set z-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> &#8211; z-axis label</li>
+<li><strong>unit</strong> &#8211; z-axis unit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Fit1D">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Fit1D</tt><big>(</big><em>data=None</em>, <em>theory=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Fit1D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.plottools.plottables.Plottable" title="sas.plottools.plottables.Plottable"><tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.plottables.Plottable</span></tt></a></p>
+<p>Fit plottable: composed of a data line plus a theory line.  This
+is treated like a single object from the perspective of the graph,
+except that it will have two legend entries, one for the data and
+one for the theory.</p>
+<p>The color of the data and theory will be shared.</p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Fit1D.changed">
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Fit1D.changed"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Fit1D.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Fit1D.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Graph">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Graph</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Generic plottables graph structure.</p>
+<p>Plot styles are based on color/symbol lists.  The user gets to select
+the list of colors/symbols/sizes to choose from, not the application
+developer.  The programmer only gets to add/remove lines from the
+plot and move to the next symbol/color.</p>
+<p>Another dimension is prominence, which refers to line sizes/point sizes.</p>
+<p>Axis transformations allow the user to select the coordinate view
+which provides clarity to the data.  There is no way we can provide
+every possible transformation for every application generically, so
+the plottable objects themselves will need to provide the transformations.
+Here are some examples from reflectometry:</p>
+<div class="highlight-python"><div class="highlight"><pre>independent: x -&gt; f(x)
+   monitor scaling: y -&gt; M*y
+   log:  y -&gt; log(y if y &gt; min else min)
+   cos:  y -&gt; cos(y*pi/180)
+dependent:   x -&gt; f(x,y)
+   Q4:      y -&gt; y*x^4
+   fresnel: y -&gt; y*fresnel(x)
+coordinated: x,y = f(x,y)
+   Q:    x -&gt; 2*pi/L (cos(x*pi/180) - cos(y*pi/180))
+         y -&gt; 2*pi/L (sin(x*pi/180) + sin(y*pi/180))
+reducing: x,y = f(x1,x2,y1,y2)
+   spin asymmetry: x -&gt; x1, y -&gt; (y1 - y2)/(y1 + y2)
+   vector net: x -&gt; x1, y -&gt; y1*cos(y2*pi/180)
+</pre></div>
+</div>
+<p>Multiple transformations are possible, such as Q4 spin asymmetry</p>
+<p>Axes have further complications in that the units of what are being
+plotted should correspond to the units on the axes.  Plotting multiple
+types on the same graph should be handled gracefully, e.g., by creating
+a separate tab for each available axis type, breaking into subplots,
+showing multiple axes on the same plot, or generating inset plots.
+Ultimately the decision should be left to the user.</p>
+<p>Graph properties such as grids/crosshairs should be under user control,
+as should the sizes of items such as axis fonts, etc.  No direct
+access will be provided to the application.</p>
+<p>Axis limits are mostly under user control.  If the user has zoomed or
+panned then those limits are preserved even if new data is plotted.
+The exception is when, e.g., scanning through a set of related lines
+in which the user may want to fix the limits so that user can compare
+the values directly.  Another exception is when creating multiple
+graphs sharing the same limits, though this case may be important
+enough that it is handled by the graph widget itself.  Axis limits
+will of course have to understand the effects of axis transformations.</p>
+<p>High level plottable objects may be composed of low level primitives.
+Operations such as legend/hide/show copy/paste, etc. need to operate
+on these primitives as a group.  E.g., allowing the user to have a
+working canvas where they can drag lines they want to save and annotate
+them.</p>
+<p>Graphs need to be printable.  A page layout program for entire plots
+would be nice.</p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.add">
+<tt class="descname">add</tt><big>(</big><em>plottable</em>, <em>color=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.add"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add a new plottable to the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.changed">
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.changed"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Detect if any graphed plottables have changed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.delete">
+<tt class="descname">delete</tt><big>(</big><em>plottable</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.delete"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove an existing plottable from the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.get">
+<tt class="descname">get</tt><big>(</big><em>key</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.get"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get the graph properties</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.get_plottable">
+<tt class="descname">get_plottable</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.get_plottable"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the plottable with the given
+name if it exists. Otherwise return None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.get_range">
+<tt class="descname">get_range</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.get_range"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the range of all displayed plottables</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.isPlotted">
+<tt class="descname">isPlotted</tt><big>(</big><em>plottable</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.isPlotted"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return True is the plottable is already on the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Redraw the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.replace">
+<tt class="descname">replace</tt><big>(</big><em>plottable</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.replace"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Replace an existing plottable from the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.reset"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reset the graph.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.reset_scale">
+<tt class="descname">reset_scale</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.reset_scale"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Resets the scale transformation data to the underlying data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.returnPlottable">
+<tt class="descname">returnPlottable</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.returnPlottable"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This method returns a dictionary of plottables contained in graph
+It is just by Plotpanel to interact with the complete list of plottables
+inside the graph.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.set">
+<tt class="descname">set</tt><big>(</big><em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.set"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the graph properties</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.title">
+<tt class="descname">title</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.title"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Graph title</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.xaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Properties of the x axis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Graph.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Graph.yaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Properties of the y axis.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Plottable">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Plottable</tt><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.check_data_PlottableX">
+<tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.check_data_PlottableX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Since no transformation is made for log10(x), check that
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.check_data_PlottableY">
+<tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.check_data_PlottableY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Since no transformation is made for log10(y), check that 
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.colors">
+<tt class="descname">colors</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.colors"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the number of colors need to render the object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.custom_color">
+<tt class="descname">custom_color</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.get_xaxis">
+<tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.get_xaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the units and name of x-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.get_yaxis">
+<tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.get_yaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the units and name of y- axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.hidden">
+<tt class="descname">hidden</tt><em class="property"> = False</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.interactive">
+<tt class="descname">interactive</tt><em class="property"> = True</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.is_empty">
+<tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.is_empty"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns True if there is no data stored in the plottable</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="sas.plottools.plottables.Plottable.labels">
+<em class="property">classmethod </em><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.labels"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Construct a set of unique labels for a collection of plottables of
+the same type.</p>
+<p>Returns a map from plottable to name.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.markersize">
+<tt class="descname">markersize</tt><em class="property"> = 5</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.name">
+<tt class="descname">name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.onFitRange">
+<tt class="descname">onFitRange</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.onFitRange"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.onReset">
+<tt class="descname">onReset</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.onReset"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reset x, y, dx, dy view with its parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The base class makes sure the correct units are being used for
+subsequent plottable.</p>
+<p>For now it is assumed that the graphs are commensurate, and if you
+put a Qx object on a Temperature graph then you had better hope 
+that it makes sense.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.reset_view">
+<tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.reset_view"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reload view with new value to plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.returnValuesOfView">
+<tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.returnValuesOfView"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return View parameters and it is used by Fit Dialog</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.setLabel">
+<tt class="descname">setLabel</tt><big>(</big><em>labelx</em>, <em>labely</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.setLabel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>It takes a label of the x and y transformation and set View parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; The label of x transformation is sent by Properties Dialog</li>
+<li><strong>transy</strong> &#8211; The label of y transformation is sent Properties Dialog</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.set_View">
+<tt class="descname">set_View</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.set_View"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load View</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.set_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.short_name">
+<tt class="descname">short_name</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.transformView">
+<tt class="descname">transformView</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.transformView"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>It transforms x, y before displaying</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.transformX">
+<tt class="descname">transformX</tt><big>(</big><em>transx</em>, <em>transdx</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.transformX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Receive pointers to function that transform x and dx
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.transformY">
+<tt class="descname">transformY</tt><big>(</big><em>transy</em>, <em>transdy</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.transformY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Receive pointers to function that transform y and dy
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transy</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdy</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.x">
+<tt class="descname">x</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.xaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the name and unit of x_axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of x-axis</li>
+<li><strong>units</strong> &#8211; the units of x_axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.Plottable.y">
+<tt class="descname">y</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Plottable.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Plottable.yaxis"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the name and unit of y_axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of y-axis</li>
+<li><strong>units</strong> &#8211; the units of y_axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Text">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Text</tt><big>(</big><em>text=None</em>, <em>xpos=0.5</em>, <em>ypos=0.9</em>, <em>name='text'</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Text"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.plottools.plottables.Plottable" title="sas.plottools.plottables.Plottable"><tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.plottables.Plottable</span></tt></a></p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Text.getText">
+<tt class="descname">getText</tt><big>(</big><em>text</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Text.getText"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get the text string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Text.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Text.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Text.setText">
+<tt class="descname">setText</tt><big>(</big><em>text</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Text.setText"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the text string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Text.set_x">
+<tt class="descname">set_x</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Text.set_x"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the x position of the text
+ACCEPTS: float</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Text.set_y">
+<tt class="descname">set_y</tt><big>(</big><em>y</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Text.set_y"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the y position of the text
+ACCEPTS: float</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Theory1D">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Theory1D</tt><big>(</big><em>x</em>, <em>y</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Theory1D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.plottools.plottables.Plottable" title="sas.plottools.plottables.Plottable"><tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.plottables.Plottable</span></tt></a></p>
+<p>Theory plottable: line plot of x,y with confidence interval y.</p>
+<dl class="method">
+<dt id="sas.plottools.plottables.Theory1D.changed">
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Theory1D.changed"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="sas.plottools.plottables.Theory1D.labels">
+<em class="property">classmethod </em><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Theory1D.labels"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Build a label mostly unique within a collection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.Theory1D.render">
+<tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Theory1D.render"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.Transform">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">Transform</tt><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#Transform"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Define a transform plugin to the plottable architecture.</p>
+<p>Transforms operate on axes.  The plottable defines the
+set of transforms available for it, and the axes on which
+they operate.  These transforms can operate on the x axis
+only, the y axis only or on the x and y axes together.</p>
+<p>This infrastructure is not able to support transformations
+such as log and polar plots as these require full control
+over the drawing of axes and grids.</p>
+<p>A transform has a number of attributes.</p>
+<dl class="docutils">
+<dt>name</dt>
+<dd>user visible name for the transform.  This will
+appear in the context menu for the axis and the transform
+menu for the graph.</dd>
+<dt>type</dt>
+<dd>operational axis.  This determines whether the
+transform should appear on x,y or z axis context
+menus, or if it should appear in the context menu for
+the graph.</dd>
+<dt>inventory</dt>
+<dd>(not implemented) 
+a dictionary of user settable parameter names and
+their associated types.  These should appear as keyword
+arguments to the transform call.  For example, Fresnel
+reflectivity requires the substrate density:
+<tt class="docutils literal"><span class="pre">{</span> <span class="pre">'rho':</span> <span class="pre">type.Value(10e-6/units.angstrom**2)</span> <span class="pre">}</span></tt>       
+Supply reasonable defaults in the callback so that
+limited plotting clients work even though they cannot
+set the inventory.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.plottools.plottables.View">
+<em class="property">class </em><tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">View</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Representation of the data that might include a transformation</p>
+<dl class="method">
+<dt id="sas.plottools.plottables.View.check_data_logX">
+<tt class="descname">check_data_logX</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.check_data_logX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove negative value in x vector to avoid plotting negative
+value of Log10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.View.check_data_logY">
+<tt class="descname">check_data_logY</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.check_data_logY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove negative value in y vector
+to avoid plotting negative value of Log10</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.View.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.View.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.View.onFitRangeView">
+<tt class="descname">onFitRangeView</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.onFitRangeView"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.View.onResetView">
+<tt class="descname">onResetView</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.onResetView"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reset x,y,dx and y in their full range  and in the initial scale
+in case their previous range has changed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.View.returnXview">
+<tt class="descname">returnXview</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.returnXview"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return View  x,y,dx,dy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.View.setTransformX">
+<tt class="descname">setTransformX</tt><big>(</big><em>funcx</em>, <em>funcdx</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.setTransformX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Receive pointers to function that transform x and dx
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.View.setTransformY">
+<tt class="descname">setTransformY</tt><big>(</big><em>funcy</em>, <em>funcdy</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.setTransformY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Receive pointers to function that transform y and dy
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.plottables.View.transform">
+<tt class="descname">transform</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#View.transform"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="docutils">
+<dt>Transforms the x,y,dx and dy vectors and stores</dt>
+<dd>the output in View parameters</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; array of x values</li>
+<li><strong>y</strong> &#8211; array of y values</li>
+<li><strong>dx</strong> &#8211; array of  errors values on x</li>
+<li><strong>dy</strong> &#8211; array of error values on y</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.View.x">
+<tt class="descname">x</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.plottools.plottables.View.y">
+<tt class="descname">y</tt><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.plottables.all">
+<tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">all</tt><big>(</big><em>L</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#all"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.plottables.any">
+<tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">any</tt><big>(</big><em>L</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#any"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.plottables.demo_plotter">
+<tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">demo_plotter</tt><big>(</big><em>graph</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#demo_plotter"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.plottables.sample_graph">
+<tt class="descclassname">sas.plottools.plottables.</tt><tt class="descname">sample_graph</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/plottables.html#sample_graph"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.toolbar">
+<span id="sas-plottools-toolbar-module"></span><h2>sas.plottools.toolbar module</h2>
+<p>This module overwrites matplotlib toolbar</p>
+<dl class="class">
+<dt id="sas.plottools.toolbar.NavigationToolBar">
+<em class="property">class </em><tt class="descclassname">sas.plottools.toolbar.</tt><tt class="descname">NavigationToolBar</tt><big>(</big><em>canvas</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/toolbar.html#NavigationToolBar"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">matplotlib.backends.backend_wxagg.NavigationToolbar2WxAgg</span></tt></p>
+<p>Overwrite matplotlib toolbar</p>
+<dl class="method">
+<dt id="sas.plottools.toolbar.NavigationToolBar.on_menu">
+<tt class="descname">on_menu</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/toolbar.html#NavigationToolBar.on_menu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Plot menu</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.toolbar.NavigationToolBar.on_print">
+<tt class="descname">on_print</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/toolbar.html#NavigationToolBar.on_print"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Print</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.plottools.toolbar.NavigationToolBar.on_reset">
+<tt class="descname">on_reset</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/toolbar.html#NavigationToolBar.on_reset"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Reset plot</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.toolbar.bind">
+<tt class="descclassname">sas.plottools.toolbar.</tt><tt class="descname">bind</tt><big>(</big><em>actor</em>, <em>event</em>, <em>action</em>, <em>**kw</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/toolbar.html#bind"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.transform">
+<span id="sas-plottools-transform-module"></span><h2>sas.plottools.transform module</h2>
+<dl class="function">
+<dt id="sas.plottools.transform.errFromX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errFromX2</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errFromX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of sqrt(x)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errFromX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errFromX4</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errFromX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of x^1/4</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errOneOverSqrtX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errOneOverSqrtX</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errOneOverSqrtX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate error on 1/sqrt(x)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errOneOverX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errOneOverX</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errOneOverX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error on 1/x</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToLog10X">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToLog10X</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToLog10X"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of Log(x)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToLogX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToLogX</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToLogX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of Log(x)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToLogXY">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToLogXY</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToLogXY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of Log(xy)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToLogYX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToLogYX2</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToLogYX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of Log(yx**2)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToLogYX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToLogYX4</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToLogYX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>error for ln(y*x^(4))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToX</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of x**2</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToX2</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of x**2</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToX4</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of x**4</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToX_pos">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToX_pos</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToX_pos"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>calculate error of x**2</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; float value</li>
+<li><strong>dx</strong> &#8211; float value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToYX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToYX2</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToYX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.errToYX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">errToYX4</tt><big>(</big><em>x</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#errToYX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>error for (y*x^(4))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.fromX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">fromX2</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#fromX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View
+Calculate square root of x</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.fromX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">fromX4</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#fromX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View
+Calculate square root of x</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toLogX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toLogX</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toLogX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View
+calculate log x</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toLogXY">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toLogXY</tt><big>(</big><em>y</em>, <em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toLogXY"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View
+calculate log x</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toLogYX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toLogYX2</tt><big>(</big><em>y</em>, <em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toLogYX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toLogYX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toLogYX4</tt><big>(</big><em>y</em>, <em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toLogYX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toOneOverSqrtX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toOneOverSqrtX</tt><big>(</big><em>y</em>, <em>x=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toOneOverSqrtX"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toOneOverX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toOneOverX</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toOneOverX"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toX">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toX</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; Float value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">x</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toX2</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View</p>
+<p>Calculate x^(2)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toX4</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View</p>
+<p>Calculate x^(4)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; float value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toX_pos">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toX_pos</tt><big>(</big><em>x</em>, <em>y=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toX_pos"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This function is used to load value on Plottable.View</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; Float value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">x</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toYX2">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toYX2</tt><big>(</big><em>y</em>, <em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toYX2"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sas.plottools.transform.toYX4">
+<tt class="descclassname">sas.plottools.transform.</tt><tt class="descname">toYX4</tt><big>(</big><em>y</em>, <em>x</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/transform.html#toYX4"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools.unitConverter">
+<span id="sas-plottools-unitconverter-module"></span><h2>sas.plottools.unitConverter module</h2>
+<dl class="function">
+<dt id="sas.plottools.unitConverter.UnitConvertion">
+<tt class="descclassname">sas.plottools.unitConverter.</tt><tt class="descname">UnitConvertion</tt><big>(</big><em>pow</em>, <em>unit</em><big>)</big><a class="reference internal" href="../../_modules/sas/plottools/unitConverter.html#UnitConvertion"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sas.plottools">
+<span id="module-contents"></span><h2>Module contents</h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sas.plottools package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.BaseInteractor">sas.plottools.BaseInteractor module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.LabelDialog">sas.plottools.LabelDialog module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.LineModel">sas.plottools.LineModel module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.PlotPanel">sas.plottools.PlotPanel module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.PropertyDialog">sas.plottools.PropertyDialog module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.SimpleFont">sas.plottools.SimpleFont module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.SizeDialog">sas.plottools.SizeDialog module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.TextDialog">sas.plottools.TextDialog module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.arrow3d">sas.plottools.arrow3d module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.binder">sas.plottools.binder module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.canvas">sas.plottools.canvas module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.config">sas.plottools.config module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.fitDialog">sas.plottools.fitDialog module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.fittings">sas.plottools.fittings module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.plottable_interactor">sas.plottools.plottable_interactor module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.plottables">sas.plottools.plottables module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.toolbar">sas.plottools.toolbar module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.transform">sas.plottools.transform module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools.unitConverter">sas.plottools.unitConverter module</a></li>
+<li><a class="reference internal" href="#module-sas.plottools">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sas.perspectives.pr.html"
+                        title="previous chapter">sas.perspectives.pr package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sas.pr.html"
+                        title="next chapter">sas.pr package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/dev/api/sas.plottools.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.pr.html" title="sas.pr package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sas.perspectives.pr.html" title="sas.perspectives.pr package"
+             >previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" >sas package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

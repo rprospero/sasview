@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sas.perspectives.fitting.help_panel &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="sas.perspectives.fitting" href="../fitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../fitting.html" accesskey="U">sas.perspectives.fitting</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for sas.perspectives.fitting.help_panel</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Help dialog</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">wx</span>
+<span class="kn">import</span> <span class="nn">wx.html</span> <span class="kn">as</span> <span class="nn">html</span>
+<span class="kn">from</span> <span class="nn">wx.lib.splitter</span> <span class="kn">import</span> <span class="n">MultiSplitterWindow</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">wx.lib.scrolledpanel</span> <span class="kn">import</span> <span class="n">ScrolledPanel</span>
+
+<div class="viewcode-block" id="HelpPanel"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.help_panel.HelpPanel">[docs]</a><span class="k">class</span> <span class="nc">HelpPanel</span><span class="p">(</span><span class="n">ScrolledPanel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">ScrolledPanel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetupScrolling</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="HelpWindow"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.help_panel.HelpWindow">[docs]</a><span class="k">class</span> <span class="nc">HelpWindow</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;Fitting Help&#39;</span><span class="p">,</span> <span class="n">pageToOpen</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">850</span><span class="p">,</span> <span class="mi">540</span><span class="p">)):</span>
+        <span class="n">wx</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        contains help info</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Show</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> 
+        <span class="kn">from</span> <span class="nn">sas.perspectives.fitting</span> <span class="kn">import</span> <span class="n">get_data_path</span> <span class="k">as</span> <span class="n">fit_path</span>
+        <span class="n">fitting_path</span> <span class="o">=</span> <span class="n">fit_path</span><span class="p">(</span><span class="n">media</span><span class="o">=</span><span class="s">&#39;media&#39;</span><span class="p">)</span>
+        <span class="n">ico_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fitting_path</span><span class="p">,</span> <span class="s">&#39;ball.ico&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ico_file</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetIcon</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">Icon</span><span class="p">(</span><span class="n">ico_file</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">BITMAP_TYPE_ICO</span><span class="p">))</span>
+        <span class="n">splitter</span> <span class="o">=</span> <span class="n">MultiSplitterWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">SP_LIVE_UPDATE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rpanel</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lpanel</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">BORDER_SUNKEN</span><span class="p">)</span>
+        
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rpanel</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">SetBackgroundColour</span><span class="p">(</span><span class="s">&#39;#6666FF&#39;</span><span class="p">)</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">SetForegroundColour</span><span class="p">(</span><span class="s">&#39;WHITE&#39;</span><span class="p">)</span>
+        <span class="n">hbox</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">StaticText</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Contents&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">GetFont</span><span class="p">()</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">SetPointSize</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">SetFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        <span class="n">hbox</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">TOP</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">BOTTOM</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">SetSizer</span><span class="p">(</span><span class="n">hbox</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+       
+        <span class="n">vboxl</span><span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>
+        <span class="n">headerl</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lpanel</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+       
+        <span class="n">headerl</span><span class="o">.</span><span class="n">SetBackgroundColour</span><span class="p">(</span><span class="s">&#39;#6666FF&#39;</span><span class="p">)</span>
+        <span class="n">headerl</span><span class="o">.</span><span class="n">SetForegroundColour</span><span class="p">(</span><span class="s">&#39;WHITE&#39;</span><span class="p">)</span>
+        <span class="n">hboxl</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">)</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">StaticText</span><span class="p">(</span><span class="n">headerl</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Menu&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">fontl</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">GetFont</span><span class="p">()</span>
+        <span class="n">fontl</span><span class="o">.</span><span class="n">SetPointSize</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">lst</span><span class="o">.</span><span class="n">SetFont</span><span class="p">(</span><span class="n">fontl</span><span class="p">)</span>
+        <span class="n">hboxl</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">TOP</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">BOTTOM</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">LEFT</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">headerl</span><span class="o">.</span><span class="n">SetSizer</span><span class="p">(</span><span class="n">hboxl</span><span class="p">)</span>
+        <span class="n">vboxl</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">headerl</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhelp</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">HtmlWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lpanel</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">NO_BORDER</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">HtmlWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rpanel</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">NO_BORDER</span><span class="p">,</span> 
+                                     <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="c"># get the media path</span>
+        <span class="k">if</span> <span class="n">pageToOpen</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pageToOpen</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">sas.models</span> <span class="kn">import</span> <span class="n">get_data_path</span> <span class="k">as</span> <span class="n">model_path</span>
+            <span class="c"># Get models help model_function path</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">model_path</span><span class="p">(</span><span class="n">media</span><span class="o">=</span><span class="s">&#39;media&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;model_functions.html&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_pd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;pd_help.html&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_sm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;smear_computation.html&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_mag</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;polar_mag_help.html&quot;</span><span class="p">)</span>
+        
+        <span class="n">_html_file</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;load_data_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Load a File&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;single_fit_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Single Fit&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;simultaneous_fit_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Simultaneous Fit&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;batch_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Batch Fit&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;model_use_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Model Selection&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;category_manager_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Model Category Manager&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s">&quot;Model Functions&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;model_editor_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Custom Model Editor&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_pd</span><span class="p">,</span> <span class="s">&quot;Polydispersion Distributions&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_sm</span><span class="p">,</span> <span class="s">&quot;Smear Computation&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_mag</span><span class="p">,</span> <span class="s">&quot;Polarization/Magnetic Scattering&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;key_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Key Combination&quot;</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s">&quot;status_bar_help.html&quot;</span><span class="p">,</span> <span class="s">&quot;Status Bar Help&quot;</span><span class="p">),</span>
+                      <span class="p">]</span>
+ 
+        <span class="n">page1</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;html&gt;</span>
+<span class="s">            &lt;body&gt;</span>
+<span class="s">             &lt;p&gt;Select topic on Menu&lt;/p&gt;</span>
+<span class="s">            &lt;/body&gt;</span>
+<span class="s">            &lt;/html&gt;&quot;&quot;&quot;</span>
+            
+        <span class="n">page</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;html&gt;</span>
+<span class="s">            &lt;body&gt;</span>
+<span class="s">            &lt;ul&gt;</span>
+<span class="s">            &quot;&quot;&quot;</span>
+            
+        <span class="k">for</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_html_file</span><span class="p">:</span>
+            <span class="n">pp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fitting_path</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="n">page</span> <span class="o">+=</span> <span class="s">&quot;&quot;&quot;&lt;li&gt;&lt;a href =&quot;</span><span class="si">%s</span><span class="s">&quot; target=&quot;showframe&quot;&gt;</span><span class="si">%s</span><span class="s">&lt;/a&gt;&lt;br&gt;&lt;/li&gt;&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+        <span class="n">page</span> <span class="o">+=</span> <span class="s">&quot;&quot;&quot;&lt;/ul&gt;</span>
+<span class="s">                    &lt;/body&gt;</span>
+<span class="s">                    &lt;/html&gt;</span>
+<span class="s">                &quot;&quot;&quot;</span>
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">SetPage</span><span class="p">(</span><span class="n">page1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhelp</span><span class="o">.</span><span class="n">SetPage</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhelp</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">EVT_HTML_LINK_CLICKED</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OnLinkClicked</span> <span class="p">)</span>
+        
+        <span class="c">#open the help frame a the current page</span>
+        <span class="k">if</span>  <span class="n">pageToOpen</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">LoadPage</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pageToOpen</span><span class="p">))</span>
+            
+        <span class="n">vbox</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+        <span class="n">vboxl</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lhelp</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rpanel</span><span class="o">.</span><span class="n">SetSizer</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lpanel</span><span class="o">.</span><span class="n">SetSizer</span><span class="p">(</span><span class="n">vboxl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lpanel</span><span class="o">.</span><span class="n">SetFocus</span><span class="p">()</span>
+        
+        <span class="n">vbox1</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">HORIZONTAL</span><span class="p">)</span>
+        <span class="n">vbox1</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+        <span class="n">splitter</span><span class="o">.</span><span class="n">AppendWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lpanel</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+        <span class="n">splitter</span><span class="o">.</span><span class="n">AppendWindow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rpanel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetSizer</span><span class="p">(</span><span class="n">vbox1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span> <span class="o">=</span> <span class="n">splitter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Centre</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">EVT_SIZE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_Size</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="HelpWindow.OnButtonClicked"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.help_panel.HelpWindow.OnButtonClicked">[docs]</a>    <span class="k">def</span> <span class="nf">OnButtonClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to diplay Model html page related to the hyperlinktext selected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">LoadPage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="HelpWindow.OnLinkClicked"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.help_panel.HelpWindow.OnLinkClicked">[docs]</a>    <span class="k">def</span> <span class="nf">OnLinkClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to diplay html page related to the hyperlinktext selected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">GetLinkInfo</span><span class="p">()</span><span class="o">.</span><span class="n">GetHref</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">LoadPage</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
+        </div>
+<div class="viewcode-block" id="HelpWindow.on_Size"><a class="viewcode-back" href="../../../../dev/api/sas.perspectives.fitting.html#sas.perspectives.fitting.help_panel.HelpWindow.on_Size">[docs]</a>    <span class="k">def</span> <span class="nf">on_Size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recover the scroll position On Size</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">GetScrollPos</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetClientSize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">SetSize</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">Show</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">ScrollLines</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhelp</span><span class="o">.</span><span class="n">Show</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../fitting.html" >sas.perspectives.fitting</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

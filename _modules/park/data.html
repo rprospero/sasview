@@ -1,0 +1,483 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.data &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.data</h1><div class="highlight"><pre>
+<span class="c"># This program is public domain</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Park 1-D data objects.</span>
+
+<span class="sd">The class Data1D represents simple 1-D data objects, along with</span>
+<span class="sd">an ascii file loader.  This format will work well for many</span>
+<span class="sd">uses, but it is likely that more specialized models will have</span>
+<span class="sd">their own data file formats.</span>
+
+<span class="sd">The minimal data format for park must supply the following</span>
+<span class="sd">methods:</span>
+
+<span class="sd">    residuals(fn)</span>
+<span class="sd">        returns the residuals vector for the model function.</span>
+<span class="sd">    residuals_deriv(fn_deriv,par)</span>
+<span class="sd">        returns the residuals vector for the model function, and</span>
+<span class="sd">        for the derivatives with respect to the given parameters.</span>
+
+<span class="sd">The function passed is going to be model.eval or in the case</span>
+<span class="sd">where derivatives are available, model.eval_deriv.  Normally</span>
+<span class="sd">this will take a vector of dependent variables and return the</span>
+<span class="sd">theory function for that vector but this is only convention.</span>
+<span class="sd">The fitting service only uses the parameter set and the residuals</span>
+<span class="sd">method from the model.</span>
+
+<span class="sd">The park GUI will make more demands on the interface, but the</span>
+<span class="sd">details are not yet resolved.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>  <span class="c"># Used only in test()</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Data1D&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">park._modeling</span> <span class="kn">import</span> <span class="n">convolve</span> <span class="k">as</span> <span class="n">_convolve</span>
+    <span class="k">def</span> <span class="nf">convolve</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span><span class="n">yi</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">dx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return convolution y of width dx at points x based on the</span>
+<span class="sd">        sampled input function yi = f(xi).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="s">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">xi</span><span class="p">,</span><span class="n">yi</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">dx</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="s">&#39;d&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">xi</span><span class="p">,</span><span class="n">yi</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">dx</span><span class="p">]</span>
+        <span class="n">_convolve</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span><span class="n">yi</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">dx</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">convolve</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return convolution y of width dx at points x based on the</span>
+<span class="sd">        sampled input function yi = f(xi).</span>
+<span class="sd">        </span>
+<span class="sd">        Note: C version is not available in this build, and python </span>
+<span class="sd">        version is not implemented.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;convolve is a compiled function&quot;</span><span class="p">)</span>
+    
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Data1D&#39;</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="Data1D"><a class="viewcode-back" href="../../dev/api/park.html#park.data.Data1D">[docs]</a><span class="k">class</span> <span class="nc">Data1D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data representation for 1-D fitting.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    </span>
+<span class="sd">    filename</span>
+<span class="sd">        The source of the data.  This may be the empty string if the</span>
+<span class="sd">        data is simulation data.</span>
+<span class="sd">    x,y,dy</span>
+<span class="sd">        The data values.</span>
+<span class="sd">        x is the measurement points of data to be fitted. x must be sorted.</span>
+<span class="sd">        y is the measured value</span>
+<span class="sd">        dy is the measurement uncertainty.</span>
+<span class="sd">    dx</span>
+<span class="sd">        Resolution at the the measured points.  The resolution may be 0, </span>
+<span class="sd">        constant, or defined for each data point.  dx is the 1-sigma</span>
+<span class="sd">        width of the Gaussian resolution function at point x.  Note that </span>
+<span class="sd">        dx_FWHM = sqrt(8 ln 2) dx_sigma, so scale dx appropriately.</span>
+
+
+<span class="sd">    fit_x,fit_dx,fit_y,fit_dy</span>
+<span class="sd">        The points used in evaluating the residuals.</span>
+<span class="sd">    calc_x</span>
+<span class="sd">        The points at which to evaluate the theory function.  This may be </span>
+<span class="sd">        different from the measured points for a number of reasons, such </span>
+<span class="sd">        as a resolution function which suggests over or under sampling of </span>
+<span class="sd">        the points (see below).  By default calc_x is x, but it can be set</span>
+<span class="sd">        explicitly by the user.</span>
+<span class="sd">    calc_y, fx</span>
+<span class="sd">        The value of the function at the theory points, and the value of</span>
+<span class="sd">        the function after resolution has been applied.  These values are</span>
+<span class="sd">        computed by a call to residuals.</span>
+
+<span class="sd">    Notes on calc_x</span>
+<span class="sd">    </span>
+<span class="sd">    The contribution of Q to a resolution of width dQo at point Qo is::</span>
+
+<span class="sd">       p(Q) = 1/sqrt(2 pi dQo**2) exp ( (Q-Qo)**2/(2 dQo**2) )</span>
+
+<span class="sd">    We are approximating the convolution at Qo using a numerical</span>
+<span class="sd">    approximation to the integral over the measured points, with the </span>
+<span class="sd">    integral is limited to p(Q_i)/p(0)&gt;=0.001.  </span>
+
+<span class="sd">    Sometimes the function we are convoluting is rapidly changing.</span>
+<span class="sd">    That means the correct convolution should uniformly sample across</span>
+<span class="sd">    the entire width of the Gaussian.  This is not possible at the</span>
+<span class="sd">    end points unless you calculate the theory function beyond what is</span>
+<span class="sd">    strictly needed for the data. For a given dQ and step size,</span>
+<span class="sd">    you need enough steps that the following is true::</span>
+
+<span class="sd">        (n*step)**2 &gt; -2 dQ**2 * ln 0.001</span>
+
+<span class="sd">    The choice of sampling density is particularly important near</span>
+<span class="sd">    critical points where the shape of the function changes.  In</span>
+<span class="sd">    reflectometry, the function goes from flat below the critical</span>
+<span class="sd">    edge to O(Q**4) above.  In one particular model, calculating every </span>
+<span class="sd">    0.005 rather than every 0.02 changed a value above the critical </span>
+<span class="sd">    edge by 15%.  In a fitting program, this would lead to a somewhat</span>
+<span class="sd">    larger estimate of the critical edge for this sample.</span>
+
+<span class="sd">    Sometimes the theory function is oscillating more rapidly than</span>
+<span class="sd">    the instrument can resolve.  This happens for example in reflectivity</span>
+<span class="sd">    measurements involving thick layers.  In these systems, the theory</span>
+<span class="sd">    function should be oversampled around the measured points Q.  With </span>
+<span class="sd">    a single thick layer, oversampling can be limited to just one </span>
+<span class="sd">    period 2 pi/d.  With multiple thick layers, oscillations will </span>
+<span class="sd">    show interference patterns and it will be necessary to oversample </span>
+<span class="sd">    uniformly through the entire width of the resolution.  If this is</span>
+<span class="sd">    not accommodated, then aliasing effects make it difficult to</span>
+<span class="sd">    compute the correct model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span><span class="bp">None</span>
+    <span class="n">dx</span><span class="p">,</span><span class="n">dy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span>
+    <span class="n">calc_x</span><span class="p">,</span><span class="n">calc_y</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span><span class="bp">None</span>
+    <span class="n">fit_x</span><span class="p">,</span><span class="n">fit_y</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span><span class="bp">None</span>
+    <span class="n">fit_dx</span><span class="p">,</span><span class="n">fit_dy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span>
+    <span class="n">fx</span> <span class="o">=</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">dx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">dy</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the fitting data.</span>
+<span class="sd">        </span>
+<span class="sd">        Data can be loaded from a file using filename or</span>
+<span class="sd">        specified directly using x,y,dx,dy.  File loading</span>
+<span class="sd">        happens after assignment of x,y,dx,dy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">dx</span><span class="p">,</span><span class="n">dy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="Data1D.resample"><a class="viewcode-back" href="../../dev/api/park.html#park.data.Data1D.resample">[docs]</a>    <span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">minstep</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Over/under sampling support.</span>
+
+<span class="sd">        Compute the calc_x points required to adequately sample</span>
+<span class="sd">        the function y=f(x) so that the value reported for each</span>
+<span class="sd">        measured point is supported by the resolution.  minstep</span>
+<span class="sd">        is the minimum allowed sampling density that should be</span>
+<span class="sd">        used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_x</span> <span class="o">=</span> <span class="n">resample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span><span class="n">minstep</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Data1D.load"><a class="viewcode-back" href="../../dev/api/park.html#park.data.Data1D.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a multicolumn datafile.</span>
+<span class="sd">        </span>
+<span class="sd">        Data should be in columns, with the following defaults::</span>
+<span class="sd">        </span>
+<span class="sd">            x,y or x,y,dy or x,dx,y,dy</span>
+<span class="sd">            </span>
+<span class="sd">        Note that this resets the selected fitting points calc_x and the</span>
+<span class="sd">        computed results calc_y and fx.</span>
+
+<span class="sd">        Data is sorted after loading.</span>
+<span class="sd">        </span>
+<span class="sd">        Any extra keyword arguments are passed to the numpy loadtxt</span>
+<span class="sd">        function.  This allows you to select the columns you want,</span>
+<span class="sd">        skip rows, set the column separator, change the comment character,</span>
+<span class="sd">        amongst other things.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fx</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">columns</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">columns</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">columns</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">,</span><span class="s">&quot;Unexpected number of columns in &quot;</span><span class="o">+</span><span class="n">filename</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Data1D.select"><a class="viewcode-back" href="../../dev/api/park.html#park.data.Data1D.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A selection vector for points to use in the evaluation of the </span>
+<span class="sd">        residuals, or None if all points are to be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span>
+ </div>
+<div class="viewcode-block" id="Data1D.residuals"><a class="viewcode-back" href="../../dev/api/park.html#park.data.Data1D.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the residuals of the data wrt to the given function.</span>
+
+<span class="sd">        y = fn(x) should be a callable accepting a list of points at which</span>
+<span class="sd">        to calculate the function, returning the values at those</span>
+<span class="sd">        points.</span>
+
+<span class="sd">        Any resolution function will be applied after the theory points</span>
+<span class="sd">        are calculated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">calc_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_x</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_x</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_y</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">calc_x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx</span> <span class="o">=</span> <span class="n">resolution</span><span class="p">(</span><span class="n">calc_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_dx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fx</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_dy</span>
+</div>
+<div class="viewcode-block" id="Data1D.residuals_deriv"><a class="viewcode-back" href="../../dev/api/park.html#park.data.Data1D.residuals_deriv">[docs]</a>    <span class="k">def</span> <span class="nf">residuals_deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">pars</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute residuals and derivatives wrt the given parameters.</span>
+
+<span class="sd">        fdf = fn(x,pars=pars) should be a callable accepting a list </span>
+<span class="sd">        of points at which to calculate the function and a keyword </span>
+<span class="sd">        argument listing the parameters for which the derivative will</span>
+<span class="sd">        be calculated.</span>
+
+<span class="sd">        Returns a list of the residuals and the derivative wrt the</span>
+<span class="sd">        parameter for each parameter.</span>
+
+<span class="sd">        Any resolution function will be applied after the theory points</span>
+<span class="sd">        and derivatives are calculated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">calc_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_x</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_x</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_x</span>
+
+        <span class="c"># Compute f and derivatives</span>
+        <span class="n">fdf</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">calc_x</span><span class="p">,</span><span class="n">pars</span><span class="o">=</span><span class="n">pars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_y</span> <span class="o">=</span> <span class="n">fdf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># Apply resolution</span>
+        <span class="n">fdf</span> <span class="o">=</span> <span class="p">[</span><span class="n">resolution</span><span class="p">(</span><span class="n">calc_x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_dx</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">fdf</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fx</span> <span class="o">=</span> <span class="n">fdf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fx</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_x</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_dy</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;check whether we want df/dp or dR/dp where R=residuals^2&#39;</span><span class="p">)</span>
+
+        <span class="c"># R = (F(x;p)-y)/sigma =&gt; dR/dp  = 1/sigma dF(x;p)/dp</span>
+        <span class="c"># dR^2/dp = 2 R /sigma dF(x;p)/dp </span>
+        <span class="n">df</span> <span class="o">=</span> <span class="p">[</span> <span class="n">v</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_dy</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fdf_res</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">delta</span><span class="p">]</span><span class="o">+</span><span class="n">df</span>
+</div></div>
+<span class="k">def</span> <span class="nf">equal_spaced</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return true if data is regularly spaced within tolerance.  Tolerance</span>
+<span class="sd">    uses relative error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">step_bar</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">step</span><span class="o">-</span><span class="n">step_bar</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="o">*</span><span class="n">step_bar</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">resample</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dx</span><span class="p">,</span><span class="n">minstep</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defining the minimum support basis.</span>
+
+<span class="sd">    Compute the calc_x points required to adequately sample</span>
+<span class="sd">    the function y=f(x) so that the value reported for each</span>
+<span class="sd">    measured point is supported by the resolution.  minstep</span>
+<span class="sd">    is the minimum allowed sampling density that should be used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="n">calcx</span><span class="p">,</span><span class="n">calcy</span><span class="p">,</span><span class="n">fitx</span><span class="p">,</span><span class="n">fitdx</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply resolution function.  If there is no resolution function, then</span>
+<span class="sd">    interpolate from the calculated points to the desired theory points.</span>
+<span class="sd">    If the data are irregular, use a brute force convolution function.</span>
+<span class="sd">    </span>
+<span class="sd">    If the data are regular and the resolution is fixed, then you can</span>
+<span class="sd">    deconvolute the data before fitting, saving time and complexity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">fitdx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">fitdx</span><span class="p">):</span>
+            <span class="n">fitdx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">fitx</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="n">fitdx</span>
+        <span class="n">fx</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">calcx</span><span class="p">,</span> <span class="n">calcy</span><span class="p">,</span> <span class="n">fitx</span><span class="p">,</span> <span class="n">fitdx</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">calcx</span> <span class="ow">is</span> <span class="n">fitx</span><span class="p">:</span>
+        <span class="n">fx</span> <span class="o">=</span> <span class="n">calcy</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">fitx</span><span class="p">,</span><span class="n">calcx</span><span class="p">,</span><span class="n">calcy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fx</span>
+
+
+<span class="k">class</span> <span class="nc">TempData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a temporary file with a given data set and remove it when done.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        from __future__ import with_statement</span>
+<span class="sd">        ...</span>
+<span class="sd">        with TempData(&quot;1 2 3\n4 5 6&quot;) as filename:</span>
+<span class="sd">            # run tests of loading from filename</span>
+
+<span class="sd">    This class is useful for testing data file readers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">suffix</span><span class="o">=</span><span class="s">&#39;.dat&#39;</span><span class="p">,</span><span class="n">prefix</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span><span class="n">text</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">tempfile</span>
+        <span class="n">fid</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="s">&#39;.dat&#39;</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">text</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span>
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">os</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="n">D2</span> <span class="o">=</span> <span class="s">&quot;# x y</span><span class="se">\n</span><span class="s">1 1</span><span class="se">\n</span><span class="s">2 2</span><span class="se">\n</span><span class="s">3 4</span><span class="se">\n</span><span class="s">2 5</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="sd">&quot;&quot;&quot;x,y dataset for TempData&quot;&quot;&quot;</span>
+<span class="n">D3</span> <span class="o">=</span> <span class="s">&quot;# x y dy</span><span class="se">\n</span><span class="s">1 1 .1</span><span class="se">\n</span><span class="s">2 2 .2</span><span class="se">\n</span><span class="s">3 4 .4</span><span class="se">\n</span><span class="s">2 5 .5</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="sd">&quot;&quot;&quot;x,y,dy dataset for TempData&quot;&quot;&quot;</span>
+<span class="n">D4</span> <span class="o">=</span> <span class="s">&quot;# x dx y dy</span><span class="se">\n</span><span class="s">1 .1 1 .1</span><span class="se">\n</span><span class="s">2 .2 2 .2</span><span class="se">\n</span><span class="s">3 .3 4 .4</span><span class="se">\n</span><span class="s">2 .3 5 .5</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="sd">&quot;&quot;&quot;x,dx,y,dy dataset for TempData&quot;&quot;&quot;</span>
+    
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+
+    <span class="c"># Check that two column data loading works</span>
+    <span class="k">with</span> <span class="n">TempData</span><span class="p">(</span><span class="n">D2</span><span class="p">)</span> <span class="k">as</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1D</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">dx</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">dy</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">calc_x</span> <span class="ow">is</span> <span class="bp">None</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+    
+    <span class="c"># Check that interpolation works</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">calc_x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mf">1.5</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">calc_y</span> <span class="o">==</span> <span class="n">data</span><span class="o">.</span><span class="n">calc_x</span><span class="p">)</span> 
+    <span class="c"># Note: calc_y is updated by data.residuals, so be careful with this test</span>
+
+    <span class="c"># Check that three column data loading works</span>
+    <span class="k">with</span> <span class="n">TempData</span><span class="p">(</span><span class="n">D3</span><span class="p">)</span> <span class="k">as</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1D</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dy</span> <span class="o">==</span> <span class="p">[</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span><span class="o">.</span><span class="mi">4</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">dx</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">calc_x</span> <span class="ow">is</span> <span class="bp">None</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/.</span><span class="mi">4</span>
+
+    <span class="c"># Check that four column data loading works</span>
+    <span class="k">with</span> <span class="n">TempData</span><span class="p">(</span><span class="n">D4</span><span class="p">)</span> <span class="k">as</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1D</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dx</span> <span class="o">==</span> <span class="p">[</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span><span class="o">.</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dy</span> <span class="o">==</span> <span class="p">[</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span><span class="o">.</span><span class="mi">4</span><span class="p">])</span>
+
+    <span class="c"># Test residuals</span>
+    <span class="k">print</span> <span class="s">&quot;Fix the convolution function!&quot;</span>
+    <span class="k">print</span> <span class="n">data</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">calc_x</span> <span class="ow">is</span> <span class="bp">None</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.wxmonitor &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.wxmonitor</h1><div class="highlight"><pre>
+<span class="c"># This program is public domain</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Asynchronous monitoring service for wx applications.</span>
+
+<span class="sd">Define a monitor using park.wxmonitor.wxMonitor(panel) where panel is</span>
+<span class="sd">the window which will receive the monitor updates.</span>
+
+<span class="sd">In panel, be sure to have methods for onMonitorStart(message), </span>
+<span class="sd">onMonitorProgress(message), etc., for the kinds of monitor messages </span>
+<span class="sd">the application will send.  The catch-all method is onMonitorMessage,</span>
+<span class="sd">which by default will print the messages on the console.  If you </span>
+<span class="sd">don&#39;t catch onMonitorLog messages then the log messages will be </span>
+<span class="sd">sent to the standard python logger.</span>
+
+<span class="sd">See `park.monitor` for details on the message types.</span>
+
+<span class="sd">Example</span>
+<span class="sd">=======</span>
+
+<span class="sd">The following defines a panel which responds to monitor messages::</span>
+
+<span class="sd">    import wx</span>
+
+<span class="sd">    class Panel(wx.Panel):</span>
+<span class="sd">        def __init__(self, *args, **kw):</span>
+<span class="sd">            wx.Panel.__init__(self, *args, **kw)</span>
+<span class="sd">            self.text = wx.TextCtrl(self, size=(200,100), style=wx.TE_MULTILINE)</span>
+<span class="sd">            self.gauge = wx.Gauge(self, range=100)</span>
+<span class="sd">            sizer = wx.BoxSizer(wx.VERTICAL)</span>
+<span class="sd">            sizer.Add(self.text, 0, wx.LEFT | wx.EXPAND)</span>
+<span class="sd">            sizer.Add(self.gauge, 0, wx.LEFT | wx.EXPAND)</span>
+<span class="sd">            self.SetSizer(sizer)</span>
+<span class="sd">            self.text.SetValue(&#39;starting value&#39;)</span>
+<span class="sd">        def onMonitorMessage(self, message):</span>
+<span class="sd">            self.text.SetValue(str(message))</span>
+<span class="sd">        def onMonitorStart(self, message):</span>
+<span class="sd">            self.text.SetValue(str(message))</span>
+<span class="sd">            self.gauge.SetValue(0)</span>
+<span class="sd">        def onMonitorProgress(self, message):</span>
+<span class="sd">            self.text.SetValue(str(message))</span>
+<span class="sd">            self.gauge.SetValue(int(100*message.complete/message.total))</span>
+<span class="sd">        def onMonitorComplete(self, message):</span>
+<span class="sd">            self.text.SetValue(str(message))</span>
+<span class="sd">            self.gauge.SetValue(100)</span>
+
+<span class="sd">We can put this panel in a simple app::</span>
+
+<span class="sd">    app = wx.PySimpleApp()</span>
+<span class="sd">    frame = wx.Frame(None, -1, &#39;Test Monitor&#39;)</span>
+<span class="sd">    panel = Panel(frame)</span>
+<span class="sd">    frame.Show()</span>
+
+<span class="sd">Next we attach attach the monitor to this panel and feed some messages from</span>
+<span class="sd">another thread::</span>
+
+<span class="sd">    import time,thread</span>
+<span class="sd">    import park.wxmonitor, park.monitor</span>
+<span class="sd">    from park.monitor import Start, Progress, Improvement, Complete</span>
+<span class="sd">    monitor = park.wxmonitor.wxMonitor(panel)</span>
+<span class="sd">    msgs = [Start(), Progress(1,10), Progress(3,10), </span>
+<span class="sd">            Improvement(&#39;Better!&#39;), Progerss(6,10), Complete(&#39;Best!&#39;)]:</span>
+<span class="sd">    def message_stream(monitor,msgs):</span>
+<span class="sd">        time.sleep(1)</span>
+<span class="sd">        for message in msgs:</span>
+<span class="sd">          monitor.put(message)</span>
+<span class="sd">          time.sleep(1)</span>
+<span class="sd">    thread.start_new_thread(message_stream, (monitor,msgs))</span>
+<span class="sd">    app.MainLoop()</span>
+<span class="sd">    </span>
+<span class="sd">You should see the progress bar jump from 10% to 30% to 60% then all the way </span>
+<span class="sd">to the end.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">wx</span>
+<span class="kn">import</span> <span class="nn">wx.lib.newevent</span>
+
+<span class="kn">import</span> <span class="nn">park.monitor</span>
+
+<span class="p">(</span><span class="n">MonitorEvent</span><span class="p">,</span> <span class="n">EVT_MONITOR</span><span class="p">)</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">newevent</span><span class="o">.</span><span class="n">NewEvent</span><span class="p">()</span>
+
+<span class="c"># For wx on Mac OS X we need to sleep after posting a message from</span>
+<span class="c"># a thread in order to give the GUI a chance to update itself.</span>
+<span class="n">SLEEP_TIME</span> <span class="o">=</span> <span class="mf">0.01</span>
+<div class="viewcode-block" id="wxMonitor"><a class="viewcode-back" href="../../dev/api/park.html#park.wxmonitor.wxMonitor">[docs]</a><span class="k">class</span> <span class="nc">wxMonitor</span><span class="p">(</span><span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Monitor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attach a job monitor to a panel.</span>
+<span class="sd">    </span>
+<span class="sd">    The monitor will perform callbacks to onMonitorStart(message),</span>
+<span class="sd">    onMonitorProgress(message), etc. if the associated method is</span>
+<span class="sd">    defined.  If the type specific method is not defined, then the</span>
+<span class="sd">    monitor will call onMonitorMessage(message).  Otherwise the</span>
+<span class="sd">    message is dropped.</span>
+<span class="sd">    </span>
+<span class="sd">    See `park.monitor` for a description of the usual messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">win</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Window to receive the monitoring events.  This is running in the</span>
+<span class="sd">        GUI thread.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">win</span> <span class="o">=</span> <span class="n">win</span>
+        <span class="n">win</span><span class="o">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">EVT_MONITOR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispatch</span><span class="p">)</span>
+
+<div class="viewcode-block" id="wxMonitor.put"><a class="viewcode-back" href="../../dev/api/park.html#park.wxmonitor.wxMonitor.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Intercept an event received from an asynchronous monitor.  This is</span>
+<span class="sd">        running in the asynchronous thread.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#print &quot;dispatch&quot;,message</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">MonitorEvent</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+        <span class="n">wx</span><span class="o">.</span><span class="n">PostEvent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">win</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">SLEEP_TIME</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="wxMonitor.dispatch"><a class="viewcode-back" href="../../dev/api/park.html#park.wxmonitor.wxMonitor.dispatch">[docs]</a>    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dispatch the event from the asynchronous monitor.  This is running</span>
+<span class="sd">        in the GUI thread.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">message</span>
+        <span class="c">#print &quot;window dispatch&quot;,message</span>
+ 
+        <span class="c"># First check for a handler in the monitor window</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">win</span><span class="p">,</span> <span class="s">&#39;onMonitor&#39;</span><span class="o">+</span><span class="n">message</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="c"># If none, then check in our class (we have a default onMonitorLog)</span>
+        <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;onMonitor&#39;</span><span class="o">+</span><span class="n">message</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="c"># If still none, then look for the generic handler</span>
+        <span class="k">if</span> <span class="n">fn</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">win</span><span class="p">,</span> <span class="s">&#39;onMonitorMessage&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">onMonitorMessage</span><span class="p">)</span>
+        <span class="c"># Process the message</span>
+        <span class="n">fn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="wxMonitor.onMonitorMessage"><a class="viewcode-back" href="../../dev/api/park.html#park.wxmonitor.wxMonitor.onMonitorMessage">[docs]</a>    <span class="k">def</span> <span class="nf">onMonitorMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generic message handler: do nothing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&quot;&gt;&quot;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="wxMonitor.onMonitorLog"><a class="viewcode-back" href="../../dev/api/park.html#park.wxmonitor.wxMonitor.onMonitorLog">[docs]</a>    <span class="k">def</span> <span class="nf">onMonitorLog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the job sends a logging record.</span>
+
+<span class="sd">        The logging record contains a normal python logging record.</span>
+
+<span class="sd">        The default behaviour is to tie into the application logging</span>
+<span class="sd">        system using::</span>
+
+<span class="sd">            logger = logging.getLogger(message.record.name)</span>
+<span class="sd">            logger.handle(message.record)</span>
+
+<span class="sd">        Logging levels are set in the job controller.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">record</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="demo"><a class="viewcode-back" href="../../dev/api/park.html#park.wxmonitor.demo">[docs]</a><span class="k">def</span> <span class="nf">demo</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">thread</span>
+    <span class="kn">import</span> <span class="nn">time</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">logging</span>
+    
+    <span class="k">class</span> <span class="nc">Panel</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+            <span class="n">wx</span><span class="o">.</span><span class="n">Panel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">TextCtrl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">wx</span><span class="o">.</span><span class="n">TE_MULTILINE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Gauge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+            <span class="n">sizer</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">BoxSizer</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">VERTICAL</span><span class="p">)</span>
+            <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">LEFT</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+            <span class="n">sizer</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">wx</span><span class="o">.</span><span class="n">LEFT</span> <span class="o">|</span> <span class="n">wx</span><span class="o">.</span><span class="n">EXPAND</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetSizer</span><span class="p">(</span><span class="n">sizer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="s">&#39;starting value&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">onMonitorMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+        <span class="k">def</span> <span class="nf">onMonitorStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">onMonitorProgress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">message</span><span class="o">.</span><span class="n">complete</span><span class="o">/</span><span class="n">message</span><span class="o">.</span><span class="n">total</span><span class="p">))</span>
+        <span class="k">def</span> <span class="nf">onMonitorComplete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gauge</span><span class="o">.</span><span class="n">SetValue</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">PySimpleApp</span><span class="p">()</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">wx</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;Test Monitor&#39;</span><span class="p">)</span>
+    <span class="n">panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">Show</span><span class="p">()</span>
+    <span class="n">monitor</span> <span class="o">=</span> <span class="n">wxMonitor</span><span class="p">(</span><span class="n">panel</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">messagestream</span><span class="p">(</span><span class="n">monitor</span><span class="p">,</span><span class="n">rate</span><span class="p">,</span><span class="n">stream</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+        <span class="n">wx</span><span class="o">.</span><span class="n">CallAfter</span><span class="p">(</span><span class="n">wx</span><span class="o">.</span><span class="n">Exit</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">(</span><span class="s">&#39;hi&#39;</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="s">&#39;hello.py&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s">&#39;log message&#39;</span><span class="p">,(),</span><span class="bp">None</span><span class="p">,</span><span class="s">&#39;here&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Test exception&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+    <span class="n">stream</span><span class="o">=</span><span class="p">[</span><span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Start</span><span class="p">(),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Improvement</span><span class="p">(</span><span class="s">&#39;Better!&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Abort</span><span class="p">(</span><span class="s">&#39;Abandoned&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Start</span><span class="p">(),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="s">&#39;seconds&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Improvement</span><span class="p">(</span><span class="s">&#39;Better!&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Complete</span><span class="p">(</span><span class="s">&#39;Best!&#39;</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Start</span><span class="p">(),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Log</span><span class="p">(</span><span class="n">R</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Progress</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">park</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="n">trace</span><span class="p">)]</span>
+    <span class="n">thread</span><span class="o">.</span><span class="n">start_new_thread</span><span class="p">(</span><span class="n">messagestream</span><span class="p">,</span> <span class="p">(</span><span class="n">monitor</span><span class="p">,</span><span class="n">rate</span><span class="p">,</span><span class="n">stream</span><span class="p">))</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">MainLoop</span><span class="p">()</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span>  <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span> <span class="n">demo</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

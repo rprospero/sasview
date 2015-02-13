@@ -1,0 +1,834 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sas.perspectives.pr package &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="sas.perspectives package" href="sas.perspectives.html" />
+    <link rel="next" title="sas.plottools package" href="sas.plottools.html" />
+    <link rel="prev" title="sas.perspectives.invariant package" href="sas.perspectives.invariant.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.plottools.html" title="sas.plottools package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sas.perspectives.invariant.html" title="sas.perspectives.invariant package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" >sas package</a> &raquo;</li>
+          <li><a href="sas.perspectives.html" accesskey="U">sas.perspectives package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sas-perspectives-pr-package">
+<h1>sas.perspectives.pr package</h1>
+<div class="section" id="submodules">
+<h2>Submodules</h2>
+</div>
+<div class="section" id="module-sas.perspectives.pr.explore_dialog">
+<span id="sas-perspectives-pr-explore-dialog-module"></span><h2>sas.perspectives.pr.explore_dialog module</h2>
+<p>Dialog panel to explore the P(r) inversion results for a range
+of D_max value. User picks a number of points and a range of
+distances, then can toggle between inversion outputs and see
+their distribution as a function of D_max.</p>
+<dl class="class">
+<dt id="sas.perspectives.pr.explore_dialog.ExploreDialog">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.explore_dialog.</tt><tt class="descname">ExploreDialog</tt><big>(</big><em>pr_state</em>, <em>nfunc</em>, <em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/explore_dialog.html#ExploreDialog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<p>The explorer dialog box. This dialog is meant to be
+invoked by the InversionControl class.</p>
+<dl class="class">
+<dt id="sas.perspectives.pr.explore_dialog.ExploreDialog.Event">
+<em class="property">class </em><tt class="descname">Event</tt><a class="reference internal" href="../../_modules/sas/perspectives/pr/explore_dialog.html#ExploreDialog.Event"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class that holds the content of the form</p>
+<dl class="attribute">
+<dt id="sas.perspectives.pr.explore_dialog.ExploreDialog.Event.dmax">
+<tt class="descname">dmax</tt><em class="property"> = 0</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.explore_dialog.ExploreDialog.Event.dmin">
+<tt class="descname">dmin</tt><em class="property"> = 0</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.explore_dialog.ExploreDialog.Event.npts">
+<tt class="descname">npts</tt><em class="property"> = 0</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.explore_dialog.ExploreDialog.set_plot_unfocus">
+<tt class="descclassname">ExploreDialog.</tt><tt class="descname">set_plot_unfocus</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/explore_dialog.html#ExploreDialog.set_plot_unfocus"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Not implemented</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.explore_dialog.OutputPlot">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.explore_dialog.</tt><tt class="descname">OutputPlot</tt><big>(</big><em>d_min</em>, <em>d_max</em>, <em>parent</em>, <em>id=-1</em>, <em>color=None</em>, <em>dpi=None</em>, <em>style=0</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/explore_dialog.html#OutputPlot"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.plottools.html#sas.plottools.PlotPanel.PlotPanel" title="sas.plottools.PlotPanel.PlotPanel"><tt class="xref py py-class docutils literal"><span class="pre">sas.plottools.PlotPanel.PlotPanel</span></tt></a></p>
+<p>Plot panel used to show the selected results as a function
+of D_max</p>
+<dl class="method">
+<dt id="sas.perspectives.pr.explore_dialog.OutputPlot.onContextMenu">
+<tt class="descname">onContextMenu</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/explore_dialog.html#OutputPlot.onContextMenu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Default context menu for the plot panel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">TODO:</th><td class="field-body">Would be nice to add printing and log/linear scales.
+The current verison of plottools no longer plays well with 
+plots outside of guiframe. Guiframe team needs to fix this.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.explore_dialog.Results">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.explore_dialog.</tt><tt class="descname">Results</tt><a class="reference internal" href="../../_modules/sas/perspectives/pr/explore_dialog.html#Results"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class to hold the inversion output parameters
+as a function of D_max</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.perspectives.pr.inversion_panel">
+<span id="sas-perspectives-pr-inversion-panel-module"></span><h2>sas.perspectives.pr.inversion_panel module</h2>
+<dl class="class">
+<dt id="sas.perspectives.pr.inversion_panel.HelpDialog">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.inversion_panel.</tt><tt class="descname">HelpDialog</tt><big>(</big><em>parent</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#HelpDialog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.inversion_panel.</tt><tt class="descname">InversionControl</tt><big>(</big><em>parent</em>, <em>id=-1</em>, <em>plots=None</em>, <em>standalone=False</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx.lib.scrolledpanel.ScrolledPanel</span></tt>, <a class="reference internal" href="sas.guiframe.html#sas.guiframe.panel_base.PanelBase" title="sas.guiframe.panel_base.PanelBase"><tt class="xref py py-class docutils literal"><span class="pre">sas.guiframe.panel_base.PanelBase</span></tt></a></p>
+<dl class="attribute">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.CENTER_PANE">
+<tt class="descname">CENTER_PANE</tt><em class="property"> = True</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.clear_panel">
+<tt class="descname">clear_panel</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.clear_panel"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.get_data">
+<tt class="descname">get_data</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.get_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.get_state">
+<tt class="descname">get_state</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.get_state"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get the current state</p>
+<p>: return: state object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.on_reset">
+<tt class="descname">on_reset</tt><big>(</big><em>event=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.on_reset"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Resets inversion parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.on_save">
+<tt class="descname">on_save</tt><big>(</big><em>evt=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.on_save"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Method used to create a memento of the current state</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">state object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.oscillation_max">
+<tt class="descname">oscillation_max</tt><em class="property"> = 1.5</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.save_project">
+<tt class="descname">save_project</tt><big>(</big><em>doc=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.save_project"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="docutils">
+<dt>return an xml node containing state of the panel</dt>
+<dd>that guiframe can write to file</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.set_manager">
+<tt class="descname">set_manager</tt><big>(</big><em>manager</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.set_manager"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.set_state">
+<tt class="descname">set_state</tt><big>(</big><em>state</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#InversionControl.set_state"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the state of the panel and inversion problem to
+the state passed as a parameter.
+Execute the inversion immediately after filling the 
+controls.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>state</strong> &#8211; InversionState object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.window_caption">
+<tt class="descname">window_caption</tt><em class="property"> = 'P(r) control panel'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.inversion_panel.InversionControl.window_name">
+<tt class="descname">window_name</tt><em class="property"> = 'pr_control'</em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.inversion_panel.PrDistDialog">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.inversion_panel.</tt><tt class="descname">PrDistDialog</tt><big>(</big><em>parent</em>, <em>id</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#PrDistDialog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<p>Property dialog to let the user change the number
+of points on the P(r) plot.</p>
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.PrDistDialog.get_content">
+<tt class="descname">get_content</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#PrDistDialog.get_content"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the content of the dialog.
+At this point the values have already been
+checked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_panel.PrDistDialog.set_content">
+<tt class="descname">set_content</tt><big>(</big><em>npts</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_panel.html#PrDistDialog.set_content"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Initialize the content of the dialog.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.perspectives.pr.inversion_state">
+<span id="sas-perspectives-pr-inversion-state-module"></span><h2>sas.perspectives.pr.inversion_state module</h2>
+<p>Handling of P(r) inversion states</p>
+<dl class="class">
+<dt id="sas.perspectives.pr.inversion_state.InversionState">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.inversion_state.</tt><tt class="descname">InversionState</tt><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_state.html#InversionState"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class to hold the state information of the InversionControl panel.</p>
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_state.InversionState.fromXML">
+<tt class="descname">fromXML</tt><big>(</big><em>file=None</em>, <em>node=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_state.html#InversionState.fromXML"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load a P(r) inversion state from a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file</strong> &#8211; .prv file</li>
+<li><strong>node</strong> &#8211; node of a XML document to read from</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_state.InversionState.toXML">
+<tt class="descname">toXML</tt><big>(</big><em>file='pr_state.prv'</em>, <em>doc=None</em>, <em>entry_node=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_state.html#InversionState.toXML"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Writes the state of the InversionControl panel to file, as XML.</p>
+<p>Compatible with standalone writing, or appending to an
+already existing XML document. In that case, the XML document
+is required. An optional entry node in the XML document 
+may also be given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file</strong> &#8211; file to write to</li>
+<li><strong>doc</strong> &#8211; XML document object [optional]</li>
+<li><strong>entry_node</strong> &#8211; XML node within the XML document at which 
+we will append the data [optional]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.inversion_state.Reader">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.inversion_state.</tt><tt class="descname">Reader</tt><big>(</big><em>call_back</em>, <em>cansas=True</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_state.html#Reader"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.dataloader.readers.html#sas.dataloader.readers.cansas_reader.Reader" title="sas.dataloader.readers.cansas_reader.Reader"><tt class="xref py py-class docutils literal"><span class="pre">sas.dataloader.readers.cansas_reader.Reader</span></tt></a></p>
+<p>Class to load a .prv P(r) inversion file</p>
+<dl class="attribute">
+<dt id="sas.perspectives.pr.inversion_state.Reader.ext">
+<tt class="descname">ext</tt><em class="property"> = ['.prv', '.PRV', '.svs', '.SVS']</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_state.Reader.read">
+<tt class="descname">read</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_state.html#Reader.read"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load a new P(r) inversion state from file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; file path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.inversion_state.Reader.type">
+<tt class="descname">type</tt><em class="property"> = ['P(r) files (*.prv)|*.prv', 'SASView files (*.svs)|*.svs']</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.inversion_state.Reader.type_name">
+<tt class="descname">type_name</tt><em class="property"> = 'P(r)'</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_state.Reader.write">
+<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>datainfo=None</em>, <em>prstate=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_state.html#Reader.write"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Write the content of a Data1D as a CanSAS XML file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> &#8211; name of the file to write</li>
+<li><strong>datainfo</strong> &#8211; Data1D object</li>
+<li><strong>prstate</strong> &#8211; InversionState object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.inversion_state.Reader.write_toXML">
+<tt class="descname">write_toXML</tt><big>(</big><em>datainfo=None</em>, <em>state=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/inversion_state.html#Reader.write_toXML"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Write toXML, a helper for write()</p>
+<p>: return: xml doc</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.perspectives.pr.pr">
+<span id="sas-perspectives-pr-pr-module"></span><h2>sas.perspectives.pr.pr module</h2>
+<dl class="class">
+<dt id="sas.perspectives.pr.pr.Plugin">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr.</tt><tt class="descname">Plugin</tt><big>(</big><em>standalone=True</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.guiframe.html#sas.guiframe.plugin_base.PluginBase" title="sas.guiframe.plugin_base.PluginBase"><tt class="xref py py-class docutils literal"><span class="pre">sas.guiframe.plugin_base.PluginBase</span></tt></a></p>
+<p>P(r) inversion perspective</p>
+<dl class="attribute">
+<dt id="sas.perspectives.pr.pr.Plugin.DEFAULT_ALPHA">
+<tt class="descname">DEFAULT_ALPHA</tt><em class="property"> = 0.0001</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.pr.Plugin.DEFAULT_DMAX">
+<tt class="descname">DEFAULT_DMAX</tt><em class="property"> = 140.0</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sas.perspectives.pr.pr.Plugin.DEFAULT_NFUNC">
+<tt class="descname">DEFAULT_NFUNC</tt><em class="property"> = 10</em></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.delete_data">
+<tt class="descname">delete_data</tt><big>(</big><em>data_id</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.delete_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>delete the data association with prview</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.estimate_file_inversion">
+<tt class="descname">estimate_file_inversion</tt><big>(</big><em>alpha</em>, <em>nfunc</em>, <em>d_max</em>, <em>data</em>, <em>path=None</em>, <em>q_min=None</em>, <em>q_max=None</em>, <em>bck=False</em>, <em>height=0</em>, <em>width=0</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.estimate_file_inversion"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.estimate_plot_inversion">
+<tt class="descname">estimate_plot_inversion</tt><big>(</big><em>alpha</em>, <em>nfunc</em>, <em>d_max</em>, <em>q_min=None</em>, <em>q_max=None</em>, <em>bck=False</em>, <em>height=0</em>, <em>width=0</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.estimate_plot_inversion"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.get_context_menu">
+<tt class="descname">get_context_menu</tt><big>(</big><em>plotpanel=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.get_context_menu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get the context menu items available for P(r)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.get_data">
+<tt class="descname">get_data</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.get_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the current data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.get_npts">
+<tt class="descname">get_npts</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.get_npts"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the number of points in the I(q) data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.get_panels">
+<tt class="descname">get_panels</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.get_panels"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Create and return a list of panel objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.help">
+<tt class="descname">help</tt><big>(</big><em>evt</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.help"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Show a general help dialog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">TODO:</th><td class="field-body">replace the text with a nice image</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.load">
+<tt class="descname">load</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.load"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load data. This will eventually be replaced
+by our standard DataLoader class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.load_abs">
+<tt class="descname">load_abs</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.load_abs"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load an IGOR .ABS reduced file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; file path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">x, y, err vectors</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.load_columns">
+<tt class="descname">load_columns</tt><big>(</big><em>path='sphere_60_q0_2.txt'</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.load_columns"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Load 2- or 3- column ascii</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.perform_estimate">
+<tt class="descname">perform_estimate</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.perform_estimate"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.perform_estimateNT">
+<tt class="descname">perform_estimateNT</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.perform_estimateNT"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.perform_inversion">
+<tt class="descname">perform_inversion</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.perform_inversion"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.post_init">
+<tt class="descname">post_init</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.post_init"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Post initialization call back to close the loose ends
+[Somehow openGL needs this call]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.pr_theory">
+<tt class="descname">pr_theory</tt><big>(</big><em>r</em>, <em>R</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.pr_theory"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return P(r) of a sphere for a given R 
+For test purposes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.save_data">
+<tt class="descname">save_data</tt><big>(</big><em>filepath</em>, <em>prstate=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.save_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Save data in provided state object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">TODO:</th><td class="field-body"><p class="first">move the state code away from inversion_panel and move it here. 
+Then remove the &#8220;prstate&#8221; input and make this method private.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> &#8211; path of file to write to</li>
+<li><strong>prstate</strong> &#8211; P(r) inversion state</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>data_list=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.set_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>receive a list of data to compute pr</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.set_state">
+<tt class="descname">set_state</tt><big>(</big><em>state=None</em>, <em>datainfo=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.set_state"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Call-back method for the inversion state reader.
+This method is called when a .prv file is loaded.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>state</strong> &#8211; InversionState object</li>
+<li><strong>datainfo</strong> &#8211; Data1D object [optional]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.setup_file_inversion">
+<tt class="descname">setup_file_inversion</tt><big>(</big><em>alpha</em>, <em>nfunc</em>, <em>d_max</em>, <em>data</em>, <em>path=None</em>, <em>q_min=None</em>, <em>q_max=None</em>, <em>bck=False</em>, <em>height=0</em>, <em>width=0</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.setup_file_inversion"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.setup_plot_inversion">
+<tt class="descname">setup_plot_inversion</tt><big>(</big><em>alpha</em>, <em>nfunc</em>, <em>d_max</em>, <em>q_min=None</em>, <em>q_max=None</em>, <em>bck=False</em>, <em>height=0</em>, <em>width=0</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.setup_plot_inversion"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.show_data">
+<tt class="descname">show_data</tt><big>(</big><em>path=None</em>, <em>data=None</em>, <em>reset=False</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.show_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Show data read from a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> &#8211; file path</li>
+<li><strong>reset</strong> &#8211; if True all other plottables will be cleared</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.show_iq">
+<tt class="descname">show_iq</tt><big>(</big><em>out</em>, <em>pr</em>, <em>q=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.show_iq"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.show_pr">
+<tt class="descname">show_pr</tt><big>(</big><em>out</em>, <em>pr</em>, <em>cov=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.show_pr"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.show_shpere">
+<tt class="descname">show_shpere</tt><big>(</big><em>x</em>, <em>radius=70.0</em>, <em>x_range=70.0</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.show_shpere"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr.Plugin.start_thread">
+<tt class="descname">start_thread</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr.html#Plugin.start_thread"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.perspectives.pr.pr_thread">
+<span id="sas-perspectives-pr-pr-thread-module"></span><h2>sas.perspectives.pr.pr_thread module</h2>
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_thread.CalcPr">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_thread.</tt><tt class="descname">CalcPr</tt><big>(</big><em>pr</em>, <em>nfunc=5</em>, <em>error_func=None</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_thread.html#CalcPr"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.data_util.html#sas.data_util.calcthread.CalcThread" title="sas.data_util.calcthread.CalcThread"><tt class="xref py py-class docutils literal"><span class="pre">sas.data_util.calcthread.CalcThread</span></tt></a></p>
+<p>Compute P(r)</p>
+<dl class="method">
+<dt id="sas.perspectives.pr.pr_thread.CalcPr.compute">
+<tt class="descname">compute</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_thread.html#CalcPr.compute"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Perform P(r) inversion</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_thread.EstimateNT">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_thread.</tt><tt class="descname">EstimateNT</tt><big>(</big><em>pr</em>, <em>nfunc=5</em>, <em>error_func=None</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_thread.html#EstimateNT"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.data_util.html#sas.data_util.calcthread.CalcThread" title="sas.data_util.calcthread.CalcThread"><tt class="xref py py-class docutils literal"><span class="pre">sas.data_util.calcthread.CalcThread</span></tt></a></p>
+<dl class="method">
+<dt id="sas.perspectives.pr.pr_thread.EstimateNT.compute">
+<tt class="descname">compute</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_thread.html#EstimateNT.compute"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculates the estimate</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr_thread.EstimateNT.isquit">
+<tt class="descname">isquit</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_thread.html#EstimateNT.isquit"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_thread.EstimatePr">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_thread.</tt><tt class="descname">EstimatePr</tt><big>(</big><em>pr</em>, <em>nfunc=5</em>, <em>error_func=None</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_thread.html#EstimatePr"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sas.data_util.html#sas.data_util.calcthread.CalcThread" title="sas.data_util.calcthread.CalcThread"><tt class="xref py py-class docutils literal"><span class="pre">sas.data_util.calcthread.CalcThread</span></tt></a></p>
+<p>Estimate P(r)</p>
+<dl class="method">
+<dt id="sas.perspectives.pr.pr_thread.EstimatePr.compute">
+<tt class="descname">compute</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_thread.html#EstimatePr.compute"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculates the estimate</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.perspectives.pr.pr_widgets">
+<span id="sas-perspectives-pr-pr-widgets-module"></span><h2>sas.perspectives.pr.pr_widgets module</h2>
+<p>Text controls for input/output of the main PrView panel</p>
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_widgets.DataDialog">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_widgets.</tt><tt class="descname">DataDialog</tt><big>(</big><em>data_list</em>, <em>parent=None</em>, <em>text=''</em>, <em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#DataDialog"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._windows.Dialog</span></tt></p>
+<p>Allow file selection at loading time</p>
+<dl class="method">
+<dt id="sas.perspectives.pr.pr_widgets.DataDialog.get_data">
+<tt class="descname">get_data</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#DataDialog.get_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>return the selected data</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_widgets.DataFileTextCtrl">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_widgets.</tt><tt class="descname">DataFileTextCtrl</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#DataFileTextCtrl"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sas.perspectives.pr.pr_widgets.OutputTextCtrl" title="sas.perspectives.pr.pr_widgets.OutputTextCtrl"><tt class="xref py py-class docutils literal"><span class="pre">sas.perspectives.pr.pr_widgets.OutputTextCtrl</span></tt></a></p>
+<p>Text control used to display only the file name
+given a full path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">TODO:</th><td class="field-body">now that we no longer choose the data file from the panel,
+it&#8217;s no longer necessary to pass around the file path. That code
+should be refactored away and simplified.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="sas.perspectives.pr.pr_widgets.DataFileTextCtrl.GetValue">
+<tt class="descname">GetValue</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#DataFileTextCtrl.GetValue"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the full path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sas.perspectives.pr.pr_widgets.DataFileTextCtrl.SetValue">
+<tt class="descname">SetValue</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#DataFileTextCtrl.SetValue"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the file name given a path</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_widgets.DialogPanel">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_widgets.</tt><tt class="descname">DialogPanel</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#DialogPanel"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx.lib.scrolledpanel.ScrolledPanel</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_widgets.OutputTextCtrl">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_widgets.</tt><tt class="descname">OutputTextCtrl</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#OutputTextCtrl"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._controls.TextCtrl</span></tt></p>
+<p>Text control used to display outputs.
+No editing allowed. The background is 
+grayed out. User can&#8217;t select text.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sas.perspectives.pr.pr_widgets.PrTextCtrl">
+<em class="property">class </em><tt class="descclassname">sas.perspectives.pr.pr_widgets.</tt><tt class="descname">PrTextCtrl</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#PrTextCtrl"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._controls.TextCtrl</span></tt></p>
+<p>Text control for model and fit parameters.
+Binds the appropriate events for user interactions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sas.perspectives.pr.pr_widgets.load_error">
+<tt class="descclassname">sas.perspectives.pr.pr_widgets.</tt><tt class="descname">load_error</tt><big>(</big><em>error=None</em><big>)</big><a class="reference internal" href="../../_modules/sas/perspectives/pr/pr_widgets.html#load_error"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Pop up an error message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>error</strong> &#8211; details error message to be displayed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sas.perspectives.pr">
+<span id="module-contents"></span><h2>Module contents</h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sas.perspectives.pr package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sas.perspectives.pr.explore_dialog">sas.perspectives.pr.explore_dialog module</a></li>
+<li><a class="reference internal" href="#module-sas.perspectives.pr.inversion_panel">sas.perspectives.pr.inversion_panel module</a></li>
+<li><a class="reference internal" href="#module-sas.perspectives.pr.inversion_state">sas.perspectives.pr.inversion_state module</a></li>
+<li><a class="reference internal" href="#module-sas.perspectives.pr.pr">sas.perspectives.pr.pr module</a></li>
+<li><a class="reference internal" href="#module-sas.perspectives.pr.pr_thread">sas.perspectives.pr.pr_thread module</a></li>
+<li><a class="reference internal" href="#module-sas.perspectives.pr.pr_widgets">sas.perspectives.pr.pr_widgets module</a></li>
+<li><a class="reference internal" href="#module-sas.perspectives.pr">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sas.perspectives.invariant.html"
+                        title="previous chapter">sas.perspectives.invariant package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sas.plottools.html"
+                        title="next chapter">sas.plottools package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/dev/api/sas.perspectives.pr.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sas.plottools.html" title="sas.plottools package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sas.perspectives.invariant.html" title="sas.perspectives.invariant package"
+             >previous</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../dev.html" >Developer Documentation</a> &raquo;</li>
+          <li><a href="modules.html" >lib.macosx-10.5-x86_64-2.7</a> &raquo;</li>
+          <li><a href="sas.html" >sas package</a> &raquo;</li>
+          <li><a href="sas.perspectives.html" >sas.perspectives package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

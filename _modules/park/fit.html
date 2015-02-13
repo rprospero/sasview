@@ -1,0 +1,425 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.fit &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.fit</h1><div class="highlight"><pre>
+<span class="c"># This program is public domain</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Fitting service interface.</span>
+
+<span class="sd">A fit consists of a set of models and a fitting engine.  The models are</span>
+<span class="sd">collected in an assembly, which manages the parameter set and the</span>
+<span class="sd">constraints between them.  The models themselves are tightly coupled</span>
+<span class="sd">to the data that they are modeling and the data is invisible to the fit.</span>
+
+<span class="sd">The fitting engine can use a variety of methods depending on model.</span>
+
+
+<span class="sd">Usage</span>
+<span class="sd">=====</span>
+
+<span class="sd">The fitter can be run directly on the local machine::</span>
+
+<span class="sd">    import park</span>
+<span class="sd">    M1 = park.models.Peaks(datafile=park.sampledata(&#39;peak.dat&#39;))</span>
+<span class="sd">    M1.add_peak(&#39;P1&#39;, &#39;gaussian&#39;, A=[4,6], mu=[0.2, 0.5], sigma=0.1)</span>
+<span class="sd">    result = park.fit(models=[M1])</span>
+<span class="sd">    print result</span>
+
+<span class="sd">The default settings print results every time the fit improves, and</span>
+<span class="sd">print a global result when the fit is complete.  This is a suitable</span>
+<span class="sd">interface for a fitting script.</span>
+
+<span class="sd">For larger fit jobs you will want to run the fit on a remote server.</span>
+<span class="sd">The model setup is identical, but the fit call is different::</span>
+
+<span class="sd">    service = park.FitService(&#39;server:port&#39;)</span>
+<span class="sd">    result = park.fit(models=[M1], service=service)</span>
+<span class="sd">    print result</span>
+
+<span class="sd">Again, the default settings print results every time the fit improves,</span>
+<span class="sd">and print a global result when the fit is complete.</span>
+
+<span class="sd">For long running fit jobs, you want to be able to disconnect from</span>
+<span class="sd">the server after submitting the job, and later reconnect to fetch</span>
+<span class="sd">the results.  An additional email field will send notification by</span>
+<span class="sd">email when the fit starts and ends, and daily updates on the status</span>
+<span class="sd">of all fits::</span>
+
+<span class="sd">    service = park.FitService(&#39;server:port&#39;)</span>
+<span class="sd">    service.notify(email=&#39;me@my.email.address&#39;,update=&#39;daily&#39;)</span>
+<span class="sd">    fit = park.Fit(models=[M1])</span>
+<span class="sd">    id = service.submit_job(fit, jobname=&#39;peaks&#39;)</span>
+<span class="sd">    print id</span>
+
+<span class="sd">The results can be retrieved either by id returned from the server,</span>
+<span class="sd">or by the given jobname::</span>
+
+<span class="sd">    import park</span>
+<span class="sd">    service = park.FitService(&#39;server:port&#39;,user=&#39;userid&#39;)</span>
+<span class="sd">    fitlist = service.retrieve(&#39;peaks&#39;)</span>
+<span class="sd">    for fit in fitlist:</span>
+<span class="sd">        print fit.summary()</span>
+
+<span class="sd">The fit itself is a complicated object, including the model, the</span>
+<span class="sd">optimizer, and the type of uncertainty analysis to perform.</span>
+
+<span class="sd">GUI Usage</span>
+<span class="sd">=========</span>
+
+<span class="sd">When used from a graphical user interface, a different programming</span>
+<span class="sd">interface is needed.  In this case, the user may want to watch</span>
+<span class="sd">the progress of the fit and perhaps stop it.  Also, as fits can</span>
+<span class="sd">take some time to complete, the user would like to be able to</span>
+<span class="sd">set up additional fits and run them at the same time, switching</span>
+<span class="sd">between them as necessary to monitor progress.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">thread</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">assembly</span><span class="o">,</span> <span class="nn">fitresult</span>
+
+<div class="viewcode-block" id="Objective"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.Objective">[docs]</a><span class="k">class</span> <span class="nc">Objective</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract interface to the fitness function for the park minimizer</span>
+<span class="sd">    classes.</span>
+
+<span class="sd">    Park provides a specific implementation `park.assembly.Assembly`.</span>
+
+<span class="sd">    TODO: add a results() method to return model specific info to the</span>
+<span class="sd">    TODO: fit handler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Objective.residuals"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.Objective.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Some fitters, notably Levenberg-Marquardt, operate directly on the</span>
+<span class="sd">        residuals vector.  If the individual residuals are not available,</span>
+<span class="sd">        then LM cannot be used.</span>
+
+<span class="sd">        This method is optional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="Objective.residuals_deriv"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.Objective.residuals_deriv">[docs]</a>    <span class="k">def</span> <span class="nf">residuals_deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns residuals and derivatives with respect to the given</span>
+<span class="sd">        parameters.</span>
+
+<span class="sd">        If these are unavailable in the model, then they can be approximated</span>
+<span class="sd">        by numerical derivatives, though it is generally better to use a</span>
+<span class="sd">        derivative free optimizer such as coliny or cobyla which can use the</span>
+<span class="sd">        function evaluations more efficiently.  In any case, your objective</span>
+<span class="sd">        function is responsible for calculating these.</span>
+
+<span class="sd">        This method is optional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="Objective.fit_parameters"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.Objective.fit_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">fit_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of fit parameters.  Each parameter has a name,</span>
+<span class="sd">        an initial value and a range.</span>
+
+<span class="sd">        See `park.fitresult.FitParameter` for an example.</span>
+
+<span class="sd">        On each function evaluation a new parameter set will be passed</span>
+<span class="sd">        to the fitter, with values in the same order as the list of</span>
+<span class="sd">        parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the objective value for parameter set p .</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="Objective.abort"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.Objective.abort">[docs]</a>    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Halts the current function evaluation, and has it return inf.</span>
+<span class="sd">        This will be called from a separate thread.  If the function</span>
+<span class="sd">        contains an expensive calculation, it should reset an abort</span>
+<span class="sd">        flag before each evaluation and test it periodically.</span>
+
+<span class="sd">        This method is optional.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div></div>
+<div class="viewcode-block" id="Fitter"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.Fitter">[docs]</a><span class="k">class</span> <span class="nc">Fitter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract interface for a fitness optimizer.</span>
+
+<span class="sd">    A fitter has a single method, fit, which takes an objective</span>
+<span class="sd">    function (`park.fit.Objective`) and a handler.</span>
+
+<span class="sd">    For a concrete instance see `park.fitmc.FitMC`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="s">&quot; is not an attribute of &quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_threaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">start_new_thread</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span><span class="n">args</span><span class="p">,</span><span class="n">kw</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the actual fit in a separate thread</span>
+
+<span class="sd">        Each cycle k of n:</span>
+<span class="sd">            self.handler.progress(k,n)</span>
+<span class="sd">        Each improvement:</span>
+<span class="sd">            self.handler.result.update(x,fx,ncalls)</span>
+<span class="sd">            self.handler.improvement()</span>
+<span class="sd">        On completion (if not already performed):</span>
+<span class="sd">            self.hander.result.update(x,fx,ncalls)</span>
+<span class="sd">            self.handler.done</span>
+<span class="sd">            self.handler.finalize()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="Fitter.fit"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.Fitter.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Global optimizer.</span>
+
+<span class="sd">        This function should return immediately</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Determine initial value and bounds</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="n">fitness</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">()</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">range</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">]</span>
+
+        <span class="c"># Initialize the monitor and results.</span>
+        <span class="c"># Need to make our own copy of the fit results so that the</span>
+        <span class="c"># values don&#39;t get stomped on by the next fit iteration.</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span>
+        <span class="n">fitpars</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitresult</span><span class="o">.</span><span class="n">FitParameter</span><span class="p">(</span><span class="n">pars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">pars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">range</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x0</span><span class="p">)]</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">fitresult</span><span class="o">.</span><span class="n">FitResult</span><span class="p">(</span><span class="n">fitpars</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">NaN</span><span class="p">)</span>
+
+        <span class="c"># Run the fit (fit should perform _progress and _improvement updates)</span>
+        <span class="c"># This function may return before the fit is complete.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="FitJob"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.FitJob">[docs]</a><span class="k">class</span> <span class="nc">FitJob</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit job.</span>
+
+<span class="sd">    This implements `park.job.Job`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fitter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitter</span> <span class="o">=</span> <span class="n">fitter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span>
+<div class="viewcode-block" id="FitJob.run"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.FitJob.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="LocalQueue"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.LocalQueue">[docs]</a><span class="k">class</span> <span class="nc">LocalQueue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple interface to the local job queue.  Currently supports start and</span>
+<span class="sd">    wait.  Needs to support stop and status.  Also, needs to be a proper queue,</span>
+<span class="sd">    and needs to allow jobs to run in separate processes according to priority,</span>
+<span class="sd">    etc.  All the essentials of the remote queuing system without the remote</span>
+<span class="sd">    calls.</span>
+
+<span class="sd">    Unlike the remote queue, the local queue need not maintain persistence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+<div class="viewcode-block" id="LocalQueue.start"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.LocalQueue.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job</span> <span class="o">=</span> <span class="n">job</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LocalQueue.wait"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.LocalQueue.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="o">=.</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wait for the job to complete.  This is used in scripts to impose</span>
+<span class="sd">        a synchronous interface to the fitting service.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">job</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">result</span>
+</div></div>
+<div class="viewcode-block" id="fit"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.fit">[docs]</a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fitter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">service</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start a fit with a set of models.  The model set must be</span>
+<span class="sd">    in a form accepted by `park.assembly.Assembly`.</span>
+
+<span class="sd">    This is a convenience function which sets up the default</span>
+<span class="sd">    optimizer and uses the local fitting engine to do the work.</span>
+<span class="sd">    Progress reports are printed as they are received.</span>
+
+<span class="sd">    The choice of fitter, service and handler can be specified</span>
+<span class="sd">    by the caller.</span>
+
+<span class="sd">    The default fitter is FitMC, which is a monte carlo Nelder-Mead</span>
+<span class="sd">    simplex local optimizer with 100 random start points.</span>
+
+<span class="sd">    The default handler does nothing.  Instead, ConsoleUpdate could</span>
+<span class="sd">    be used to report progress during the fit.</span>
+
+<span class="sd">    The default service is to run in a separate thread with FitThread.</span>
+<span class="sd">    Note that this will change soon to run in a separate process on</span>
+<span class="sd">    the local machine so that python&#39;s global interpreter lock does</span>
+<span class="sd">    not interfere with parallelism.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">models</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;fit expected a list of models&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">service</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">service</span> <span class="o">=</span> <span class="n">LocalQueue</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">fitter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">fitmc</span>
+        <span class="n">fitter</span> <span class="o">=</span> <span class="n">fitmc</span><span class="o">.</span><span class="n">FitMC</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">handler</span> <span class="o">=</span> <span class="n">fitresult</span><span class="o">.</span><span class="n">FitHandler</span><span class="p">()</span>
+
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">assembly</span><span class="o">.</span><span class="n">Assembly</span><span class="p">(</span><span class="n">models</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span><span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">models</span>
+    <span class="n">job</span> <span class="o">=</span> <span class="n">FitJob</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span><span class="n">fitter</span><span class="p">,</span><span class="n">handler</span><span class="p">)</span>
+    <span class="n">service</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">service</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="assembly_example"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.assembly_example">[docs]</a><span class="k">def</span> <span class="nf">assembly_example</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">park</span><span class="o">,</span> <span class="nn">time</span>
+    <span class="n">problem</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">assembly</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
+    <span class="c">#result = fit(problem)</span>
+    <span class="c">#result.print_summary()</span>
+    <span class="n">handler</span><span class="o">=</span><span class="n">fitresult</span><span class="o">.</span><span class="n">ConsoleUpdate</span><span class="p">(</span><span class="n">improvement_delta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">progress_delta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c">#result = fit(problem, handler=handler)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">fit</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;=== Fit complete ===&quot;</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&quot;=== Target values ===&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;M1: a=1, c=1.5&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;M2: a=2.5, c=3&quot;</span>
+
+    <span class="k">if</span> <span class="bp">False</span><span class="p">:</span>  <span class="c"># Detailed results</span>
+        <span class="k">print</span> <span class="s">&quot;parameter vector&quot;</span><span class="p">,</span><span class="n">result</span><span class="o">.</span><span class="n">pvec</span>
+        <span class="n">problem</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">pvec</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;residuals&quot;</span><span class="p">,</span><span class="n">problem</span><span class="o">.</span><span class="n">residuals</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">m</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">problem</span><span class="o">.</span><span class="n">parts</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">&quot;Model&quot;</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="s">&quot;chisq&quot;</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">chisq</span><span class="p">,</span><span class="s">&quot;weight&quot;</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span>
+            <span class="k">print</span> <span class="s">&quot;pars&quot;</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">a</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">c</span>
+            <span class="k">print</span> <span class="s">&quot;x&quot;</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fit_x</span>
+            <span class="k">print</span> <span class="s">&quot;y&quot;</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fit_y</span>
+            <span class="k">print</span> <span class="s">&quot;f(x)&quot;</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fx</span>
+            <span class="k">print</span> <span class="s">&quot;(y-f(x))/dy&quot;</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">residuals</span>
+
+</div>
+<div class="viewcode-block" id="demo"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.demo">[docs]</a><span class="k">def</span> <span class="nf">demo</span><span class="p">(</span><span class="n">fitter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiple minima example&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">math</span>
+    <span class="k">class</span> <span class="nc">MultiMin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">fit_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">fitresult</span><span class="o">.</span><span class="n">FitParameter</span><span class="p">(</span><span class="s">&#39;x1&#39;</span><span class="p">,[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">fx</span> <span class="o">=</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fx</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">fitresult</span><span class="o">.</span><span class="n">ConsoleUpdate</span><span class="p">()</span> <span class="c"># Show updates on the console</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">progress_delta</span> <span class="o">=</span> <span class="mi">1</span>          <span class="c"># Update user every second</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">improvement_delta</span> <span class="o">=</span> <span class="mf">0.1</span>     <span class="c"># Show improvements almost immediately</span>
+    <span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">MultiMin</span><span class="p">(),</span> <span class="n">handler</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">handler</span><span class="o">.</span><span class="n">done</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="demo2"><a class="viewcode-back" href="../../dev/api/park.html#park.fit.demo2">[docs]</a><span class="k">def</span> <span class="nf">demo2</span><span class="p">(</span><span class="n">fitter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">park</span><span class="o">,</span> <span class="nn">time</span>
+    <span class="n">problem</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">assembly</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">fitresult</span><span class="o">.</span><span class="n">ConsoleUpdate</span><span class="p">()</span> <span class="c"># Show updates on the console</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">progress_delta</span> <span class="o">=</span> <span class="mi">1</span>          <span class="c"># Update user every second</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">improvement_delta</span> <span class="o">=</span> <span class="mi">1</span>       <span class="c"># Show improvements at the same rate</span>
+    <span class="n">fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">handler</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">handler</span><span class="o">.</span><span class="n">done</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c">#main()</span>
+    <span class="n">assembly_example</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

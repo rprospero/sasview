@@ -1,0 +1,604 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.model &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.model</h1><div class="highlight"><pre>
+<span class="c"># This program is public domain</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Define a park fitting model.</span>
+
+<span class="sd">Usage</span>
+<span class="sd">-----</span>
+
+<span class="sd">The simplest sort of fitting model is something like the following::</span>
+
+<span class="sd">    import numpy</span>
+<span class="sd">    import park</span>
+<span class="sd">    def G(x,mu,sigma):</span>
+<span class="sd">        return numpy.exp(-0.5*(x-mu)**2/sigma**2)</span>
+
+<span class="sd">    class Gauss(park.Model):</span>
+<span class="sd">        parameters = [&#39;center&#39;,&#39;width&#39;,&#39;scale&#39;]</span>
+<span class="sd">        def eval(self,x):</span>
+<span class="sd">            return self.scale * G(x,self.center,self.width)</span>
+
+<span class="sd">It has a function which is evaluated at a series of x values and</span>
+<span class="sd">a set of adjustable parameters controlling the shape of f(x).</span>
+
+<span class="sd">You can check your module with something like the following::</span>
+
+<span class="sd">    $ ipython -pylab</span>
+
+<span class="sd">    from gauss import Gauss</span>
+
+<span class="sd">    g = Gauss(center=5,width=1,scale=10)</span>
+<span class="sd">    x = asarray([1,2,3,4,5])</span>
+<span class="sd">    y = g(x)</span>
+<span class="sd">    plot(x,y)</span>
+
+<span class="sd">This should produce a plot of the Gaussian peak.</span>
+
+<span class="sd">You will then want to try your model with some data.  Create a file</span>
+<span class="sd">with some dummy data, such as gauss.dat::</span>
+
+<span class="sd">    # x y</span>
+<span class="sd">    4 2</span>
+<span class="sd">    5 6</span>
+<span class="sd">    6 7</span>
+<span class="sd">    7 3</span>
+
+<span class="sd">In order to match the model to data, you need to define a fitness</span>
+<span class="sd">object.  This shows the difference between the model and the data,</span>
+<span class="sd">which you can then plot or sum to create a weighted chisq value::</span>
+
+<span class="sd">    f = park.Fitness(g, &#39;gauss.dat&#39;)</span>
+<span class="sd">    plot(f.data.fit_x, f.residuals())</span>
+
+<span class="sd">The data file can have up to four columns, either x,y or x,y,dy</span>
+<span class="sd">or x,dx,y,dy where x,y are the measurement points and values,</span>
+<span class="sd">dx is the instrument resolution in x and dy is the uncertainty</span>
+<span class="sd">in the measurement value y.  You can pass any keyword arguments</span>
+<span class="sd">to data.load that are accepted by numpy.loadtxt.  For example,</span>
+<span class="sd">you can reorder columns or skip rows.  Additionally, you can modify</span>
+<span class="sd">data attributes directly x,y,dx,dy and calc_x.  See help on park.Data1D</span>
+<span class="sd">for details.</span>
+
+<span class="sd">Once you have your model debugged you can use it in a fit::</span>
+
+<span class="sd">    g = Gauss(center=[3,5],scale=7.2,width=[1,3])</span>
+<span class="sd">    result = park.fit((g, &#39;gauss.dat&#39;))</span>
+<span class="sd">    result.plot()</span>
+
+<span class="sd">In this example, center and width are allowed to vary but scale is fixed.</span>
+
+<span class="sd">Existing models can be readily adapted to Park::</span>
+
+<span class="sd">    class Gauss(object):</span>
+<span class="sd">        &quot;Existing model&quot;</span>
+<span class="sd">        center,width,scale = 0,1,1</span>
+<span class="sd">        def __init__(self,**kw):</span>
+<span class="sd">            for k,v in kw.items(): setattr(self,k,v)</span>
+<span class="sd">        def eval(self,x):</span>
+<span class="sd">            return self.scale *G(x,self.center,self.width)</span>
+
+<span class="sd">    class GaussAdaptor(Gauss,Model):</span>
+<span class="sd">        &quot;PARK adaptor&quot;</span>
+<span class="sd">        parameters = [&#39;center&#39;,&#39;width&#39;,&#39;scale&#39;]</span>
+<span class="sd">        def __init__(self,*args,**kw):</span>
+<span class="sd">            Model.__init__(self,*args)</span>
+<span class="sd">            Gauss.__init__(self,**kw)</span>
+
+<span class="sd">    g = GaussAdaptor(center=[3,5],scale=7.2,width=[1,3])</span>
+<span class="sd">    result = park.fit((g, &#39;gauss.dat&#39;))</span>
+<span class="sd">    result.plot()</span>
+
+<span class="sd">Models can become much more complex than the ones described above,</span>
+<span class="sd">including multilevel models where fitting parameters can be added</span>
+<span class="sd">and removed dynamically.</span>
+
+<span class="sd">In many cases the park optimizer will need an adaptor for pre-existing</span>
+<span class="sd">models.  The adaptor above relies on python properties to translate</span>
+<span class="sd">model.par access into model._par.get() and model._par.set() where _par</span>
+<span class="sd">is the internal name for par.  This technique works for simple static</span>
+<span class="sd">models, but will not work well for sophisticated models which have,</span>
+<span class="sd">for example, a dynamic parameter set where the model parameters cannot</span>
+<span class="sd">be set as properties.  A solution to this problem is to subclass the</span>
+<span class="sd">park.Parameter and override the value attribute as a property.</span>
+
+<span class="sd">Once models are defined they can be used in a variety of contexts, such</span>
+<span class="sd">as simultaneous fitting with constraints between the parameters.  With</span>
+<span class="sd">some care in defining the model, computationally intensive fits can</span>
+<span class="sd">be distributed across multiple processors.  We provide a simple user</span>
+<span class="sd">interface for interacting with the model parameters and managing fits.</span>
+<span class="sd">This can be extended with model specialized model editors which format</span>
+<span class="sd">the parameters in a sensible way for the model, or allow direct manipulation</span>
+<span class="sd">of the model structure.  The underlying fitting engine can also be</span>
+<span class="sd">used directly from your own user interface.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Model&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">park</span>
+<span class="kn">from</span> <span class="nn">park.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ParameterSet</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
+
+
+<span class="k">class</span> <span class="nc">ParameterProperty</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attribute accessor for a named parameter.</span>
+
+<span class="sd">    Objects of class ParameterProperty act similarly to normal property</span>
+<span class="sd">    objects in that assignment to object.attr triggers the __set__</span>
+<span class="sd">    method of ParameterProperty and queries of the value object.attr</span>
+<span class="sd">    triggers the __get__ method.  These methods look up the actual</span>
+<span class="sd">    parameter in the dictionary model.parameterset, delegating the</span>
+<span class="sd">    the set/get methods of the underlying parameter object.</span>
+
+<span class="sd">    For example::</span>
+
+<span class="sd">        model.P1 = 5</span>
+<span class="sd">        print model.P1</span>
+
+<span class="sd">    is equivalent to::</span>
+
+<span class="sd">        model.parameterset[&#39;P1&#39;].set(5)</span>
+<span class="sd">        print model.parameterset[&#39;P1&#39;].get()</span>
+
+<span class="sd">    To enable this behaviour, the model developer must assign a</span>
+<span class="sd">    ParameterProperty object to a class attribute of the model.  It</span>
+<span class="sd">    must be a class attribute.  Properties assigned as an instance</span>
+<span class="sd">    attribute in the __init__ of the class will not be recognized</span>
+<span class="sd">    as properties.</span>
+
+<span class="sd">    An example model will look something like the following::</span>
+
+<span class="sd">        class MyModel:</span>
+<span class="sd">            # A property must be assigned as a class attribute!</span>
+<span class="sd">            P1 = ParameterProperty(&#39;P1&#39;)</span>
+<span class="sd">            P2 = ParameterProperty(&#39;P2&#39;)</span>
+<span class="sd">            def __init__(self, P1=None, P2=None):</span>
+<span class="sd">                parP1 = Parameter(&#39;P1&#39;)</span>
+<span class="sd">                if P1 is not None: parP1.set(P1)</span>
+<span class="sd">                parP2 = Parameter(&#39;P2&#39;)</span>
+<span class="sd">                if P2 is not None: parP2.set(P2)</span>
+<span class="sd">                self.parameterset = { &#39;P1&#39;: parP1, &#39;P2&#39;: parP2 }</span>
+
+<span class="sd">    This work is done implicitly by MetaModel, and by subclassing</span>
+<span class="sd">    the class Model, the model developer does not ever need to</span>
+<span class="sd">    use ParameterProperty.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">instance</span><span class="p">,</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">instance</span><span class="o">.</span><span class="n">parameterset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">instance</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">parameterset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">MetaModel</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpret parameters.</span>
+
+<span class="sd">    This is a meta class, and the usual meta class rules apply.  That is,</span>
+<span class="sd">    the Model base class should be defined like::</span>
+
+<span class="sd">        class Model(object):</span>
+<span class="sd">            __metaclass__ = MetaModel</span>
+<span class="sd">            ...</span>
+
+<span class="sd">    The MetaModel.__new__ method is called whenever a new Model</span>
+<span class="sd">    class is created.  The name of the model, its superclasses and</span>
+<span class="sd">    its attributes are passed to MetaModel.__new__ which creates the</span>
+<span class="sd">    actual class.  It is not called for new instances of the model.</span>
+
+<span class="sd">    MetaModel is designed to simplify the definition of parameters for</span>
+<span class="sd">    the model.  When processing the class, MetaModel defines</span>
+<span class="sd">    parameters which is a list of names of all the parameters in the</span>
+<span class="sd">    model, and parameterset, which is a dictionary of the actual</span>
+<span class="sd">    parameters and any parameter sets in the model.</span>
+
+<span class="sd">    Parameters can be defined using a list of names in the parameter</span>
+<span class="sd">    attribute, or by defining the individual parameters as separate</span>
+<span class="sd">    attributes of class Parameter.</span>
+
+<span class="sd">    For example, the following defines parameters P1, P2, and P3::</span>
+
+<span class="sd">        class MyModel(Model):</span>
+<span class="sd">            parameters = [&#39;P1&#39;,&#39;P2&#39;]</span>
+<span class="sd">            P2 = Parameter(range=[0,inf])</span>
+<span class="sd">            P3 = Parameter()</span>
+
+<span class="sd">    For each parameter, MetaModel will define a parameter accessor,</span>
+<span class="sd">    and add the parameter definition to the parameter set. The accessor</span>
+<span class="sd">    delegates query and assignment to the Parameter get/set methods. The</span>
+<span class="sd">    attributes of the particular parameter instance can be</span>
+<span class="sd">    adjusted using model.parameterset[&#39;name&#39;].attribute = value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="nb">vars</span><span class="p">):</span>
+        <span class="c">#print &#39;calling model meta&#39;,vars</span>
+
+        <span class="c"># Find all the parameters for the model.  The listed parameters</span>
+        <span class="c"># are defined using::</span>
+        <span class="c">#    parameters = [&#39;P1&#39;, &#39;P2&#39;, ...]</span>
+        <span class="c"># The remaining parameters are defined individually::</span>
+        <span class="c">#    P3 = Parameter()</span>
+        <span class="c">#    P4 = Parameter()</span>
+        <span class="c"># The undefined parameters are those that are listed but not defined.</span>
+        <span class="n">listed</span> <span class="o">=</span> <span class="nb">vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;parameters&#39;</span><span class="p">,[])</span>
+        <span class="n">defined</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">Parameter</span><span class="p">)]</span>
+        <span class="n">undefined</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">listed</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">defined</span><span class="p">]</span>
+        <span class="c">#print listed,defined,undefined</span>
+
+        <span class="c"># Define a getter/setter for every parameter so that the user</span>
+        <span class="c"># can say model.name to access parameter name.</span>
+        <span class="c">#</span>
+        <span class="c"># Create a parameter object for every undefined parameter.</span>
+        <span class="c"># Check if the base class defines a default value, and use</span>
+        <span class="c"># that for the initial value.  We don&#39;t want to do this for</span>
+        <span class="c"># parameters explicitly defined since the user may have</span>
+        <span class="c"># given them a default value already.</span>
+        <span class="c">#</span>
+        <span class="c"># For predefined parameters we must set the name explicitly.</span>
+        <span class="c"># This saves the user from having to use, e.g.::</span>
+        <span class="c">#     P1 = Parameter(&#39;P1&#39;)</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">undefined</span><span class="p">:</span>
+            <span class="c"># Check if the attribute value is initialized in a base class</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">p</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="c">#print &quot;looking up value in base as&quot;,value</span>
+            <span class="n">pars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">p</span><span class="p">,</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">))</span>
+            <span class="nb">vars</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParameterProperty</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">defined</span><span class="p">:</span>
+            <span class="c"># Make sure parameter name is correct.  Note that we are using</span>
+            <span class="c"># _name rather than .name to access the name attribute since</span>
+            <span class="c"># name is a read-only parameter.</span>
+            <span class="nb">vars</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">p</span>
+            <span class="n">pars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">vars</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+            <span class="nb">vars</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParameterProperty</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="c"># Construct the class attributes &#39;parameters&#39; and &#39;parameterset&#39;.</span>
+        <span class="c"># Listed parameters are given first, with unlisted parameters</span>
+        <span class="c"># following alphabetically.  For hierarchical parameter sets,</span>
+        <span class="c"># we also need to include the defined sets.</span>
+        <span class="n">unlisted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">defined</span><span class="o">+</span><span class="n">undefined</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">listed</span><span class="p">))</span>
+        <span class="n">unlisted</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">listed</span> <span class="o">+</span> <span class="n">unlisted</span>
+        <span class="n">parsets</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">ParameterSet</span><span class="p">)]</span>
+        <span class="nb">vars</span><span class="p">[</span><span class="s">&#39;parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="nb">vars</span><span class="p">[</span><span class="s">&#39;parameterset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="n">pars</span><span class="o">=</span><span class="n">pars</span><span class="o">+</span><span class="n">parsets</span><span class="p">)</span>
+        <span class="c">#print &#39;pars&#39;,vars[&#39;parameters&#39;]</span>
+        <span class="c">#print &#39;parset&#39;,vars[&#39;parameterset&#39;]</span>
+
+        <span class="c"># Return a new specialized instance of the class with parameters</span>
+        <span class="c"># and parameterset made explicit.</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="nb">vars</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../dev/api/park.html#park.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Model definition.</span>
+
+<span class="sd">    The model manages attribute access to the fitting parameters and</span>
+<span class="sd">    also manages the dataset.</span>
+
+<span class="sd">    derivatives [&#39;p1&#39;,&#39;p2&#39;,...]</span>
+<span class="sd">        List of parameters for which the model can calculate</span>
+<span class="sd">        derivatives.  The derivs</span>
+<span class="sd">        The model function can compute the derivative with respect</span>
+<span class="sd">        to this parameter.  The function model.derivs(x,[p1,p2,...])</span>
+<span class="sd">        will return (f(x),df/dp1(x), ...).  The parameters and their</span>
+<span class="sd">        order are determined by the fitting engine.</span>
+
+<span class="sd">        Note: This is a property of the model, not the fit.</span>
+<span class="sd">        Numerical derivatives will be used if the parameter is</span>
+<span class="sd">        used in an expression or if no analytic derivative is</span>
+<span class="sd">        available for the parameter.  Automatic differentiation</span>
+<span class="sd">        on parameter expressions is possible, but beyond the scope</span>
+<span class="sd">        of this project.</span>
+
+<span class="sd">    eval(x)</span>
+<span class="sd">        Evaluate the model at x.  This must be defined by the subclass.</span>
+
+<span class="sd">    eval_deriv(x,pars=[])</span>
+<span class="sd">        Evaluate the model and the derivatives at x.  This must be</span>
+<span class="sd">        defined by the subclass.</span>
+
+<span class="sd">    parameters</span>
+<span class="sd">        The names of the model parameters.  If this is not provided, then</span>
+<span class="sd">        the model will search the subclass for park.Parameter attributes</span>
+<span class="sd">        and construct the list of names from that.  Any parameters in the</span>
+<span class="sd">        list not already defined as park.Parameter attributes will be</span>
+<span class="sd">        defined as parameters with a default of 0.</span>
+
+<span class="sd">    parameterset</span>
+<span class="sd">        The set of parameters defined by the model.  These are the</span>
+<span class="sd">        parameters themselves, gathered into a park.ParameterSet.</span>
+
+<span class="sd">    The minimum fittng model if you choose not to subclass park.Model</span>
+<span class="sd">    requires parameterset and a residuals() method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">MetaModel</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the model.</span>
+
+<span class="sd">        Model(&#39;name&#39;,P1=value, P2=Value, ...)</span>
+
+<span class="sd">        When overriding __init__ in the subclass be sure to call</span>
+<span class="sd">        Model.__init__(self, *args, **kw).  This makes a private</span>
+<span class="sd">        copy of the parameterset for the model and initializes</span>
+<span class="sd">        any parameters set using keyword arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#print &#39;calling model init on&#39;,id(self)</span>
+        <span class="c"># To avoid trashing the Model.parname = Parameter() template</span>
+        <span class="c"># when we create an instance and accessor for the parameter</span>
+        <span class="c"># we need to make sure that we are using our own copy of the</span>
+        <span class="c"># model dictionary stored in vars</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;expect name as model parameter&quot;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">&gt;=</span><span class="mi">1</span> <span class="k">else</span> <span class="s">&#39;unknown&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="c">#print &#39;done&#39;,id(self)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pars</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model.eval"><a class="viewcode-back" href="../../dev/api/park.html#park.model.Model.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the model at x.</span>
+
+<span class="sd">        This method needs to be specialized in the model to evaluate the</span>
+<span class="sd">        model function.  Alternatively, the model can implement is own</span>
+<span class="sd">        version of residuals which calculates the residuals directly</span>
+<span class="sd">        instead of calling eval.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;Model needs to implement eval&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Model.eval_derivs"><a class="viewcode-back" href="../../dev/api/park.html#park.model.Model.eval_derivs">[docs]</a>    <span class="k">def</span> <span class="nf">eval_derivs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pars</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate the model and derivatives wrt pars at x.</span>
+
+<span class="sd">        pars is a list of the names of the parameters for which derivatives</span>
+<span class="sd">        are desired.</span>
+
+<span class="sd">        This method needs to be specialized in the model to evaluate the</span>
+<span class="sd">        model function.  Alternatively, the model can implement is own</span>
+<span class="sd">        version of residuals which calculates the residuals directly</span>
+<span class="sd">        instead of calling eval.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;Model needs to implement eval_derivs&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Model.set"><a class="viewcode-back" href="../../dev/api/park.html#park.model.Model.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the initial value for a set of parameters.</span>
+
+<span class="sd">        E.g., model.set(width=3,center=5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># This is a convenience funciton for the user.</span>
+        <span class="c">#</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+</div></div>
+<span class="k">def</span> <span class="nf">add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a parameter to an existing park model.</span>
+
+<span class="sd">    Note: this may not work if it is operating on a BaseModel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">park</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ParameterProperty</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">park</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="c"># Gauss theory function</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+    <span class="n">eps</span><span class="p">,</span><span class="n">inf</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">inf</span>
+    <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">sigma</span><span class="p">):</span>
+        <span class="n">mu</span><span class="p">,</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mu</span><span class="p">),</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c"># === Minimal model ===</span>
+    <span class="c"># just list the fitting parameters and define the function.</span>
+    <span class="k">class</span> <span class="nc">Gauss</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;center&#39;</span><span class="p">,</span><span class="s">&#39;width&#39;</span><span class="p">,</span><span class="s">&#39;scale&#39;</span><span class="p">]</span>
+        <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">G</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+    <span class="c"># Create a couple of models and make sure they don&#39;t conflict</span>
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">Gauss</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">Gauss</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="k">assert</span> <span class="n">g2</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">6</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">g2</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="c"># === explore parameters ===</span>
+    <span class="c"># dedicated model using park parameters directly, and defining derivatives</span>
+    <span class="k">class</span> <span class="nc">Gauss</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                           <span class="n">tip</span><span class="o">=</span><span class="s">&#39;Peak center&#39;</span><span class="p">)</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                          <span class="n">limits</span><span class="o">=</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span><span class="n">inf</span><span class="p">),</span>
+                          <span class="n">tip</span><span class="o">=</span><span class="s">&#39;Peak width (1-sigma)&#39;</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                          <span class="n">limits</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">inf</span><span class="p">),</span>
+                          <span class="n">tip</span><span class="o">=</span><span class="s">&#39;Peak scale (&gt;0)&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span> <span class="n">G</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="c"># Derivatives</span>
+        <span class="n">derivatives</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;center&#39;</span><span class="p">,</span><span class="s">&#39;width&#39;</span><span class="p">,</span><span class="s">&#39;scale&#39;</span><span class="p">]</span>
+        <span class="k">def</span> <span class="nf">dscale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">g</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="k">def</span> <span class="nf">dcenter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="o">*</span><span class="n">g</span>
+        <span class="k">def</span> <span class="nf">dwidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="n">g</span>
+        <span class="n">dmap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">dscale</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="n">dcenter</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="n">dwidth</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">eval_derivs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">pars</span><span class="o">=</span><span class="p">[]):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Calculate function value and derivatives wrt to the parameters.</span>
+
+<span class="sd">            pars is a list of parameter names, possibly consisting of any</span>
+<span class="sd">            parameter with deriv=True.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">dg</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dmap</span><span class="p">[</span><span class="n">p</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span><span class="n">g</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">g</span><span class="p">]</span><span class="o">+</span><span class="n">dg</span>
+
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">Gauss</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">g1</span><span class="o">.</span><span class="n">parameterset</span><span class="p">[</span><span class="s">&#39;center&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tip</span> <span class="o">=</span> <span class="s">&#39;This is the center&#39;</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">Gauss</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="k">assert</span> <span class="n">g2</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">6</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">g2</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="c"># ====== Test wrapper =======</span>
+    <span class="c"># delegate to existing model via inheritence</span>
+    <span class="k">class</span> <span class="nc">Gauss</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pre-existing model&quot;&quot;&quot;</span>
+        <span class="n">center</span><span class="p">,</span><span class="n">width</span><span class="p">,</span><span class="n">scale</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+            <span class="c">#print &quot;calling BaseGauss init on&quot;,id(self)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+            <span class="c">#print &quot;done&quot;,id(self)</span>
+        <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">*</span><span class="n">G</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">GaussAdaptor</span><span class="p">(</span><span class="n">Gauss</span><span class="p">,</span><span class="n">Model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;PARK wrapper&quot;&quot;&quot;</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;center&#39;</span><span class="p">,</span><span class="s">&#39;width&#39;</span><span class="p">,</span><span class="s">&#39;scale&#39;</span><span class="p">]</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+            <span class="c">#print &quot;calling Gauss init on&quot;,id(self)</span>
+            <span class="n">Model</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">Gauss</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+            <span class="c">#print &quot;done&quot;,id(self)</span>
+
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">GaussAdaptor</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">GaussAdaptor</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">g3</span> <span class="o">=</span> <span class="n">GaussAdaptor</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="k">assert</span> <span class="n">g2</span><span class="o">.</span><span class="n">center</span> <span class="o">==</span> <span class="mi">6</span>
+    <span class="k">assert</span> <span class="n">g3</span><span class="o">.</span><span class="n">scale</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">g1</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">g2</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="n">g4</span> <span class="o">=</span> <span class="n">GaussAdaptor</span><span class="p">(</span><span class="s">&#39;M3&#39;</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">g4</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;M3&#39;</span>
+
+    <span class="c"># dedicated multilevel model using park parameters directly</span>
+    <span class="k">class</span> <span class="nc">MultiGauss</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+    <span class="c"># wrapped model using park parameters indirectly</span>
+    <span class="k">class</span> <span class="nc">BaseMultiGauss</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">BaseGauss</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">))</span>
+    <span class="k">class</span> <span class="nc">WrapMultiGauss</span><span class="p">(</span><span class="n">BaseMultiGauss</span><span class="p">,</span><span class="n">Model</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

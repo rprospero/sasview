@@ -1,0 +1,206 @@
+park package
+============
+
+Submodules
+----------
+
+park.assembly module
+--------------------
+
+.. automodule:: park.assembly
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.data module
+----------------
+
+.. automodule:: park.data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.deps module
+----------------
+
+.. automodule:: park.deps
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.diffev module
+------------------
+
+.. automodule:: park.diffev
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.expression module
+----------------------
+
+.. automodule:: park.expression
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.fit module
+---------------
+
+.. automodule:: park.fit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.fitmc module
+-----------------
+
+.. automodule:: park.fitmc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.fitresult module
+---------------------
+
+.. automodule:: park.fitresult
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.fitservice module
+----------------------
+
+.. automodule:: park.fitservice
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.formatnum module
+---------------------
+
+.. automodule:: park.formatnum
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.message module
+-------------------
+
+.. automodule:: park.message
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.model module
+-----------------
+
+.. automodule:: park.model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.monitor module
+-------------------
+
+.. automodule:: park.monitor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.parameter module
+---------------------
+
+.. automodule:: park.parameter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.parkde module
+------------------
+
+.. automodule:: park.parkde
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.parksnob module
+--------------------
+
+.. automodule:: park.parksnob
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.peaks module
+-----------------
+
+.. automodule:: park.peaks
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.pmap module
+----------------
+
+.. automodule:: park.pmap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.rangemap module
+--------------------
+
+.. automodule:: park.rangemap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.serial module
+------------------
+
+.. automodule:: park.serial
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.setup module
+-----------------
+
+.. automodule:: park.setup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.simplex module
+-------------------
+
+.. automodule:: park.simplex
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.version module
+-------------------
+
+.. automodule:: park.version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+park.wxmonitor module
+---------------------
+
+.. automodule:: park.wxmonitor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: park
+    :members:
+    :undoc-members:
+    :show-inheritance:

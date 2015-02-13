@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.fitresult &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.fitresult</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">formatnum</span> <span class="kn">import</span> <span class="n">format_uncertainty</span>
+
+<div class="viewcode-block" id="FitHandler"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitHandler">[docs]</a><span class="k">class</span> <span class="nc">FitHandler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract interface for fit thread handler.</span>
+
+<span class="sd">    The methods in this class are called by the optimizer as the fit</span>
+<span class="sd">    progresses.</span>
+
+<span class="sd">    Note that it is up to the optimizer to call the fit handler correctly,</span>
+<span class="sd">    reporting all status changes and maintaining the &#39;done&#39; flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="sd">&quot;&quot;&quot;True when the fit job is complete&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;The current best result of the fit&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FitHandler.improvement"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitHandler.improvement">[docs]</a>    <span class="k">def</span> <span class="nf">improvement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when a result is observed which is better than previous</span>
+<span class="sd">        results from the fit.</span>
+
+<span class="sd">        result is a FitResult object, with parameters, #calls and fitness.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="FitHandler.error"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitHandler.error">[docs]</a>    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Model had an error; print traceback</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="FitHandler.progress"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitHandler.progress">[docs]</a>    <span class="k">def</span> <span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">expected</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called each cycle of the fit, reporting the current and the</span>
+<span class="sd">        expected amount of work.   The meaning of these values is</span>
+<span class="sd">        optimizer dependent, but they can be converted into a percent</span>
+<span class="sd">        complete using (100*current)//expected.</span>
+
+<span class="sd">        Progress is updated each iteration of the fit, whatever that</span>
+<span class="sd">        means for the particular optimization algorithm.  It is called</span>
+<span class="sd">        after any calls to improvement for the iteration so that the</span>
+<span class="sd">        update handler can control I/O bandwidth by suppressing</span>
+<span class="sd">        intermediate improvements until the fit is complete.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="FitHandler.finalize"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitHandler.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit is complete; best results are reported</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="FitHandler.abort"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitHandler.abort">[docs]</a>    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit was aborted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</div></div>
+<div class="viewcode-block" id="ConsoleUpdate"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.ConsoleUpdate">[docs]</a><span class="k">class</span> <span class="nc">ConsoleUpdate</span><span class="p">(</span><span class="n">FitHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print progress to the console.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">isbetter</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="sd">&quot;&quot;&quot;Record whether results improved since last update&quot;&quot;&quot;</span>
+    <span class="n">progress_delta</span> <span class="o">=</span>  <span class="mi">60</span>
+    <span class="sd">&quot;&quot;&quot;Number of seconds between progress updates&quot;&quot;&quot;</span>
+    <span class="n">improvement_delta</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="sd">&quot;&quot;&quot;Number of seconds between improvement updates&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">quiet</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">progress_delta</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span><span class="n">improvement_delta</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If quiet is true, only print out final summary, not progress and</span>
+<span class="sd">        improvements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#import traceback; traceback.print_stack()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_percent</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">improvement_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isbetter</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="n">quiet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress_delta</span> <span class="o">=</span> <span class="n">progress_delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">improvement_delta</span> <span class="o">=</span> <span class="n">improvement_delta</span>
+
+<div class="viewcode-block" id="ConsoleUpdate.progress"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.ConsoleUpdate.progress">[docs]</a>    <span class="k">def</span> <span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Report on progress.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span> <span class="k">return</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">100</span><span class="o">*</span><span class="n">k</span><span class="p">)</span><span class="o">//</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="c"># Show improvements if there are any</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">t</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">improvement_time</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isbetter</span> <span class="ow">and</span> <span class="n">dt</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">improvement_delta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isbetter</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">improvement_time</span> <span class="o">=</span> <span class="n">t</span>
+
+        <span class="c"># Update percent complete</span>
+        <span class="n">dp</span> <span class="o">=</span> <span class="n">p</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">progress_percent</span>
+        <span class="k">if</span> <span class="n">dp</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">t</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_time</span>
+        <span class="k">if</span> <span class="n">dt</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_delta</span><span class="p">:</span>
+            <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">dp</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;</span><span class="si">%d%%</span><span class="s"> complete&quot;</span><span class="o">%</span><span class="n">p</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progress_percent</span> <span class="o">=</span> <span class="n">p</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">progress_time</span> <span class="o">=</span> <span class="n">t</span>
+            <span class="k">elif</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">dp</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">//</span><span class="mi">5</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_percent</span><span class="o">//</span><span class="mi">5</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%d%%</span><span class="s"> complete&quot;</span><span class="o">%</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">//</span><span class="mi">5</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progress_percent</span> <span class="o">=</span> <span class="n">p</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progress_time</span> <span class="o">=</span> <span class="n">t</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">//</span><span class="mi">10</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress_percent</span><span class="o">//</span><span class="mi">10</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;</span><span class="si">%d%%</span><span class="s"> complete&quot;</span><span class="o">%</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">//</span><span class="mi">10</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progress_percent</span> <span class="o">=</span> <span class="n">p</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">progress_time</span> <span class="o">=</span> <span class="n">t</span>
+</div>
+<div class="viewcode-block" id="ConsoleUpdate.improvement"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.ConsoleUpdate.improvement">[docs]</a>    <span class="k">def</span> <span class="nf">improvement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when a result is observed which is better than previous</span>
+<span class="sd">        results from the fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isbetter</span> <span class="o">=</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="ConsoleUpdate.error"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.ConsoleUpdate.error">[docs]</a>    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Model had an error; print traceback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isbetter</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+        <span class="k">print</span> <span class="n">msg</span>
+</div>
+<div class="viewcode-block" id="ConsoleUpdate.finalize"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.ConsoleUpdate.finalize">[docs]</a>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isbetter</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+        <span class="k">print</span> <span class="s">&quot;Total function calls:&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">calls</span>
+</div>
+<div class="viewcode-block" id="ConsoleUpdate.abort"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.ConsoleUpdate.abort">[docs]</a>    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isbetter</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="FitParameter"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitParameter">[docs]</a><span class="k">class</span> <span class="nc">FitParameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit result for an individual parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range</span> <span class="o">=</span> <span class="nb">range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">None</span>
+<div class="viewcode-block" id="FitParameter.summarize"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitParameter.summarize">[docs]</a>    <span class="k">def</span> <span class="nf">summarize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return parameter range string.</span>
+
+<span class="sd">        E.g.,  &quot;       Gold .....|.... 5.2043 in [2,7]&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span>
+        <span class="n">lo</span><span class="p">,</span><span class="n">hi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">range</span>
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span><span class="ow">and</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">hi</span><span class="p">):</span>
+            <span class="n">portion</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">-</span><span class="n">lo</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">hi</span><span class="o">-</span><span class="n">lo</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">portion</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">portion</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="k">elif</span> <span class="n">portion</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span> <span class="n">portion</span> <span class="o">=</span> <span class="mf">0.99999999</span>
+            <span class="n">barpos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">portion</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">bar</span><span class="p">)))</span>
+            <span class="n">bar</span><span class="p">[</span><span class="n">barpos</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;|&#39;</span>
+        <span class="n">bar</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+        <span class="n">lostr</span> <span class="o">=</span> <span class="s">&quot;[</span><span class="si">%g</span><span class="s">&quot;</span><span class="o">%</span><span class="n">lo</span> <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span> <span class="k">else</span> <span class="s">&quot;(-inf&quot;</span>
+        <span class="n">histr</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%g</span><span class="s">]&quot;</span><span class="o">%</span><span class="n">hi</span> <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span> <span class="k">else</span> <span class="s">&quot;inf)&quot;</span>
+        <span class="n">valstr</span> <span class="o">=</span> <span class="n">format_uncertainty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%25s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> in </span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">&quot;</span>  <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">bar</span><span class="p">,</span><span class="n">valstr</span><span class="p">,</span><span class="n">lostr</span><span class="p">,</span><span class="n">histr</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;FitParameter(&#39;</span><span class="si">%s</span><span class="s">&#39;)&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</div>
+<div class="viewcode-block" id="FitResult"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitResult">[docs]</a><span class="k">class</span> <span class="nc">FitResult</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Container for reporting fit results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">calls</span><span class="p">,</span> <span class="n">fitness</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+        <span class="sd">&quot;&quot;&quot;Fit parameter list, each with name, range and value attributes.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls</span> <span class="o">=</span> <span class="n">calls</span>
+        <span class="sd">&quot;&quot;&quot;Number of function calls&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">fitness</span>
+        <span class="sd">&quot;&quot;&quot;Value of the goodness of fit metric&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvec</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">])</span>
+        <span class="sd">&quot;&quot;&quot;Parameter vector&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="sd">&quot;&quot;&quot;Parameter uncertainties&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="sd">&quot;&quot;&quot;Covariance matrix&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FitResult.update"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitResult.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvec</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">calls</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls</span> <span class="o">=</span> <span class="n">calls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">fitness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pvec</span> <span class="o">=</span> <span class="n">pvec</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">pvec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="FitResult.calc_cov"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitResult.calc_cov">[docs]</a>    <span class="k">def</span> <span class="nf">calc_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the covariance matrix inv(J&#39;J) at point p.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s">&#39;jacobian&#39;</span><span class="p">):</span>
+            <span class="c"># Find cov of f at p</span>
+            <span class="c">#     cov(f,p) = inv(J&#39;J)</span>
+            <span class="c"># Use SVD</span>
+            <span class="c">#     J = U S V&#39;</span>
+            <span class="c">#     J&#39;J = (U S V&#39;)&#39; (U S V&#39;)</span>
+            <span class="c">#         = V S&#39; U&#39; U S V&#39;</span>
+            <span class="c">#         = V S S V&#39;</span>
+            <span class="c">#     inv(J&#39;J) = inv(V S S V&#39;)</span>
+            <span class="c">#              = inv(V&#39;) inv(S S) inv(V)</span>
+            <span class="c">#              = V inv (S S) V&#39;</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pvec</span><span class="p">)</span>
+            <span class="n">u</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">vh</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">J</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">JTJinv</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vh</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">/</span><span class="n">s</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">vh</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_cov</span><span class="p">(</span><span class="n">JTJinv</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FitResult.set_cov"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitResult.set_cov">[docs]</a>    <span class="k">def</span> <span class="nf">set_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cov</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the covariance matrix inv(J&#39;J) at point p.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="n">cov</span>
+        <span class="k">if</span> <span class="n">cov</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="p">))</span>
+            <span class="c"># Set the uncertainties on the individual parameters</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="c"># Reset the uncertainties on the individual parameters</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c">#import traceback; traceback.print_stack()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="s">&quot;No results&quot;</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;P</span><span class="si">%-3d</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">summarize</span><span class="p">())</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)]</span>
+        <span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;=== goodness of fit: </span><span class="si">%g</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FitResult.print_summary"><a class="viewcode-back" href="../../dev/api/park.html#park.fitresult.FitResult.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fid</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">):</span>
+        <span class="k">print</span> <span class="o">&gt;&gt;</span><span class="n">fid</span><span class="p">,</span> <span class="bp">self</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

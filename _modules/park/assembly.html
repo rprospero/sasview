@@ -1,0 +1,733 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.assembly &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.assembly</h1><div class="highlight"><pre>
+<span class="c"># This program is public domain</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An assembly is a collection of fitting functions.  This provides</span>
+<span class="sd">the model representation that is the basis of the park fitting engine.</span>
+
+<span class="sd">Models can range from very simple one dimensional theory functions</span>
+<span class="sd">to complex assemblies of multidimensional datasets from different</span>
+<span class="sd">experimental techniques, each with their own theory function and</span>
+<span class="sd">a common underlying physical model.</span>
+
+<span class="sd">Usage</span>
+<span class="sd">=====</span>
+
+<span class="sd">First define the models you want to work with.  In the example</span>
+<span class="sd">below we will use an example of a simple multilayer system measured by</span>
+<span class="sd">specular reflection of xrays and neutrons.  The gold depth is the only</span>
+<span class="sd">fitting parameter, ranging from 10-30 A.  The interface depths are</span>
+<span class="sd">tied together using expressions.  In this case the expression is</span>
+<span class="sd">a simple copy, but any standard math functions can be used.  Some</span>
+<span class="sd">model developers may provide additional functions for use with the</span>
+<span class="sd">expression.</span>
+
+<span class="sd">Example models::</span>
+
+<span class="sd">    import reflectometry.model1d as refl</span>
+<span class="sd">    xray = refl.model(&#39;xray&#39;)</span>
+<span class="sd">    xray.incident(&#39;Air&#39;,rho=0)</span>
+<span class="sd">    xray.interface(&#39;iAu&#39;,sigma=5)</span>
+<span class="sd">    xray.layer(&#39;Au&#39;,rho=124.68,depth=[10,30])</span>
+<span class="sd">    xray.interface(&#39;iSi&#39;,sigma=5)</span>
+<span class="sd">    xray.substrate(&#39;Si&#39;,rho=20.07)</span>
+<span class="sd">    datax = refl.data(&#39;xray.dat&#39;)</span>
+
+<span class="sd">    neutron = refl.model(&#39;neutron&#39;)</span>
+<span class="sd">    neutron.incident(&#39;Air&#39;,rho=0)</span>
+<span class="sd">    neutron.interface(&#39;iAu&#39;,sigma=&#39;xray.iAu&#39;)</span>
+<span class="sd">    neutron.layer(&#39;Au&#39;,rho=4.66,depth=&#39;xray.Au.depth&#39;)</span>
+<span class="sd">    neutron.interface(&#39;iSi&#39;,sigma=&#39;xray.iSi&#39;)</span>
+<span class="sd">    neutron.substrate(&#39;Si&#39;,rho=2.07)</span>
+<span class="sd">    datan = refl.data(&#39;neutron.dat&#39;)</span>
+
+<span class="sd">As you can see from the above, parameters can be set to a value if</span>
+<span class="sd">the parameter is fixed, to a range if the parametemr is fitted, or</span>
+<span class="sd">to a string expression if the parameter is calculated from other</span>
+<span class="sd">parameters.  See park.Parameter.set for further details.</span>
+
+<span class="sd">Having constructed the models, we can now create an assembly::</span>
+
+<span class="sd">    import park</span>
+<span class="sd">    assembly = park.Assembly([(xray,datax), (neutron,datan)])</span>
+
+<span class="sd">Note: this would normally be done in the context of a fit</span>
+<span class="sd">using fit = park.Fit([(xray,datax), (neutron,datan)]), and later referenced</span>
+<span class="sd">using fit.assembly.</span>
+
+<span class="sd">Individual parts of the assembly are accessable using the</span>
+<span class="sd">model number 0, 1, 2... or by the model name.  In the above,</span>
+<span class="sd">assembly[0] and assembly[&#39;xray&#39;] refer to the same model.</span>
+<span class="sd">Assemblies have insert and append functions for adding new</span>
+<span class="sd">models, and &quot;del model[idx]&quot; for removing them.</span>
+
+<span class="sd">Once the assembly is created computing the values for the system</span>
+<span class="sd">is a matter of calling::</span>
+
+<span class="sd">    assembly.eval()</span>
+<span class="sd">    print &quot;Chi**2&quot;,assembly.chisq</span>
+<span class="sd">    print &quot;Reduced chi**2&quot;,assembly.chisq/assembly.degrees_of_freedom</span>
+<span class="sd">    plot(arange(len(assembly.residuals)), assembly.residuals)</span>
+
+<span class="sd">This defines the attributes residuals, degrees_of_freedom and chisq,</span>
+<span class="sd">which is what the optimizer uses as the cost function to minimize.</span>
+
+<span class="sd">assembly.eval uses the current values for the parameters in the</span>
+<span class="sd">individual models.  These parameters can be changed directly</span>
+<span class="sd">in the model.  In the reflectometry example above, you could</span>
+<span class="sd">set the gold thickness using xray.layer.Au.depth=156, or</span>
+<span class="sd">something similar (the details are model specific).  Parameters</span>
+<span class="sd">can also be changed through the assembly parameter set.  In the same</span>
+<span class="sd">example, this would be assembly.parameterset[&#39;xray&#39;][&#39;Au&#39;][&#39;depth&#39;].</span>
+<span class="sd">See parameter set for details.</span>
+
+<span class="sd">In the process of modeling data, particularly with multiple</span>
+<span class="sd">datasets, you will sometimes want to temporarily ignore</span>
+<span class="sd">how well one of the datasets matches so that you</span>
+<span class="sd">can more quickly refine the model for the other datasets,</span>
+<span class="sd">or see how particular models are influencing the fit.  To</span>
+<span class="sd">temporarily ignore the xray data in the example above use::</span>
+
+<span class="sd">    assembly.parts[0].isfitted = False</span>
+
+<span class="sd">The model itself isn&#39;t ignored since its parameters may be</span>
+<span class="sd">needed to compute the parameters for other models.  To</span>
+<span class="sd">reenable checking against the xray data, you would assign</span>
+<span class="sd">a True value instead.  More subtle weighting of the models</span>
+<span class="sd">can be controlled using assembly.parts[idx].weight, but</span>
+<span class="sd">see below for a note on model weighting.</span>
+
+<span class="sd">A note on model weighting</span>
+<span class="sd">-------------------------</span>
+
+<span class="sd">Changing the weight is equivalent to scaling the error bars</span>
+<span class="sd">on the given model by a factor of weight/n where n is the</span>
+<span class="sd">number of data points.  It is better to set the correct error</span>
+<span class="sd">bars on your data in the first place than to adjust the weights.</span>
+<span class="sd">If you have the correct error bars, then you should expect</span>
+<span class="sd">roughly 2/3 of the data points to lie within one error bar of</span>
+<span class="sd">the theory curve.  If consecutive data points have largely</span>
+<span class="sd">overlapping errorbars, then your uncertainty is overestimated.</span>
+
+<span class="sd">Another case where weights are adjusted (abused?) is to</span>
+<span class="sd">compensate for systematic errors in the data by forcing the</span>
+<span class="sd">errorbars to be large enough to cover the systematic bias.</span>
+<span class="sd">This is a poor approach to the problem.  A better strategy</span>
+<span class="sd">is to capture the systematic effects in the model, and treat</span>
+<span class="sd">the measurement of the independent variable as an additional</span>
+<span class="sd">data point in the fit.  This is still not statistically sound</span>
+<span class="sd">as there is likely to be a large correlation between the</span>
+<span class="sd">uncertainty of the measurement and the values of all the</span>
+<span class="sd">other variables.</span>
+
+<span class="sd">That said, adjusting the weight on a dataset is a quick way</span>
+<span class="sd">of reducing its influence on the entire fit.  Please use it</span>
+<span class="sd">with care.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Assembly&#39;</span><span class="p">,</span> <span class="s">&#39;Fitness&#39;</span><span class="p">]</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">park</span>
+<span class="kn">from</span> <span class="nn">park.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span><span class="n">ParameterSet</span>
+<span class="kn">from</span> <span class="nn">park.fitresult</span> <span class="kn">import</span> <span class="n">FitParameter</span>
+<span class="kn">import</span> <span class="nn">park.expression</span>
+
+
+
+<div class="viewcode-block" id="Fitness"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Fitness">[docs]</a><span class="k">class</span> <span class="nc">Fitness</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Container for theory and data.</span>
+
+<span class="sd">    The fit object compares theory with data.</span>
+
+<span class="sd">    TODO: what to do with fittable metadata (e.g., footprint correction)?</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span><span class="n">model</span>
+    <span class="k">def</span> <span class="nf">_parameterset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameterset</span>
+    <span class="n">parameterset</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_parameterset</span><span class="p">)</span>
+<div class="viewcode-block" id="Fitness.residuals"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Fitness.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">residuals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Fitness.residuals_deriv"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Fitness.residuals_deriv">[docs]</a>    <span class="k">def</span> <span class="nf">residuals_deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pars</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">residuals_deriv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval_derivs</span><span class="p">,</span><span class="n">pars</span><span class="o">=</span><span class="n">pars</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Fitness.set"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Fitness.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set parameters in the model.</span>
+
+<span class="sd">        User convenience function.  This allows a user with an assembly</span>
+<span class="sd">        of models in a script to for example set the fit range for</span>
+<span class="sd">        parameter &#39;a&#39; of the model::</span>
+
+<span class="sd">            assembly[0].set(a=[5,6])</span>
+
+<span class="sd">        Raises KeyError if the parameter is not in parameterset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Fitness.abort"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Fitness.abort">[docs]</a>    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span><span class="s">&#39;abort&#39;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">abort</span><span class="p">()</span>
+</div></div>
+<span class="k">class</span> <span class="nc">Part</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Part of a fitting assembly.  Part holds the model itself and</span>
+<span class="sd">    associated data.  The part can be initialized with a fitness</span>
+<span class="sd">    object or with a pair (model,data) for the default fitness function.</span>
+
+<span class="sd">    fitness (Fitness)</span>
+<span class="sd">        object implementing the `park.assembly.Fitness` interface.  In</span>
+<span class="sd">        particular, fitness should provide a parameterset attribute</span>
+<span class="sd">        containing a ParameterSet and a residuals method returning a vector</span>
+<span class="sd">        of residuals.</span>
+<span class="sd">    weight (dimensionless)</span>
+<span class="sd">        weight for the model.  See comments in assembly.py for details.</span>
+<span class="sd">    isfitted (boolean)</span>
+<span class="sd">        True if the model residuals should be included in the fit.</span>
+<span class="sd">        The model parameters may still be used in parameter</span>
+<span class="sd">        expressions, but there will be no comparison to the data.</span>
+<span class="sd">    residuals (vector)</span>
+<span class="sd">        Residuals for the model if they have been calculated, or None</span>
+<span class="sd">    degrees_of_freedom</span>
+<span class="sd">        Number of residuals minus number of fitted parameters.</span>
+<span class="sd">        Degrees of freedom for individual models does not make</span>
+<span class="sd">        sense in the presence of expressions combining models,</span>
+<span class="sd">        particularly in the case where a model has many parameters</span>
+<span class="sd">        but no data or many computed parameters.  The degrees of</span>
+<span class="sd">        freedom for the model is set to be at least one.</span>
+<span class="sd">    chisq</span>
+<span class="sd">        sum(residuals**2); use chisq/degrees_of_freedom to</span>
+<span class="sd">        get the reduced chisq value.</span>
+
+<span class="sd">        Get/set the weight on the given model.</span>
+
+<span class="sd">        assembly.weight(3) returns the weight on model 3 (0-origin)</span>
+<span class="sd">        assembly.weight(3,0.5) sets the weight on model 3 (0-origin)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">isfitted</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">fitness</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Fitness</span><span class="p">(</span><span class="o">*</span><span class="n">fitness</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">fitness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isfitted</span> <span class="o">=</span> <span class="n">isfitted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chisq</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">Inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="Assembly"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly">[docs]</a><span class="k">class</span> <span class="nc">Assembly</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collection of fit models.</span>
+
+<span class="sd">    Assembly implements the `park.fit.Objective` interface.</span>
+
+<span class="sd">    See `park.assembly` for usage.</span>
+
+<span class="sd">    Instance variables:</span>
+
+<span class="sd">    residuals : array</span>
+<span class="sd">        a vector of residuals spanning all models, with model</span>
+<span class="sd">        weights applied as appropriate.</span>
+<span class="sd">    degrees_of_freedom : integer</span>
+<span class="sd">        length of the residuals - number of fitted parameters</span>
+<span class="sd">    chisq : float</span>
+<span class="sd">        sum squared residuals; this is not the reduced chisq, which</span>
+<span class="sd">        you can get using chisq/degrees_of_freedom</span>
+
+<span class="sd">    These fields are defined for the individual models as well, with</span>
+<span class="sd">    degrees of freedom adjusted to the length of the individual data</span>
+<span class="sd">    set.  If the model is not fitted or the weight is zero, the residual</span>
+<span class="sd">    will not be calculated.</span>
+
+<span class="sd">    The residuals fields are available only after the model has been</span>
+<span class="sd">    evaluated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;Build an assembly from a list of models.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Part</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate through the models in order&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span> <span class="k">yield</span> <span class="n">m</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the nth model&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">fitness</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fitness</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace the nth model&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">fitness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete the nth model&quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Assembly.weight"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.weight">[docs]</a>    <span class="k">def</span> <span class="nf">weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Query the weight on a particular model.</span>
+
+<span class="sd">        Set weight to value if value is supplied.</span>
+
+<span class="sd">        :Parameters:</span>
+<span class="sd">         idx : integer</span>
+<span class="sd">           model number</span>
+<span class="sd">         value : float</span>
+<span class="sd">           model weight</span>
+<span class="sd">        :return: model weight</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">weight</span>
+</div>
+<div class="viewcode-block" id="Assembly.isfitted"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.isfitted">[docs]</a>    <span class="k">def</span> <span class="nf">isfitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Query if a particular model is fitted.</span>
+
+<span class="sd">        Set isfitted to value if value is supplied.</span>
+
+<span class="sd">        :param idx: model number</span>
+<span class="sd">        :type idx: integer</span>
+<span class="sd">        :param value:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">isfitted</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">isfitted</span>
+</div>
+<div class="viewcode-block" id="Assembly.append"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">isfitted</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a model to the end of set.</span>
+
+<span class="sd">        :param fitness: the fitting model</span>
+<span class="sd">            The fitting model can be an instance of `park.assembly.Fitness`,</span>
+<span class="sd">            or a tuple of (`park.model.Model`,`park.data.Data1D`)</span>
+<span class="sd">        :param weight: model weighting (usually 1.0)</span>
+<span class="sd">        :param isfitted: whether model should be fit (equivalent to weight 0.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Part</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span><span class="n">weight</span><span class="p">,</span><span class="n">isfitted</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Assembly.insert"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">isfitted</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a model to a particular position in the set.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">Part</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span><span class="n">weight</span><span class="p">,</span><span class="n">isfitted</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adjust the parameter set after the addition of a new model.&quot;&quot;&quot;</span>
+        <span class="n">subsets</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">parameterset</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">(</span><span class="s">&#39;root&#39;</span><span class="p">,</span><span class="n">subsets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">setprefix</span><span class="p">()</span>
+        <span class="c">#print [p.path for p in self.parameterset.flatten()]</span>
+
+<div class="viewcode-block" id="Assembly.eval"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recalculate the theory functions, and from them, the</span>
+<span class="sd">        residuals and chisq.</span>
+
+<span class="sd">        :note: Call this after the parameters have been updated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Handle abort from a separate thread.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cancel</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># Evaluate the computed parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitexpression</span><span class="p">()</span>
+
+        <span class="c"># Check that the resulting parameters are in a feasible region.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isfeasible</span><span class="p">():</span> <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="n">resid</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+            <span class="c"># In order to support abort, need to be able to propagate an</span>
+            <span class="c"># external abort signal from self.abort() into an abort signal</span>
+            <span class="c"># for the particular model.  Can&#39;t see a way to do this which</span>
+            <span class="c"># doesn&#39;t involve setting a state variable.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_model</span> <span class="o">=</span> <span class="n">m</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cancel</span><span class="p">:</span> <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">isfitted</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">weight</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">residuals</span><span class="p">()</span>
+                <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">residuals</span><span class="p">)</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">degrees_of_freedom</span> <span class="o">=</span> <span class="n">N</span><span class="o">-</span><span class="n">k</span> <span class="k">if</span> <span class="n">N</span><span class="o">&gt;</span><span class="n">k</span> <span class="k">else</span> <span class="mi">1</span>
+                <span class="n">m</span><span class="o">.</span><span class="n">chisq</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">residuals</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">resid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">residuals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">resid</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span> <span class="o">=</span> <span class="n">N</span><span class="o">-</span><span class="n">k</span> <span class="k">if</span> <span class="n">N</span><span class="o">&gt;</span><span class="n">k</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chisq</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chisq</span>
+</div>
+<div class="viewcode-block" id="Assembly.jacobian"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.jacobian">[docs]</a>    <span class="k">def</span> <span class="nf">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvec</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the derivative wrt the fit parameters at point p.</span>
+
+<span class="sd">        Numeric derivatives are calculated based on step, where step is</span>
+<span class="sd">        the portion of the total range for parameter j, or the portion of</span>
+<span class="sd">        point value p_j if the range on parameter j is infinite.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Make sure the input vector is an array</span>
+        <span class="n">pvec</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pvec</span><span class="p">)</span>
+        <span class="c"># We are being lazy here.  We can precompute the bounds, we can</span>
+        <span class="c"># use the residuals_deriv from the sub-models which have analytic</span>
+        <span class="c"># derivatives and we need only recompute the models which depend</span>
+        <span class="c"># on the varying parameters.</span>
+        <span class="c"># Meanwhile, let&#39;s compute the numeric derivative using the</span>
+        <span class="c"># three point formula.</span>
+        <span class="c"># We are not checking that the varied parameter in numeric</span>
+        <span class="c"># differentiation is indeed feasible in the interval of interest.</span>
+        <span class="nb">range</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">range</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">])</span>
+        <span class="n">lo</span><span class="p">,</span><span class="n">hi</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">]</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">hi</span><span class="o">-</span><span class="n">lo</span><span class="p">)</span><span class="o">*</span><span class="n">step</span>
+        <span class="c"># For infinite ranges, use p*1e-8 for the step size</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+        <span class="c">#print &quot;J&quot;,idx,delta,pvec,type(idx),type(delta),type(pvec)</span>
+        <span class="n">delta</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvec</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">*</span><span class="n">step</span>
+        <span class="n">delta</span><span class="p">[</span><span class="n">delta</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span>
+
+        <span class="c"># Set the initial value</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pvec</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="c"># Gather the residuals</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pvec</span><span class="p">):</span>
+            <span class="c"># Center point formula:</span>
+            <span class="c">#     df/dv = lim_{h-&gt;0} ( f(v+h)-f(v-h) ) / ( 2h )</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">delta</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">h</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+            <span class="n">rk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span> <span class="o">-</span> <span class="n">h</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+            <span class="n">rk</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rk</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">h</span><span class="p">))</span>
+        <span class="c"># return the jacobian</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+</div>
+<div class="viewcode-block" id="Assembly.cov"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.cov">[docs]</a>    <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the covariance matrix inv(J&#39;J) at point p.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Find cov of f at p</span>
+        <span class="c">#     cov(f,p) = inv(J&#39;J)</span>
+        <span class="c"># Use SVD</span>
+        <span class="c">#     J = U S V&#39;</span>
+        <span class="c">#     J&#39;J = (U S V&#39;)&#39; (U S V&#39;)</span>
+        <span class="c">#         = V S&#39; U&#39; U S V&#39;</span>
+        <span class="c">#         = V S S V&#39;</span>
+        <span class="c">#     inv(J&#39;J) = inv(V S S V&#39;)</span>
+        <span class="c">#              = inv(V&#39;) inv(S S) inv(V)</span>
+        <span class="c">#              = V inv (S S) V&#39;</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">pvec</span><span class="p">)</span>
+        <span class="n">u</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">vh</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">J</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">JTJinv</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vh</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">/</span><span class="n">s</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">vh</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JTJinv</span>
+</div>
+<div class="viewcode-block" id="Assembly.stderr"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.stderr">[docs]</a>    <span class="k">def</span> <span class="nf">stderr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return parameter uncertainty.</span>
+
+<span class="sd">        This is just the sqrt diagonal of covariance matrix inv(J&#39;J) at point p.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">pvec</span><span class="p">)))</span>
+</div>
+<div class="viewcode-block" id="Assembly.isfeasible"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.isfeasible">[docs]</a>    <span class="k">def</span> <span class="nf">isfeasible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if the parameter set is in a feasible region of the</span>
+<span class="sd">        modeling space.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c"># Fitting service interface</span></div>
+<div class="viewcode-block" id="Assembly.fit_parameters"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.fit_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">fit_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an alphabetical list of the fitting parameters.</span>
+
+<span class="sd">        This function is called once at the beginning of a fit,</span>
+<span class="sd">        and serves as a convenient place to precalculate what</span>
+<span class="sd">        can be precalculated such as the set of fitting parameters</span>
+<span class="sd">        and the parameter expressions evaluator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">setprefix</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">fitted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_restraints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">restrained</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">gather_context</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitexpression</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">build_eval</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span><span class="n">context</span><span class="p">)</span>
+        <span class="c">#print &quot;constraints&quot;,self._fitexpression.__doc__</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="n">b</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="c"># Convert to fitparameter a object</span>
+        <span class="n">fitpars</span> <span class="o">=</span> <span class="p">[</span><span class="n">FitParameter</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">range</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">fitpars</span>
+</div>
+<div class="viewcode-block" id="Assembly.set_result"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.set_result">[docs]</a>    <span class="k">def</span> <span class="nf">set_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the parameters resulting from the fit into the parameter set,</span>
+<span class="sd">        and update the calculated expression.</span>
+
+<span class="sd">        The parameter values may be retrieved by walking the assembly.parameterset</span>
+<span class="sd">        tree, checking each parameter for isfitted, iscomputed, or isfixed.</span>
+<span class="sd">        For example::</span>
+
+<span class="sd">            assembly.set_result(result)</span>
+<span class="sd">            for p in assembly.parameterset.flatten():</span>
+<span class="sd">                if p.isfitted():</span>
+<span class="sd">                    print &quot;%s %g in [%g,%g]&quot;%(p.path,p.value,p.range[0],p.range[1])</span>
+<span class="sd">                elif p.iscomputed():</span>
+<span class="sd">                    print &quot;%s computed as %g&quot;%(p.path.p.value)</span>
+
+<span class="sd">        This does not calculate the function or the residuals for these parameters.</span>
+<span class="sd">        You can call assembly.eval() to do this.  The residuals will be set in</span>
+<span class="sd">        assembly[i].residuals.  The theory and data are model specific, and can</span>
+<span class="sd">        be found in assembly[i].fitness.data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitexpression</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Assembly.all_results"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.all_results">[docs]</a>    <span class="k">def</span> <span class="nf">all_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extend result from the fit with the calculated parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">calcpars</span> <span class="o">=</span> <span class="p">[</span><span class="n">FitParameter</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">range</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">computed</span><span class="p">]</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">parameters</span> <span class="o">+=</span> <span class="n">calcpars</span>
+</div>
+<div class="viewcode-block" id="Assembly.result"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.result">[docs]</a>    <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s">&#39;step&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Details to send back to the fitting client on an improved fit.</span>
+
+<span class="sd">        status is &#39;start&#39;, &#39;step&#39; or &#39;end&#39; depending if this is the</span>
+<span class="sd">        first result to return, an improved result, or the final result.</span>
+
+<span class="sd">        [Not implemented]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="Assembly.fresiduals"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.fresiduals">[docs]</a>    <span class="k">def</span> <span class="nf">fresiduals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvec</span><span class="p">):</span>
+        <span class="n">chisq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">pvec</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span>
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pvec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cost function.</span>
+
+<span class="sd">        Evaluate the system for the parameter vector pvec, returning chisq</span>
+<span class="sd">        as the cost function to be minimized.</span>
+
+<span class="sd">        Raises a runtime error if the number of fit parameters is</span>
+<span class="sd">        different than the length of the vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Plug fit parameters into model</span>
+        <span class="c">#print &quot;Trying&quot;,pvec</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitparameters</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pvec</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pars</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Unexpected number of parameters&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pvec</span><span class="p">):</span>
+            <span class="n">pars</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c"># Evaluate model</span>
+        <span class="n">chisq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="c"># Evaluate additional restraints based on parameter value</span>
+        <span class="c"># likelihood</span>
+        <span class="n">restraints_penalty</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restraints</span><span class="p">:</span>
+            <span class="n">restraints_penalty</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">likelihood</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="c"># Return total cost function</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chisq</span> <span class="o">+</span> <span class="n">restraints_penalty</span>
+
+<div class="viewcode-block" id="Assembly.abort"><a class="viewcode-back" href="../../dev/api/park.html#park.assembly.Assembly.abort">[docs]</a>    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interrupt the current function evaluation.</span>
+
+<span class="sd">        Forward this to the currently executing model if possible.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cancel</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_model</span><span class="p">,</span><span class="s">&#39;abort&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_model</span><span class="o">.</span><span class="n">abort</span><span class="p">()</span>
+</div></div>
+<span class="k">class</span> <span class="nc">_Exp</span><span class="p">(</span><span class="n">park</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sample model for testing assembly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="s">&#39;c&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">_Linear</span><span class="p">(</span><span class="n">park</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="s">&#39;c&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="c">#print &quot;eval&quot;,self.a,self.c,x,self.a*x+self.c</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span>
+<span class="k">def</span> <span class="nf">example</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return an example assembly consisting of a pair of functions,</span>
+<span class="sd">        M1.a*exp(M1.c*x), M2.a*exp(2*M1.c*x)</span>
+<span class="sd">    and ideal data for</span>
+<span class="sd">        M1.a=1, M1.c=1.5, M2.a=2.5</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+    <span class="kn">import</span> <span class="nn">park</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span>
+    <span class="c"># Make some fake data</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">)</span>
+    <span class="c"># Define a shared model</span>
+    <span class="k">if</span> <span class="bp">True</span><span class="p">:</span> <span class="c"># Exp model</span>
+        <span class="n">y1</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">1.5</span><span class="o">*</span><span class="n">x1</span><span class="p">),</span><span class="mf">2.5</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x2</span><span class="p">)</span>
+        <span class="n">M1</span> <span class="o">=</span> <span class="n">_Exp</span><span class="p">(</span><span class="s">&#39;M1&#39;</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">M2</span> <span class="o">=</span> <span class="n">_Exp</span><span class="p">(</span><span class="s">&#39;M2&#39;</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="s">&#39;2*M1.c&#39;</span><span class="p">)</span>
+        <span class="c">#M2 = _Exp(&#39;M2&#39;,a=[1,3],c=3)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c"># Linear model</span>
+        <span class="n">y1</span><span class="p">,</span><span class="n">y2</span> <span class="o">=</span> <span class="n">x1</span><span class="o">+</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">*</span><span class="n">x2</span><span class="o">+</span><span class="mi">3</span>
+        <span class="n">M1</span> <span class="o">=</span> <span class="n">_Linear</span><span class="p">(</span><span class="s">&#39;M1&#39;</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">M2</span> <span class="o">=</span> <span class="n">_Linear</span><span class="p">(</span><span class="s">&#39;M2&#39;</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="s">&#39;2*M1.c&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">False</span><span class="p">:</span> <span class="c"># Unbounded</span>
+        <span class="n">M1</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">]</span>
+        <span class="n">M1</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">]</span>
+        <span class="n">M2</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">]</span>
+    <span class="n">D1</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Data1D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y1</span><span class="p">)</span>
+    <span class="n">D2</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Data1D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y2</span><span class="p">)</span>
+    <span class="c"># Construct the assembly</span>
+    <span class="n">assembly</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Assembly</span><span class="p">([(</span><span class="n">M1</span><span class="p">,</span><span class="n">D1</span><span class="p">),(</span><span class="n">M2</span><span class="p">,</span><span class="n">D2</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">assembly</span>
+
+<span class="k">class</span> <span class="nc">_Sphere</span><span class="p">(</span><span class="n">park</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span><span class="s">&#39;b&#39;</span><span class="p">,</span><span class="s">&#39;c&#39;</span><span class="p">,</span><span class="s">&#39;d&#39;</span><span class="p">,</span><span class="s">&#39;e&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">example5</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+    <span class="kn">import</span> <span class="nn">park</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">inf</span>
+    <span class="c"># Make some fake data</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span>
+    <span class="c"># Define a shared model</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">_Sphere</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">d</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="n">e</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+    <span class="n">Sfit</span> <span class="o">=</span> <span class="n">_Sphere</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">],</span><span class="n">b</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">],</span><span class="n">d</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">],</span><span class="n">e</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">inf</span><span class="p">,</span><span class="n">inf</span><span class="p">])</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Data1D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="c"># Construct the assembly</span>
+    <span class="n">assembly</span> <span class="o">=</span> <span class="n">park</span><span class="o">.</span><span class="n">Assembly</span><span class="p">([(</span><span class="n">Sfit</span><span class="p">,</span><span class="n">D</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">assembly</span>
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="n">assembly</span> <span class="o">=</span> <span class="n">example</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">assembly</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;M1&#39;</span>
+
+    <span class="c"># extract the fitting parameters</span>
+    <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">assembly</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">()]</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;M1.a&#39;</span><span class="p">,</span><span class="s">&#39;M1.c&#39;</span><span class="p">,</span><span class="s">&#39;M2.a&#39;</span><span class="p">])</span>
+    <span class="c"># Compute chisq and verify constraints are updated properly</span>
+    <span class="k">assert</span> <span class="n">assembly</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">assembly</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">c</span> <span class="o">==</span> <span class="mf">1.5</span> <span class="ow">and</span> <span class="n">assembly</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">c</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="c"># Try without constraints</span>
+    <span class="n">assembly</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">assembly</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">()</span>  <span class="c"># Fit parameters have changed</span>
+    <span class="k">assert</span> <span class="n">assembly</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="c"># Check that assembly.cov runs ... still need to check that it is correct!</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">assembly</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">2.5</span><span class="p">]))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span> <span class="n">test</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

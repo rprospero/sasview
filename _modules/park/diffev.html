@@ -1,0 +1,314 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.diffev &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.diffev</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span><span class="p">,</span> <span class="n">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<div class="viewcode-block" id="DE"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE">[docs]</a><span class="k">class</span> <span class="nc">DE</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Differential evolution test implementation</span>
+<span class="sd">    Implements the Scheme_DE_rand_1 variant</span>
+
+<span class="sd">       F: float</span>
+<span class="sd">           weighting factor which determines the magnitude of perturbation</span>
+<span class="sd">           occurring in each generation.</span>
+
+<span class="sd">       crossover_rate:  float</span>
+<span class="sd">           In general, 0 &lt; crossover_rate &lt; 1.  Usually</span>
+<span class="sd">           considerably lower than 1.  Convergence slows as the value</span>
+<span class="sd">           increases, but higher crossover rates may be necessary when</span>
+
+<span class="sd">       func: w = f(p)</span>
+<span class="sd">           The function to be minimized, of the form w = f(p), where p</span>
+<span class="sd">           is a vector of length func_dim and w is a scalar</span>
+
+<span class="sd">       func_dim: int</span>
+<span class="sd">           The dimension of the objective function</span>
+
+<span class="sd">       pop: array</span>
+<span class="sd">           The initial population.  This should be an iterable composed of</span>
+<span class="sd">           Rank-1 numpy arrays.  The population size must be at least 4,</span>
+<span class="sd">           preferably much greater.</span>
+
+<span class="sd">       l_bound, u_bound: vector</span>
+<span class="sd">           arrays of size func_dim representing the upper and lower bounds</span>
+<span class="sd">           for the parameters in the solution vectors</span>
+
+<span class="sd">       tol: float</span>
+<span class="sd">           if (max(pop_values) - min(pop_values) &lt;= conv), the population</span>
+<span class="sd">           has converged and the evolution will stop</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">crossover_rate</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">func_dim</span><span class="p">,</span> <span class="n">pop</span><span class="p">,</span> <span class="n">l_bound</span><span class="p">,</span>
+                 <span class="n">u_bound</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pop_size</span>          <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span>         <span class="o">=</span> <span class="n">func_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">F_orig</span>            <span class="o">=</span> <span class="n">F</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">F</span>                 <span class="o">=</span> <span class="n">F</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crossover_rate</span>    <span class="o">=</span> <span class="n">crossover_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span>              <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>               <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">l_bound</span>           <span class="o">=</span> <span class="n">l_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u_bound</span>           <span class="o">=</span> <span class="n">u_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population</span>        <span class="o">=</span> <span class="n">pop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generations</span>       <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pop_values</span>        <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_gene</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">best_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_gene</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_gene_history</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">best_gene</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_val_history</span>  <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">best_value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span>            <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c">#//////////////////////////////////////////////////</span>
+<div class="viewcode-block" id="DE.evolve"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.evolve">[docs]</a>    <span class="k">def</span> <span class="nf">evolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numgens</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Evolve the population for numgens generations, or until it converges.</span>
+<span class="sd">            Returns the best vector from the run&#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">psyco</span>
+            <span class="n">psyco</span><span class="o">.</span><span class="n">full</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">start_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generations</span>
+        <span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generations</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generations</span> <span class="o">+</span> <span class="n">numgens</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">candidate_pop</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pop_size</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">r3</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_participants</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+                <span class="c">#perturbation/mutation</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">r1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">r2</span><span class="p">]</span>
+                                                          <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">r3</span><span class="p">])</span>
+
+                <span class="c">#crossover</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crossover</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+                <span class="c">#check bound constraints</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_within_bounds</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>
+                    <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_random_gene</span><span class="p">()</span>
+
+                <span class="c">#test fitness to determine membership in next gen</span>
+                <span class="n">candidate_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">candidate_val</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop_values</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">candidate_pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pop_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">candidate_val</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">candidate_pop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop_size</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">population</span>  <span class="o">=</span> <span class="n">candidate_pop</span>
+            <span class="n">x</span><span class="p">,</span><span class="n">fx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_gene</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">fx</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_value</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">best_gene</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_value</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span><span class="n">fx</span>
+                <span class="k">if</span> <span class="n">monitor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">monitor</span><span class="o">.</span><span class="n">improvement</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">fx</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_val_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_gene_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_gene</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">generations</span> <span class="o">=</span> <span class="n">gen</span>
+
+            <span class="k">if</span> <span class="n">monitor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">monitor</span><span class="o">.</span><span class="n">progress</span><span class="p">(</span><span class="n">gen</span><span class="o">-</span><span class="n">start_gen</span><span class="p">,</span><span class="n">numgens</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_converged</span><span class="p">():</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_gene</span>
+
+
+    <span class="c">#////////////////////////////////////////////////</span></div>
+<div class="viewcode-block" id="DE.get_random_gene"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.get_random_gene">[docs]</a>    <span class="k">def</span> <span class="nf">get_random_gene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Generate a random gene within the bounds constraints.</span>
+<span class="sd">           Used to replace out-of-bounds genes&#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
+                  <span class="k">for</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l_bound</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_bound</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="c">#////////////////////////////////////////////////</span></div>
+<div class="viewcode-block" id="DE.is_within_bounds"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.is_within_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">is_within_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gene</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Determine whether the gene meets the bounds constraints&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l_bound</span> <span class="o">&lt;</span> <span class="n">gene</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u_bound</span> <span class="o">&gt;</span> <span class="n">gene</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="c">#////////////////////////////////////////////////</span>
+    <span class="c">#This appears to be a total failure.  I&#39;ll leave the code in,</span>
+    <span class="c">#but it&#39;s not called from the main evolution loop anymore.</span></div>
+<div class="viewcode-block" id="DE.adjust_F"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.adjust_F">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_F</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Adjust F to account for stagnation of the population &#39;&#39;&#39;</span>
+        <span class="c">#has the best vector improved this generation?</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_val_history</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_val_history</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_val_history</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stagnant_gens</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stagnant_gens</span>  <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c">#adapt F to account for stagnation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">F</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">F_orig</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stagnant_gens</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)),</span> <span class="mf">2.0</span><span class="p">)</span>
+
+    <span class="c">#////////////////////////////////////////////////</span></div>
+<div class="viewcode-block" id="DE.get_best_gene"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.get_best_gene">[docs]</a>    <span class="k">def</span> <span class="nf">get_best_gene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;find the most fit gene in the current population&#39;&#39;&#39;</span>
+        <span class="c">#print &quot;pop&quot;, self.pop_values</span>
+
+        <span class="n">best_index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pop_values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">best_index</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pop_values</span><span class="p">[</span><span class="n">best_index</span><span class="p">],</span>
+
+    <span class="c">#////////////////////////////////////////////////</span></div>
+<div class="viewcode-block" id="DE.select_participants"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.select_participants">[docs]</a>    <span class="k">def</span> <span class="nf">select_participants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;generate r1, r2, and r3 randomly from the range [0, NP-1]</span>
+<span class="sd">            such that they are distinct values not equal to i&#39;&#39;&#39;</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop_size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">choices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">choices</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="c">#////////////////////////////////////////////////</span></div>
+<div class="viewcode-block" id="DE.crossover"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.crossover">[docs]</a>    <span class="k">def</span> <span class="nf">crossover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Perform a crossover between the candidate and the ith member of</span>
+<span class="sd">            the previous generation.&#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c">#generate lower bound of crossover (this bound is inclusive)</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c">#determine the size of the crossover</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">crossover_rate</span> <span class="ow">and</span> <span class="n">L</span> <span class="o">&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">-</span> <span class="n">low</span><span class="p">):</span>
+            <span class="n">L</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c">#calculate the upper bound of crossover (this bound is exclusive)</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="n">low</span> <span class="o">+</span> <span class="n">L</span>
+
+        <span class="n">high</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">high</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
+        <span class="n">low</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">low</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
+        <span class="n">seq</span>   <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">choose</span><span class="p">(</span> <span class="p">((</span><span class="n">seq</span> <span class="o">&gt;=</span> <span class="n">low</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">seq</span> <span class="o">&lt;</span> <span class="n">high</span><span class="p">)),</span>
+                             <span class="p">[</span><span class="n">candidate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="DE.is_converged"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.DE.is_converged">[docs]</a>    <span class="k">def</span> <span class="nf">is_converged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;check for convergence&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pop_values</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pop_values</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+</div></div>
+<div class="viewcode-block" id="diffev"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.diffev">[docs]</a><span class="k">def</span> <span class="nf">diffev</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pop_scale</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">crossover_rate</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+           <span class="n">Fscale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run differential evolution, returning x,fx,ncalls</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span>
+    <span class="n">pop</span> <span class="o">=</span> <span class="n">gen_pop</span><span class="p">(</span><span class="n">dim</span><span class="o">*</span><span class="n">pop_scale</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">pop</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+    <span class="n">evolver</span> <span class="o">=</span> <span class="n">DE</span><span class="p">(</span><span class="n">Fscale</span><span class="p">,</span> <span class="n">crossover_rate</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">pop</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="n">evolver</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">maxiter</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="n">monitor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">evolver</span><span class="o">.</span><span class="n">best_gene</span><span class="p">,</span> <span class="n">evolver</span><span class="o">.</span><span class="n">best_value</span><span class="p">,</span> <span class="n">evolver</span><span class="o">.</span><span class="n">ncalls</span>
+
+
+
+
+<span class="c">########################################################################</span>
+<span class="c">#end DE def</span>
+<span class="c">########################################################################</span></div>
+<div class="viewcode-block" id="gen_pop"><a class="viewcode-back" href="../../dev/api/park.html#park.diffev.gen_pop">[docs]</a><span class="k">def</span> <span class="nf">gen_pop</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">l_bound</span><span class="p">,</span> <span class="n">u_bound</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;generate a random population of vectors within the given bounds.  dimension</span>
+<span class="sd">       indicates the length of the vectors.  l_bound and u_bound should be vectors</span>
+<span class="sd">       of length dimension (any iterable container should work)&#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">dimension</span><span class="p">):</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">((</span><span class="n">u_bound</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">l_bound</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">random</span><span class="p">())</span> <span class="o">+</span> <span class="n">l_bound</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

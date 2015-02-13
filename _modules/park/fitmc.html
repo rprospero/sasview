@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>park.fitmc &mdash; SasView 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="SasView 3.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for park.fitmc</h1><div class="highlight"><pre>
+<span class="c"># The job queue needs to be in a transaction/rollback protected database.</span>
+<span class="c"># If the server is rebooted, long running jobs should continue to work.</span>
+<span class="c">#</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">simplex</span>
+
+<span class="kn">import</span> <span class="nn">fitresult</span><span class="o">,</span> <span class="nn">pmap</span><span class="o">,</span> <span class="nn">fit</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;fitmc&#39;</span><span class="p">,</span> <span class="s">&#39;FitMCJob&#39;</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">LocalFit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract interface for a local minimizer</span>
+
+<span class="sd">    See `park.fitmc.FitSimplex` for a concrete implementation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Minimize the value of a fitness function.</span>
+
+<span class="sd">        See `park.fitmc.Fitness` for the definition of the goodness of fit</span>
+<span class="sd">        object.  x0 is a vector containing the initial value for the fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cancel the fit.  This will be called from a separate execution</span>
+<span class="sd">        thread.  The fit should terminate as soon as possible after this</span>
+<span class="sd">        function has been called.  Ideally this would interrupt the</span>
+<span class="sd">        cur</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="k">class</span> <span class="nc">FitSimplex</span><span class="p">(</span><span class="n">LocalFit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Local minimizer using Nelder-Mead simplex algorithm.</span>
+
+<span class="sd">    Simplex is robust and derivative free, though not very efficient.</span>
+
+<span class="sd">    This class wraps the bounds contrained Nelder-Mead simplex</span>
+<span class="sd">    implementation for `park.simplex.simplex`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="sd">&quot;&quot;&quot;Size of the initial simplex; this is a portion between 0 and 1&quot;&quot;&quot;</span>
+    <span class="n">xtol</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c">#xtol = 1e-4</span>
+    <span class="sd">&quot;&quot;&quot;Stop when simplex vertices are within xtol of each other&quot;&quot;&quot;</span>
+    <span class="n">ftol</span> <span class="o">=</span> <span class="mf">1e-4</span>
+    <span class="sd">&quot;&quot;&quot;Stop when vertex values are within ftol of each other&quot;&quot;&quot;</span>
+    <span class="n">maxiter</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="sd">&quot;&quot;&quot;Maximum number of iterations before fit terminates&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the fit&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cancel</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">pars</span> <span class="o">=</span> <span class="n">fitness</span><span class="o">.</span><span class="n">fit_parameters</span><span class="p">()</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">range</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">simplex</span><span class="o">.</span><span class="n">simplex</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+                                 <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xtol</span><span class="p">,</span>
+                                 <span class="n">ftol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ftol</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="p">,</span>
+                                 <span class="n">abort_test</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_iscancelled</span><span class="p">)</span>
+        <span class="c">#print &quot;calls:&quot;,result.calls</span>
+        <span class="c">#print &quot;simplex returned&quot;,result.x,result.fx</span>
+        <span class="c"># Need to make our own copy of the fit results so that the</span>
+        <span class="c"># values don&#39;t get stomped on by the next fit iteration.</span>
+        <span class="n">fitpars</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitresult</span><span class="o">.</span><span class="n">FitParameter</span><span class="p">(</span><span class="n">pars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">pars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">range</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">)]</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">fitresult</span><span class="o">.</span><span class="n">FitResult</span><span class="p">(</span><span class="n">fitpars</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">calls</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">fx</span><span class="p">)</span>
+        <span class="c"># Compute the parameter uncertainties from the jacobian</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">calc_cov</span><span class="p">(</span><span class="n">fitness</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cancel the fit in progress from another thread of execution&quot;&quot;&quot;</span>
+        <span class="c"># Effectively an atomic operation; rely on GIL to protect it.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cancel</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c"># Abort the current function evaluation if possible.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span><span class="s">&#39;abort&#39;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="o">.</span><span class="n">abort</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_iscancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cancel</span>
+
+<span class="k">class</span> <span class="nc">MapMC</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate a local fit at a particular start point.</span>
+
+<span class="sd">    This is the function to be mapped across a set of start points for the</span>
+<span class="sd">    monte carlo map-reduce implementation.</span>
+
+<span class="sd">    See `park.pmap.Mapper` for required interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimizer</span><span class="p">,</span> <span class="n">fitness</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">minimizer</span><span class="p">,</span> <span class="n">fitness</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">,</span><span class="n">x0</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minimizer</span><span class="o">.</span><span class="n">abort</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">CollectMC</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collect the results from multiple start points in a Monte Carlo fit engine.</span>
+
+<span class="sd">    See `park.pmap.Collector` for required interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_expected</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_expected</span> <span class="o">=</span> <span class="n">number_expected</span>
+        <span class="sd">&quot;&quot;&quot;Number of starting points to check with local optimizer&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="c"># Keep track of the amount of work done</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls</span> <span class="o">+=</span> <span class="n">result</span><span class="o">.</span><span class="n">calls</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">best</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">fitness</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">best</span><span class="o">.</span><span class="n">fitness</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">improvement</span><span class="p">()</span>
+        <span class="c"># Progress should go after improvement in case the fit handler</span>
+        <span class="c"># wants to suppress intermediate improvements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">progress</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_expected</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">abort</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">calls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">fitmc</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">localfit</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">handler</span><span class="p">):</span>
+<div class="viewcode-block" id="fitmc"><a class="viewcode-back" href="../../dev/api/park.html#park.fitmc.fitmc">[docs]</a>    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run a monte carlo fit.</span>
+
+<span class="sd">    This procedure maps a local optimizer across a set of n initial points.</span>
+<span class="sd">    The initial parameter value defined by the fitness parameters defines</span>
+<span class="sd">    one initial point.  The remainder are randomly generated within the</span>
+<span class="sd">    bounds of the problem.</span>
+
+<span class="sd">    localfit is the local optimizer to use.  It should be a bounded</span>
+<span class="sd">    optimizer following the `park.fitmc.LocalFit` interface.</span>
+
+<span class="sd">    handler accepts updates to the current best set of fit parameters.</span>
+<span class="sd">    See `park.fitresult.FitHandler` for details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Generate random number within bounds.  If bounds are indefinite, use [0,1]</span>
+    <span class="c"># If bounds are semi-definite, use [low,low+1] or [high-1,high], depending</span>
+    <span class="c"># on which limit is unbounded.</span>
+    <span class="n">lo</span><span class="p">,</span><span class="n">hi</span> <span class="o">=</span> <span class="n">bounds</span>
+    <span class="n">inf_lo</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span>
+    <span class="n">inf_hi</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">hi</span><span class="o">-</span><span class="n">lo</span>
+    <span class="n">delta</span><span class="p">[</span><span class="n">inf_lo</span><span class="o">|</span><span class="n">inf_hi</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">lo</span><span class="p">[</span><span class="n">inf_lo</span><span class="p">]</span> <span class="o">=</span> <span class="n">hi</span><span class="p">[</span><span class="n">inf_lo</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span>
+    <span class="n">lo</span><span class="p">[</span><span class="n">inf_lo</span><span class="o">&amp;</span><span class="n">inf_hi</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">))</span><span class="o">*</span><span class="n">delta</span><span class="o">+</span><span class="n">lo</span>
+    <span class="c">#print &quot;Population&quot;,P</span>
+    <span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x0</span>
+
+    <span class="n">pmap</span><span class="o">.</span><span class="n">pmapreduce</span><span class="p">(</span><span class="n">MapMC</span><span class="p">(</span><span class="n">localfit</span><span class="p">,</span><span class="n">fitness</span><span class="p">),</span>
+                    <span class="n">CollectMC</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">handler</span><span class="p">),</span>
+                    <span class="n">P</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">FitMC</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">Fitter</span><span class="p">):</span></div>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Monte Carlo optimizer.</span>
+
+<span class="sd">    This implements `park.fit.Fitter`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">localfit</span> <span class="o">=</span> <span class="n">FitSimplex</span><span class="p">()</span>
+    <span class="n">start_points</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run a monte carlo fit.</span>
+
+<span class="sd">        This procedure maps a local optimizer across a set of initial points.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fitmc</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">localfit</span><span class="p">,</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">start_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">fit</span><span class="o">.</span><span class="n">demo2</span><span class="p">(</span><span class="n">FitMC</span><span class="p">(</span><span class="n">localfit</span><span class="o">=</span><span class="n">FitSimplex</span><span class="p">(),</span><span class="n">start_points</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">SasView 3.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, The SasView Project.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
