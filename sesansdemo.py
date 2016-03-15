@@ -6,7 +6,7 @@
 from __future__ import division
 
 from pylab import *
-from scipy.special import jv as besselj
+from scipy.special import j0 as besselj
 
 # q-range parameters
 
@@ -46,7 +46,7 @@ ylabel(r'$d\Sigma/d\Omega [m^{-1}]$')
 # Hankel transform to nice range for plot
 nz=61;
 zz=linspace(0,240,nz); # [nm], should be less than reciprocal from q
-G = np.inner(besselj(0,np.outer(zz,q)),I*q)
+G = np.inner(besselj(np.outer(zz,q)),I*q)
 G=G*dq*1e9*2*pi; # integr step, conver q into [m**-1] and 2 pi circle integr
 # plot(zz,G);
 stt= th*Lambda**2/4/pi/pi*G[0]  # scattering power according to SANS formalism

@@ -11,7 +11,7 @@ from __future__ import division
 
 import numpy as np
 from numpy import pi, exp
-from scipy.special import jv as besselj
+from scipy.special import j0 as besselj
 
 def make_q(q_max, Rmax):
     r"""
@@ -42,7 +42,7 @@ def hankel(SElength, wavelength, thickness, q, Iq):
 
     *I* [cm$^{-1}$] is the value of the SANS model at *q*
     """
-    G = np.inner(besselj(0,np.outer(SElength,q)),Iq*q)
+    G = np.inner(besselj(np.outer(SElength,q)),Iq*q)
 
     # [m^-1] step size in q, needed for integration
     dq = (q[1]-q[0])*1e10
