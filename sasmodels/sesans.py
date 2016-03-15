@@ -42,10 +42,7 @@ def hankel(SElength, wavelength, thickness, q, Iq):
 
     *I* [cm$^{-1}$] is the value of the SANS model at *q*
     """
-    G = np.zeros_like(SElength, 'd')
-    for i, SElength_i in enumerate(SElength):
-        integral = besselj(0, q*SElength_i)*Iq*q
-        G[i] = np.sum(integral)
+    G = np.inner(besselj(0,np.outer(SElength,q)),Iq*q)
 
     # [m^-1] step size in q, needed for integration
     dq = (q[1]-q[0])*1e10
