@@ -26,10 +26,9 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
 
 if __name__ == "__main__":
     APP = QtGui.QApplication([])
-    import qt4reactor
     # DO NOT move the following import to the top!
     # (unless you know what you're doing)
     from twisted.internet import reactor
-    DLG = CompositeWindow(reactor)
+    DLG = CompositeWindow()
     DLG.show()
-    reactor.run()
+    APP.exec_()
