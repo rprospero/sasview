@@ -8,6 +8,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.sascalc.fit.models import ModelManager
 
 # local
 from UI.Composite import Ui_CompositeModelPanel
@@ -23,6 +24,15 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         self.setupUi(self)
 
         self.setWindowTitle("Composite Model Creator")
+
+        self.modelManager = ModelManager()
+        models = self.modelManager.get_model_list()
+        for k in models:
+            self.model1.addItem("_"+k, None)
+            self.model2.addItem("_"+k, None)
+            for m in models[k]:
+                self.model1.addItem(m.name, m)
+                self.model2.addItem(m.name, m)
 
 if __name__ == "__main__":
     APP = QtGui.QApplication([])
