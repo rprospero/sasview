@@ -88,25 +88,30 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         self.mapper.toFirst()
 
     def modelChanged(self, item):
-        invalid = "background-color: rgb(255, 128, 128);\n"
         if item.row() == W.MODEL1:
             result = self._get_model_from_index(
                 self.model.item(W.MODEL1).text())
-            print(result)
-            if result:
-                self.model1.setStyleSheet("")
-            else:
-                self.model1.setStyleSheet(invalid)
             self.m1 = result
         elif item.row() == W.MODEL2:
             result = self._get_model_from_index(
                 self.model.item(W.MODEL2).text())
-            if result:
-                self.model2.setStyleSheet("")
-            else:
-                self.model2.setStyleSheet(invalid)
             self.m2 = result
-        print(self.m1, self.m2)
+
+        self._valid_entry(self.m1, self.model1)
+        self._valid_entry(self.m2, self.model2)
+        self._valid_entry(self._valid_name(), self.functionName)
+
+    @staticmethod
+    def _valid_entry(test, widget):
+        invalid = "background-color: rgb(255, 128, 128);\n"
+        if test:
+            widget.setStyleSheet("")
+        else:
+            widget.setStyleSheet(invalid)
+
+    def _valid_name(self):
+        name = str(self.model.item(W.NAME).text())
+        return name.strip() != ""
 
     def _get_model_from_index(self, name):
         models = self.modelManager.get_model_list()
