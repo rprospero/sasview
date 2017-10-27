@@ -1,3 +1,4 @@
+import re
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import QtWebKit
@@ -111,7 +112,7 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
 
     def _valid_name(self):
         name = str(self.model.item(W.NAME).text())
-        if name.strip() == "":
+        if not re.match('^[A-Za-z_][A-Za-z0-9_]+$', name):
             return False
         models = self.modelManager.get_model_list()
         for k in models:
@@ -131,10 +132,16 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
 
     def on_apply(self):
         if not (self.m1 and self.m2):
-            print("Please select two models")
+            QtGui.QMessageBox.critical(
+                self,
+                "Cannot Create Model",
+                "Please select two models")
             return
         elif not self._valid_name():
-            print("Please choose a different name")
+            QtGui.QMessageBox.critical(
+                self,
+                "Cannot Create Model",
+                "Please choose a different name")
             return
         print("Applied")
 
