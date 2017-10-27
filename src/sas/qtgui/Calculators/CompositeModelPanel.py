@@ -26,6 +26,15 @@ W = enum(
     'OPERATOR'
 )
 
+SUM_TEMPLATE = """
+from sasmodels.core import load_model_info
+from sasmodels.sasview_model import make_model_from_info
+
+model_info = load_model_info('{model1}{operator}{model2}')
+model_info.name = '{name}'{desc_line}
+Model = make_model_from_info(model_info)
+"""
+
 class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -71,7 +80,7 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         self.model.setItem(W.DESCRIPTION, QtGui.QStandardItem(""))
         self.model.setItem(W.MODEL1, QtGui.QStandardItem(""))
         self.model.setItem(W.MODEL2, QtGui.QStandardItem(""))
-        self.model.setItem(W.OPERATOR, QtGui.QStandardItem(""))
+        self.model.setItem(W.OPERATOR, QtGui.QStandardItem("+"))
 
         self.model.dataChanged.connect(self.modelChanged)
 
@@ -143,7 +152,16 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
                 "Cannot Create Model",
                 "Please choose a different name")
             return
-        print("Applied")
+        description = str(self.model.item(W.DESCRIPTION).text())
+        if description.strip() != "":
+            description = "\nmodel_info.description = '{}'".format(description)
+        output = SUM_TEMPLATE.format(
+            name=self.model.item(W.NAME).text(),
+            model1=self.model.item(W.MODEL1).text(),
+            model2=self.model.item(W.MODEL2).text(),
+            operator=self.model.item(W.OPERATOR).text(),
+            desc_line=description)
+        print(output)
 
 
 
