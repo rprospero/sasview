@@ -31,6 +31,7 @@ from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
+from sas.qtgui.Calculators.CompositeModelPanel import CompositeWindow
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
@@ -143,6 +144,7 @@ class GuiManager(object):
         self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
+        self.EditCustomModel = CompositeWindow(self)
 
     def statusBarSetup(self):
         """
@@ -651,7 +653,7 @@ class GuiManager(object):
     def actionEdit_Custom_Model(self):
         """
         """
-        print("actionEdit_Custom_Model TRIGGERED")
+        self.EditCustomModel.show()
         pass
 
     #============ ANALYSIS =================
