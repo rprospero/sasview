@@ -10,7 +10,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.sascalc.fit.models import ModelManager, find_plugins_dir
+from sas.qtgui.Perspectives.Fitting.ModelUtilities import ModelManager, find_plugins_dir
 
 # local
 from UI.Composite import Ui_CompositeModelPanel
