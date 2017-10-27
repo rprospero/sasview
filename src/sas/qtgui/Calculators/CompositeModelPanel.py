@@ -111,7 +111,14 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
 
     def _valid_name(self):
         name = str(self.model.item(W.NAME).text())
-        return name.strip() != ""
+        if name.strip() == "":
+            return False
+        models = self.modelManager.get_model_list()
+        for k in models:
+            for m in models[k]:
+                if name == m.name:
+                    return False
+        return True
 
     def _get_model_from_index(self, name):
         models = self.modelManager.get_model_list()
@@ -123,7 +130,14 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         return result
 
     def on_apply(self):
-        pass
+        if not (self.m1 and self.m2):
+            print("Please select two models")
+            return
+        elif not self._valid_name():
+            print("Please choose a different name")
+            return
+        print("Applied")
+
 
 
 if __name__ == "__main__":

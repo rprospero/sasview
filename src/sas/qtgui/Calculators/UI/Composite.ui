@@ -17,16 +17,6 @@
    <item row="0" column="1">
     <widget class="QLineEdit" name="functionName"/>
    </item>
-   <item row="1" column="1">
-    <widget class="QLineEdit" name="functionDescription">
-     <property name="maximumSize">
-      <size>
-       <width>281</width>
-       <height>23</height>
-      </size>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
@@ -111,6 +101,9 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPlainTextEdit" name="functionDescription"/>
    </item>
   </layout>
  </widget>
