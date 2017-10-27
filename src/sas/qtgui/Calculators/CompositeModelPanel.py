@@ -13,6 +13,18 @@ from sas.sascalc.fit.models import ModelManager
 # local
 from UI.Composite import Ui_CompositeModelPanel
 
+def enum(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)
+
+W = enum(
+    'NAME',
+    'DESCRIPTION',
+    'MODEL1',
+    'MODEL2',
+    'OPERATOR'
+)
+
 class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -25,19 +37,89 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
 
         self.setWindowTitle("Composite Model Creator")
 
+        self.m1 = self.m2 = None
         self.modelManager = ModelManager()
         models = self.modelManager.get_model_list()
+        model1 = self.model1.model()
+        model2 = self.model2.model()
         for k in models:
-            self.model1.addItem("_"+k, None)
-            self.model2.addItem("_"+k, None)
+            category = QtGui.QStandardItem(k)
+            font = category.font()
+            font.setBold(True)
+            category.setFont(font)
+            model1.appendRow(category)
+            category = QtGui.QStandardItem(category)
+            model2.appendRow(category)
             for m in models[k]:
-                self.model1.addItem(m.name, m)
-                self.model2.addItem(m.name, m)
+                value = QtGui.QStandardItem(m.name)
+                model1.appendRow(value)
+                value = QtGui.QStandardItem(value)
+                model2.appendRow(value)
 
         self.setupSignals()
+        self.setupModel()
+        self.setupMapper()
 
     def setupSignals(self):
         self.closeButton.clicked.connect(self.close)
+        self.applyButton.clicked.connect(self.on_apply)
+
+    def setupModel(self):
+        self.model = QtGui.QStandardItemModel(self)
+        self.model.setItem(W.NAME, QtGui.QStandardItem(""))
+        self.model.setItem(W.DESCRIPTION, QtGui.QStandardItem(""))
+        self.model.setItem(W.MODEL1, QtGui.QStandardItem(""))
+        self.model.setItem(W.MODEL2, QtGui.QStandardItem(""))
+        self.model.setItem(W.OPERATOR, QtGui.QStandardItem(""))
+
+        self.model.dataChanged.connect(self.modelChanged)
+
+    def setupMapper(self):
+        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper.setModel(self.model)
+        self.mapper.setOrientation(QtCore.Qt.Vertical)
+
+        self.mapper.addMapping(self.functionName, W.NAME)
+        self.mapper.addMapping(self.functionDescription, W.DESCRIPTION)
+        self.mapper.addMapping(self.model1, W.MODEL1)
+        self.mapper.addMapping(self.model2, W.MODEL2)
+        self.mapper.addMapping(self.op, W.OPERATOR)
+
+        self.mapper.toFirst()
+
+    def modelChanged(self, item):
+        invalid = "background-color: rgb(255, 128, 128);\n"
+        if item.row() == W.MODEL1:
+            result = self._get_model_from_index(
+                self.model.item(W.MODEL1).text())
+            print(result)
+            if result:
+                self.model1.setStyleSheet("")
+            else:
+                self.model1.setStyleSheet(invalid)
+            self.m1 = result
+        elif item.row() == W.MODEL2:
+            result = self._get_model_from_index(
+                self.model.item(W.MODEL2).text())
+            if result:
+                self.model2.setStyleSheet("")
+            else:
+                self.model2.setStyleSheet(invalid)
+            self.m2 = result
+        print(self.m1, self.m2)
+
+    def _get_model_from_index(self, name):
+        models = self.modelManager.get_model_list()
+        result = None
+        for k in models:
+            for m in models[k]:
+                if name == m.name:
+                    result = m
+        return result
+
+    def on_apply(self):
+        pass
+
 
 if __name__ == "__main__":
     APP = QtGui.QApplication([])
