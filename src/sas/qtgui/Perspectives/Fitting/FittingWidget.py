@@ -31,6 +31,7 @@ from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
+from sas.qtgui.Perspectives.Fitting.ModelUtilities import ModelManager, find_plugins_dir
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
@@ -45,6 +46,7 @@ TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
 CATEGORY_STRUCTURE = "Structure Factor"
+CATEGORY_PLUGINS = "Plugin Models"
 STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
@@ -1129,12 +1131,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             categorization_file = CategoryInstaller.get_default_file()
         with open(categorization_file, 'rb') as cat_file:
             self.master_category_dict = json.load(cat_file)
-            self.regenerateModelDict()
+        model_list = ModelManager().get_model_list()['Plugin Models']
+        self.master_category_dict[CATEGORY_PLUGINS] = \
+            [[m.name[10:], True] for m in model_list]
+        self.regenerateModelDict()
 
         # Load the model dict
         models = load_standard_models()
         for model in models:
             self.models[model.name] = model
+        for model in model_list:
+            self.models[model.name[10:]] = model
 
     def regenerateModelDict(self):
         """
@@ -1241,7 +1248,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into QStandardItemModel based on selected _model_
         """
-        kernel_module = generate.load_kernel_module(model_name)
+        try:
+            kernel_module = generate.load_kernel_module(model_name)
+        except ImportError:
+            kernel_module = generate.load_kernel_module(
+                os.path.join(find_plugins_dir(), model_name+".py"))
         self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         # Instantiate the current sasmodel
