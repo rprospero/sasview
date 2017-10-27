@@ -1,3 +1,4 @@
+import os.path
 import re
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -9,7 +10,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.sascalc.fit.models import ModelManager
+from sas.sascalc.fit.models import ModelManager, find_plugins_dir
 
 # local
 from UI.Composite import Ui_CompositeModelPanel
@@ -28,11 +29,11 @@ W = enum(
 
 SUM_TEMPLATE = """
 from sasmodels.core import load_model_info
-from sasmodels.sasview_model import make_model_from_info
+from sasmodels.sasview_model import _make_model_from_info
 
 model_info = load_model_info('{model1}{operator}{model2}')
 model_info.name = '{name}'{desc_line}
-Model = make_model_from_info(model_info)
+Model = _make_model_from_info(model_info)
 """
 
 class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
@@ -161,7 +162,10 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
             model2=self.model.item(W.MODEL2).text(),
             operator=self.model.item(W.OPERATOR).text(),
             desc_line=description)
-        print(output)
+        path = os.path.join(find_plugins_dir(),
+                            str(self.model.item(W.NAME).text())+".py")
+        with open(path, "w") as outfile:
+            outfile.write(output)
 
 
 
