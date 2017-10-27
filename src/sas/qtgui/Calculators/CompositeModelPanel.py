@@ -34,6 +34,11 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
                 self.model1.addItem(m.name, m)
                 self.model2.addItem(m.name, m)
 
+        self.setupSignals()
+
+    def setupSignals(self):
+        self.closeButton.clicked.connect(self.close)
+
 if __name__ == "__main__":
     APP = QtGui.QApplication([])
     # DO NOT move the following import to the top!
