@@ -42,6 +42,8 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
 
         self.setWindowTitle("Custom Model Editor")
 
+        self.modelManager = ModelManager()
+
         self.setupSignals()
         self.setupModel()
         self.setupMapper()
@@ -83,9 +85,9 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
 
         self.applyBtn.setEnabled(True)
 
+        name = str(self.model.item(W.NAME).text())
         self._valid_entry(
-            self._valid_field(
-                str(self.model.item(W.NAME).text())),
+            self._valid_name(name),
             self.functionName)
 
         param = str(self.model.item(W.PARAMS).text())
@@ -98,10 +100,24 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         self._valid_entry(all(map(lambda x: self._valid_field(x),
                                   param)),
                           self.polyParams)
+
+        func = str(self.model.item(W.FUNCTION).text())
+        self._valid_entry("return" in func, self.function)
         # self._valid_entry(self._valid_name(), self.functionName)
+
 
     def _valid_field(self, x):
         return re.match('^[A-Za-z_][A-Za-z0-9_]+$', x.strip())
+
+    def _valid_name(self, x):
+        if not self._valid_field(x):
+            return False
+        models = self.modelManager.get_model_list()
+        for k in models:
+            for m in models[k]:
+                if x == m.name:
+                    return False
+        return True
 
     def _valid_entry(self, test, widget):
         invalid = "background-color: rgb(255, 128, 128);\n"
