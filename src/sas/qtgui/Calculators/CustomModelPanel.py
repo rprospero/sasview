@@ -110,6 +110,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         # self._valid_entry(self._valid_name(), self.functionName)
 
     def _fill_math_combo(self):
+        idx = 0
         for item in dir(math):
             if item[:2] == "__":
                 continue
@@ -117,6 +118,11 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
                 self.math.addItem(item)
             else:
                 self.math.addItem(item+"()")
+            self.math.setItemData(
+                idx,
+                getattr(math, item).__doc__,
+                QtCore.Qt.ToolTipRole)
+            idx += 1
         # Just to show off, let's also add in the special
         # functions from scipy.  The odds of the users
         # NOT needing some kind of Bessel function are
@@ -128,6 +134,11 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
                 self.math.addItem("scipy.special." + item)
             else:
                 self.math.addItem("scipy.special." + item + "()")
+            self.math.setItemData(
+                idx,
+                getattr(scipy.special, item).__doc__,
+                QtCore.Qt.ToolTipRole)
+            idx += 1
 
     def _valid_field(self, x):
         return re.match('^[A-Za-z_][A-Za-z0-9_]+$', x.strip())
