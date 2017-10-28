@@ -1,6 +1,8 @@
 import datetime
+import math
 import os.path
 import re
+import scipy.special
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import QtWebKit
@@ -43,6 +45,8 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         self.setWindowTitle("Custom Model Editor")
 
         self.modelManager = ModelManager()
+
+        self._fill_math_combo()
 
         self.setupSignals()
         self.setupModel()
@@ -105,6 +109,25 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         self._valid_entry("return" in func, self.function)
         # self._valid_entry(self._valid_name(), self.functionName)
 
+    def _fill_math_combo(self):
+        for item in dir(math):
+            if item[:2] == "__":
+                continue
+            if type(getattr(math, item)) is float:
+                self.math.addItem(item)
+            else:
+                self.math.addItem(item+"()")
+        # Just to show off, let's also add in the special
+        # functions from scipy.  The odds of the users
+        # NOT needing some kind of Bessel function are
+        # infinitesimal.
+        for item in dir(scipy.special):
+            if item[0] == "_":
+                continue
+            if type(getattr(scipy.special, item)) is float:
+                self.math.addItem("scipy.special." + item)
+            else:
+                self.math.addItem("scipy.special." + item + "()")
 
     def _valid_field(self, x):
         return re.match('^[A-Za-z_][A-Za-z0-9_]+$', x.strip())
