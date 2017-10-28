@@ -55,6 +55,12 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
     def setupSignals(self):
         self.closeBtn.clicked.connect(self.close)
         self.applyBtn.clicked.connect(self.on_apply)
+        # We can't map the function to the model without
+        # losing cursor information, so we need to watch
+        # this signal separately.
+        self.function.textChanged.connect(
+            lambda: self.modelChanged(
+                self.model.createIndex(W.FUNCTION, 0)))
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -76,8 +82,9 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         self.mapper.addMapping(self.description, W.DESCRIPTION)
         self.mapper.addMapping(self.params, W.PARAMS)
         self.mapper.addMapping(self.polyParams, W.POLYPARAMS)
-        self.mapper.addMapping(self.function, W.FUNCTION)
         self.mapper.addMapping(self.math, W.MATH)
+        # We can't add a mapping to the function, since it causes Qt
+        # to lose the cursor position information.
 
         self.mapper.toFirst()
 
@@ -86,6 +93,13 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         if not self.mapper:
             return
         self.mapper.toFirst()
+
+        if item.row() == W.MATH:
+            print(self.function.textCursor())
+            print(self.function.textCursor().position())
+            self.function.textCursor().insertText(
+                str(self.model.item(W.MATH).text()))
+            return
 
         self.applyBtn.setEnabled(True)
 
@@ -105,7 +119,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
                                   param)),
                           self.polyParams)
 
-        func = str(self.model.item(W.FUNCTION).text())
+        func = str(self.function.toPlainText())
         self._valid_entry("return" in func, self.function)
         # self._valid_entry(self._valid_name(), self.functionName)
 
@@ -183,7 +197,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         name = str(self.model.item(W.NAME).text())
         param_str = str(self.model.item(W.PARAMS).text())
         pd_param_str = str(self.model.item(W.POLYPARAMS).text())
-        func_str = str(self.model.item(W.FUNCTION).text())
+        func_str = str(self.function.toPlainText())
         
         total = CUSTOM_TEMPLATE.format(
             name=name,
@@ -208,7 +222,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         total += "    ]\n"
 
         total += "def Iq({}):\n".format(", ".join(['x'] + param_names))
-        total += '   """Absolute scattering"""\n'
+        total += '    """Absolute scattering"""\n'
         if "scipy." in func_str:
             total += "    import scipy\n"
         if "numpy." in func_str:
