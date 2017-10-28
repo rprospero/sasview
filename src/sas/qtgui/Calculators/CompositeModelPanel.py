@@ -74,6 +74,9 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
     def setupSignals(self):
         self.closeButton.clicked.connect(self.close)
         self.applyButton.clicked.connect(self.on_apply)
+        def test():
+            print("Recieved Signal")
+        self.modelManager.signal.modelsChanged.connect(test)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -167,7 +170,7 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         with open(path, "w") as outfile:
             outfile.write(output)
 
-        self.modelManager.signal.modelsChanged.emit()
+        self.modelManager.update()
         self.close()
 
 

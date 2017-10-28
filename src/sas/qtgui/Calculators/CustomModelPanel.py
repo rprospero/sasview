@@ -252,6 +252,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
                                name + ".py"), "w") as out:
             out.write(total)
 
+        self.modelManager.update()
         self.close()
 
 
