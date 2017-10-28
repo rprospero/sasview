@@ -1248,11 +1248,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into QStandardItemModel based on selected _model_
         """
-        try:
-            kernel_module = generate.load_kernel_module(model_name)
-        except ImportError:
+        if str(self.cbCategory.currentText()) == CATEGORY_PLUGINS:
             kernel_module = generate.load_kernel_module(
-                os.path.join(find_plugins_dir(), model_name+".py"))
+                os.path.join(find_plugins_dir(), model_name + ".py"))
+        else:
+            kernel_module = generate.load_kernel_module(model_name)
         self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         # Instantiate the current sasmodel
