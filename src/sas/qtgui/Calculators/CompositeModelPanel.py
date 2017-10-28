@@ -10,7 +10,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting.ModelUtilities import ModelManager, find_plugins_dir
+import sas.qtgui.Utilities.ModelManager as ModelManager
 
 # local
 from UI.Composite import Ui_CompositeModelPanel
@@ -49,7 +49,7 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         self.setWindowTitle("Composite Model Creator")
 
         self.m1 = self.m2 = None
-        self.modelManager = ModelManager()
+        self.modelManager = ModelManager
         models = self.modelManager.get_model_list()
         model1 = self.model1.model()
         model2 = self.model2.model()
@@ -162,11 +162,12 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
             model2=self.model.item(W.MODEL2).text(),
             operator=self.model.item(W.OPERATOR).text(),
             desc_line=description)
-        path = os.path.join(find_plugins_dir(),
+        path = os.path.join(ModelManager.find_plugins_dir(),
                             str(self.model.item(W.NAME).text())+".py")
         with open(path, "w") as outfile:
             outfile.write(output)
 
+        self.modelManager.signal.modelsChanged.emit()
         self.close()
 
 

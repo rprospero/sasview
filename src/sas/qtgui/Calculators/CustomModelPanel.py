@@ -13,7 +13,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.qtgui.Perspectives.Fitting.ModelUtilities import ModelManager, find_plugins_dir
+import sas.qtgui.Utilities.ModelManager as ModelManager
 
 # local
 from UI.custom import Ui_ModelEditor
@@ -44,7 +44,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
 
         self.setWindowTitle("Custom Model Editor")
 
-        self.modelManager = ModelManager()
+        self.modelManager = ModelManager
 
         self._fill_math_combo()
 
@@ -248,7 +248,8 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         total += '## uncomment the following if Iqxy works for vector x, y\n'
         total += '#Iqxy.vectorized = True\n'
 
-        with open(os.path.join(find_plugins_dir(), name + ".py"), "w") as out:
+        with open(os.path.join(ModelManager.find_plugins_dir(),
+                               name + ".py"), "w") as out:
             out.write(total)
 
         self.close()

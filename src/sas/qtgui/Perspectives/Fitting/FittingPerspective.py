@@ -11,7 +11,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
+import sas.qtgui.Utilities.ModelManager as ModelManager
 
 class FittingWindow(QtGui.QTabWidget):
     """
@@ -64,7 +64,7 @@ class FittingWindow(QtGui.QTabWidget):
         # GPU Options
         self.gpu_options_widget = GPUOptions(self)
 
-        self.menu_manager = ModelUtilities.ModelManager()
+        self.menu_manager = ModelManager
         # TODO: reuse these in FittingWidget properly
         self.model_list_box = self.menu_manager.get_model_list()
         self.model_dictionary = self.menu_manager.get_model_dictionary()

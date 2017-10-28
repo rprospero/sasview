@@ -31,7 +31,7 @@ from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
-from sas.qtgui.Perspectives.Fitting.ModelUtilities import ModelManager, find_plugins_dir
+import sas.qtgui.Utilities.ModelManager as ModelManager
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
@@ -1131,7 +1131,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             categorization_file = CategoryInstaller.get_default_file()
         with open(categorization_file, 'rb') as cat_file:
             self.master_category_dict = json.load(cat_file)
-        model_list = ModelManager().get_model_list()['Plugin Models']
+        model_list = ModelManager.get_model_list()['Plugin Models']
         self.master_category_dict[CATEGORY_PLUGINS] = \
             [[m.name[10:], True] for m in model_list]
         self.regenerateModelDict()
@@ -1250,7 +1250,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         if str(self.cbCategory.currentText()) == CATEGORY_PLUGINS:
             kernel_module = generate.load_kernel_module(
-                os.path.join(find_plugins_dir(), model_name + ".py"))
+                os.path.join(ModelManager.find_plugins_dir(), model_name + ".py"))
         else:
             kernel_module = generate.load_kernel_module(model_name)
         self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
