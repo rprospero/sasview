@@ -77,31 +77,36 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
 
     def modelChanged(self, item):
 
+        self.applyBtn.setEnabled(True)
+
         self._valid_entry(
             self._valid_field(
                 str(self.model.item(W.NAME).text())),
             self.functionName)
 
-        param = str(self.model.item(W.PARAMS).text()).split(",")
+        param = str(self.model.item(W.PARAMS).text())
+        param = [x[0] for x in self.get_param_helper(param)]
         self._valid_entry(all(map(lambda x: self._valid_field(x),
                                   param)),
                           self.params)
-        param = str(self.model.item(W.POLYPARAMS).text()).split(",")
+        param = str(self.model.item(W.POLYPARAMS).text())
+        param = [x[0] for x in self.get_param_helper(param)]
         self._valid_entry(all(map(lambda x: self._valid_field(x),
                                   param)),
                           self.polyParams)
         # self._valid_entry(self._valid_name(), self.functionName)
+        self.mapper.toFirst()
 
     def _valid_field(self, x):
         return re.match('^[A-Za-z_][A-Za-z0-9_]+$', x.strip())
 
-    @staticmethod
-    def _valid_entry(test, widget):
+    def _valid_entry(self, test, widget):
         invalid = "background-color: rgb(255, 128, 128);\n"
         if test:
             widget.setStyleSheet("")
         else:
             widget.setStyleSheet(invalid)
+            self.applyBtn.setEnabled(False)
 
     @staticmethod
     def get_param_helper(param_str):
