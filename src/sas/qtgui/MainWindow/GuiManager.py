@@ -32,6 +32,7 @@ from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringC
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
 from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 from sas.qtgui.Calculators.CompositeModelPanel import CompositeWindow
+from sas.qtgui.Calculators.CustomModelPanel import CustomModelPanel
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
@@ -144,7 +145,8 @@ class GuiManager(object):
         self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
-        self.EditCustomModel = CompositeWindow(self)
+        self.CreateCompositeModel = CompositeWindow(self)
+        self.CreateCustomModel = CustomModelPanel(self)
 
     def statusBarSetup(self):
         """
@@ -396,7 +398,8 @@ class GuiManager(object):
         self._workspace.actionGPU_Options.triggered.connect(self.actionGPU_Options)
         self._workspace.actionFit_Results.triggered.connect(self.actionFit_Results)
         self._workspace.actionChain_Fitting.triggered.connect(self.actionChain_Fitting)
-        self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
+        self._workspace.actionSum_Multi_Model.triggered.connect(self.actionSum_Multi_Model)
+        self._workspace.actionCreate_Custom_Model.triggered.connect(self.actionCreate_Custom_Model)
         # Window
         self._workspace.actionCascade.triggered.connect(self.actionCascade)
         self._workspace.actionTile.triggered.connect(self.actionTile)
@@ -650,10 +653,16 @@ class GuiManager(object):
         print("actionChain_Fitting TRIGGERED")
         pass
 
-    def actionEdit_Custom_Model(self):
+    def actionSum_Multi_Model(self):
         """
         """
-        self.EditCustomModel.show()
+        self.CreateCompositeModel.show()
+        pass
+
+    def actionCreate_Custom_Model(self):
+        """
+        """
+        self.CreateCustomModel.show()
         pass
 
     #============ ANALYSIS =================

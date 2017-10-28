@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>26</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -96,6 +96,13 @@
     <property name="title">
      <string>Fitting</string>
     </property>
+    <widget class="QMenu" name="menuEdit_Custom_Model">
+     <property name="title">
+      <string>Edit Custom Model</string>
+     </property>
+     <addaction name="actionSum_Multi_Model"/>
+     <addaction name="actionCreate_Custom_Model"/>
+    </widget>
     <addaction name="actionNew_Fit_Page"/>
     <addaction name="separator"/>
     <addaction name="actionConstrained_Fit"/>
@@ -107,7 +114,7 @@
     <addaction name="separator"/>
     <addaction name="actionChain_Fitting"/>
     <addaction name="separator"/>
-    <addaction name="actionEdit_Custom_Model"/>
+    <addaction name="menuEdit_Custom_Model"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -400,11 +407,6 @@
     <string>Chain Fitting (BatchFit only)</string>
    </property>
   </action>
-  <action name="actionEdit_Custom_Model">
-   <property name="text">
-    <string>Edit Custom Model</string>
-   </property>
-  </action>
   <action name="actionCascade">
    <property name="text">
     <string>Cascade</string>
@@ -503,8 +505,15 @@
    <property name="text">
     <string>GPU Options</string>
    </property>
-   <property name="softKeyRole">
-    <enum>QAction::NoSoftKey</enum>
+  </action>
+  <action name="actionSum_Multi_Model">
+   <property name="text">
+    <string>Sum Multi Model</string>
+   </property>
+  </action>
+  <action name="actionCreate_Custom_Model">
+   <property name="text">
+    <string>Create Custom Model</string>
    </property>
   </action>
  </widget>
