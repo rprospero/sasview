@@ -22,19 +22,12 @@ def enum(*sequential, **named):
 W = enum(
     'NAME',
     'DESCRIPTION',
-    'MODEL1',
-    'MODEL2',
-    'OPERATOR'
+    'PARAMS',
+    'POLYPARAMS',
+    'FUNCTION',
+    'MATH',
 )
 
-SUM_TEMPLATE = """
-from sasmodels.core import load_model_info
-from sasmodels.sasview_model import make_model_from_info
-
-model_info = load_model_info('{model1}{operator}{model2}')
-model_info.name = '{name}'{desc_line}
-Model = make_model_from_info(model_info)
-"""
 
 class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
     # The controller which is responsible for managing signal slots connections
@@ -60,9 +53,9 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         self.model = QtGui.QStandardItemModel(self)
         self.model.setItem(W.NAME, QtGui.QStandardItem(""))
         self.model.setItem(W.DESCRIPTION, QtGui.QStandardItem(""))
-        self.model.setItem(W.MODEL1, QtGui.QStandardItem(""))
-        self.model.setItem(W.MODEL2, QtGui.QStandardItem(""))
-        self.model.setItem(W.OPERATOR, QtGui.QStandardItem("+"))
+        self.model.setItem(W.PARAMS, QtGui.QStandardItem(""))
+        self.model.setItem(W.POLYPARAMS, QtGui.QStandardItem(""))
+        self.model.setItem(W.MATH, QtGui.QStandardItem("+"))
 
         self.model.dataChanged.connect(self.modelChanged)
 
@@ -71,27 +64,41 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
 
-        # self.mapper.addMapping(self.functionName, W.NAME)
-        # self.mapper.addMapping(self.functionDescription, W.DESCRIPTION)
-        # self.mapper.addMapping(self.model1, W.MODEL1)
-        # self.mapper.addMapping(self.model2, W.MODEL2)
-        # self.mapper.addMapping(self.op, W.OPERATOR)
+        self.mapper.addMapping(self.functionName, W.NAME)
+        self.mapper.addMapping(self.description, W.DESCRIPTION)
+        self.mapper.addMapping(self.params, W.PARAMS)
+        self.mapper.addMapping(self.polyParams, W.POLYPARAMS)
+        self.mapper.addMapping(self.math, W.MATH)
 
         self.mapper.toFirst()
 
     def modelChanged(self, item):
-        if item.row() == W.MODEL1:
-            result = self._get_model_from_index(
-                self.model.item(W.MODEL1).text())
-            self.m1 = result
-        elif item.row() == W.MODEL2:
-            result = self._get_model_from_index(
-                self.model.item(W.MODEL2).text())
-            self.m2 = result
 
-        self._valid_entry(self.m1, self.model1)
-        self._valid_entry(self.m2, self.model2)
-        self._valid_entry(self._valid_name(), self.functionName)
+        self._valid_entry(
+            self._valid_field(
+                str(self.model.item(W.NAME).text())),
+            self.functionName)
+
+        param = str(self.model.item(W.PARAMS).text()).split(",")
+        self._valid_entry(all(map(lambda x: self._valid_field(x),
+                                  param)),
+                          self.params)
+        param = str(self.model.item(W.POLYPARAMS).text()).split(",")
+        self._valid_entry(all(map(lambda x: self._valid_field(x),
+                                  param)),
+                          self.polyParams)
+        # self._valid_entry(self._valid_name(), self.functionName)
+
+    def _valid_field(self, x):
+        return re.match('^[A-Za-z_][A-Za-z0-9_]+$', x.strip())
+
+    @staticmethod
+    def _valid_entry(test, widget):
+        invalid = "background-color: rgb(255, 128, 128);\n"
+        if test:
+            widget.setStyleSheet("")
+        else:
+            widget.setStyleSheet(invalid)
 
     def on_apply(self):
         pass
