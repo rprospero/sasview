@@ -54,9 +54,9 @@ class SasView(object):
         # Rebuild .sasview/categories.json.  This triggers a load of sasmodels
         # and all the plugins.
         try:
-            from sas.sascalc.fit.models import ModelManager
+            import sas.qtgui.Utilities.ModelManager as ModelManager
             from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
-            model_list = ModelManager().cat_model_list()
+            model_list = ModelManager.cat_model_list()
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
             logger.error("%s: could not load SasView models")
