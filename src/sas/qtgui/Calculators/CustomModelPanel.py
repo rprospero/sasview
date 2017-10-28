@@ -200,7 +200,8 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         total += '## uncomment the following if Iqxy works for vector x, y\n'
         total += '#Iqxy.vectorized = True\n'
 
-        print(total)
+        with open(os.path.join(find_plugins_dir(), name + ".py"), "w") as out:
+            out.write(total)
 
 
 CUSTOM_TEMPLATE = '''\
