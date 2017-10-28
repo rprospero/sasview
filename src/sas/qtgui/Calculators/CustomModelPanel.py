@@ -77,6 +77,10 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
 
     def modelChanged(self, item):
 
+        if not self.mapper:
+            return
+        self.mapper.toFirst()
+
         self.applyBtn.setEnabled(True)
 
         self._valid_entry(
@@ -95,7 +99,6 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
                                   param)),
                           self.polyParams)
         # self._valid_entry(self._valid_name(), self.functionName)
-        self.mapper.toFirst()
 
     def _valid_field(self, x):
         return re.match('^[A-Za-z_][A-Za-z0-9_]+$', x.strip())
