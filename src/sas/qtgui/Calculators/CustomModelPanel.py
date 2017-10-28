@@ -203,6 +203,8 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         with open(os.path.join(find_plugins_dir(), name + ".py"), "w") as out:
             out.write(total)
 
+        self.close()
+
 
 CUSTOM_TEMPLATE = '''\
 r"""

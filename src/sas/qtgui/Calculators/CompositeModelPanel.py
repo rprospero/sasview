@@ -167,6 +167,8 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         with open(path, "w") as outfile:
             outfile.write(output)
 
+        self.close()
+
 
 
 if __name__ == "__main__":
