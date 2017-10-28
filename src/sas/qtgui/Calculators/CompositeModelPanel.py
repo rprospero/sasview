@@ -48,9 +48,18 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
 
         self.setWindowTitle("Composite Model Creator")
 
+        self.setupSampleModels()
+
+        self.setupSignals()
+        self.setupModel()
+        self.setupMapper()
+
+    def setupSampleModels(self):
         self.m1 = self.m2 = None
         self.modelManager = ModelManager
         models = self.modelManager.get_model_list()
+        self.model1.clear()
+        self.model2.clear()
         model1 = self.model1.model()
         model2 = self.model2.model()
         for k in models:
@@ -67,16 +76,10 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
                 value = QtGui.QStandardItem(value)
                 model2.appendRow(value)
 
-        self.setupSignals()
-        self.setupModel()
-        self.setupMapper()
-
     def setupSignals(self):
         self.closeButton.clicked.connect(self.close)
         self.applyButton.clicked.connect(self.on_apply)
-        def test():
-            print("Recieved Signal")
-        self.modelManager.signal.modelsChanged.connect(test)
+        self.modelManager.signal.modelsChanged.connect(self.setupSampleModels)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
