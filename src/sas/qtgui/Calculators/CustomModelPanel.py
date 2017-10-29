@@ -44,7 +44,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
 
         self.setWindowTitle("Custom Model Editor")
 
-        self.modelManager = ModelManager
+        self.model_list = ModelManager.get_model_list()
 
         self._fill_math_combo()
 
@@ -61,6 +61,10 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         self.function.textChanged.connect(
             lambda: self.modelChanged(
                 self.model.createIndex(W.FUNCTION, 0)))
+        ModelManager.signal.modelsChanged.connect(self.setupSampleModels)
+
+    def setupSampleModels(self):
+        self.model_list = ModelManager.get_model_list()
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -160,9 +164,8 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
     def _valid_name(self, x):
         if not self._valid_field(x):
             return False
-        models = self.modelManager.get_model_list()
-        for k in models:
-            for m in models[k]:
+        for k in self.model_list:
+            for m in self.model_list[k]:
                 if x == m.name or "[plug-in] " + x == m.name:
                     return False
         return True
