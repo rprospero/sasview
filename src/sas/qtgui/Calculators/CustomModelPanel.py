@@ -163,7 +163,7 @@ class CustomModelPanel(QtGui.QDialog, Ui_ModelEditor):
         models = self.modelManager.get_model_list()
         for k in models:
             for m in models[k]:
-                if x == m.name:
+                if x == m.name or "[plug-in] " + x == m.name:
                     return False
         return True
 
