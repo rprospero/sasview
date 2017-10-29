@@ -90,6 +90,7 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
         self.model.setItem(W.OPERATOR, QtGui.QStandardItem("+"))
 
         self.model.dataChanged.connect(self.modelChanged)
+        self.modelManager.signal.modelsChanged.connect(self.setupSampleModels)
 
     def setupMapper(self):
         self.mapper = QtGui.QDataWidgetMapper(self)
