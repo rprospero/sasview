@@ -457,6 +457,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
 
+        ModelManager.signal.modelsChanged.connect(self.readCategoryInfo)
+
     def showModelDescription(self, position):
         """
         Shows a window with model description, when right clicked in the treeview

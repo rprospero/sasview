@@ -49,6 +49,7 @@ class FittingWindow(QtGui.QTabWidget):
         # Deal with signals
         self.tabCloseRequested.connect(self.tabCloses)
         self.communicate.dataDeletedSignal.connect(self.dataDeleted)
+        ModelManager.signal.modelsChanged.connect(self.modelListChanged)
 
         # Perspective window not allowed to close by default
         self._allow_close = False
@@ -64,10 +65,7 @@ class FittingWindow(QtGui.QTabWidget):
         # GPU Options
         self.gpu_options_widget = GPUOptions(self)
 
-        self.menu_manager = ModelManager
-        # TODO: reuse these in FittingWidget properly
-        self.model_list_box = self.menu_manager.get_model_list()
-        self.model_dictionary = self.menu_manager.get_model_dictionary()
+        self.modelListChanged()
 
         #self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
         self.updateWindowTitle()
@@ -238,5 +236,12 @@ class FittingWindow(QtGui.QTabWidget):
         self.fit_options.selected_id = str(fitter)
         # Update the title
         self.updateWindowTitle()
+
+        pass
+
+    def modelListChanged(self):
+        # TODO: reuse these in FittingWidget properly
+        self.model_list_box = ModelManager.get_model_list()
+        self.model_dictionary = ModelManager.get_model_dictionary()
 
         pass
