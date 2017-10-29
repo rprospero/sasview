@@ -553,6 +553,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.enableStructureCombo()
             self._model_model.clear()
             return
+        elif category == '':
+            # We haven't finished creating the form yet
+            return
 
         # Safely clear and enable the model combo
         self.cbModel.blockSignals(True)
@@ -1144,6 +1147,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.models[model.name] = model
         for model in model_list:
             self.models[model.name[10:]] = model
+
+        self.onSelectCategory()
 
     def regenerateModelDict(self):
         """
