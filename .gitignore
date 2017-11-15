@@ -57,3 +57,7 @@ tests.log
 /installers/installer.iss
 /installers/build
 /installers/dist
+
+#Generated GUI files
+/src/sas/qtgui/*/UI/*.py
+/src/sas/qtgui/*/*/UI/*.py
