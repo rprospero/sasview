@@ -79,6 +79,7 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
     def setupSignals(self):
         self.closeButton.clicked.connect(self.close)
         self.applyButton.clicked.connect(self.on_apply)
+        self.helpButton.clicked.connect(self.on_help)
         self.modelManager.signal.modelsChanged.connect(self.setupSampleModels)
 
     def setupModel(self):
@@ -176,6 +177,14 @@ class CompositeWindow(QtGui.QDialog, Ui_CompositeModelPanel):
 
         self.modelManager.update()
         self.close()
+
+    def on_help(self):
+        help_location = GuiUtils.HELP_DIRECTORY_LOCATION
+        help_location += "/user/sasgui/perspectives/fitting/fitting_help.html"
+        help_location += "#sum-multi-p1-p2"
+        self.helpView = QtWebKit.QWebView()
+        self.helpView.load(QtCore.QUrl(help_location))
+        self.helpView.show()
 
 
 
