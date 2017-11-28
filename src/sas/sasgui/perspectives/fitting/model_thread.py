@@ -4,11 +4,13 @@ Calculation thread for modeling
 
 import time
 import math
+import logging
 
 import numpy as np
 
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
+from sas.sascalc.fit.qsmearing import SesansSmear
 
 class Calc2D(CalcThread):
     """
@@ -171,29 +173,35 @@ class Calc1D(CalcThread):
         unsmeared_error = None
         ##smearer the ouput of the plot
         if self.smearer is not None:
-            first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
+            if type(self.smearer) == SesansSmear:
+                logging.info(type(self.smearer))
+                logging.info("smearer type")
+                output = self.smearer.get_value()
+                logging.info(output.shape)
+            else:
+                first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                              self.qmax)
-            mask = self.data.x[first_bin:last_bin+1]
-            unsmeared_output = np.zeros((len(self.data.x)))
-            unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
-            self.smearer.model = self.model
-            output = self.smearer(unsmeared_output, first_bin, last_bin)
+                mask = self.data.x[first_bin:last_bin+1]
+                unsmeared_output = np.zeros((len(self.data.x)))
+                unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+                self.smearer.model = self.model
+                output = self.smearer(unsmeared_output, first_bin, last_bin)
 
-            # Rescale data to unsmeared model
-            # Check that the arrays are compatible. If we only have a model but no data,
-            # the length of data.y will be zero.
-            if isinstance(self.data.y, np.ndarray) and output.shape == self.data.y.shape:
-                unsmeared_data = np.zeros((len(self.data.x)))
-                unsmeared_error = np.zeros((len(self.data.x)))
-                unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
-                                                        * unsmeared_output[first_bin:last_bin+1]\
-                                                        / output[first_bin:last_bin+1]
-                unsmeared_error[first_bin:last_bin+1] = self.data.dy[first_bin:last_bin+1]\
-                                                        * unsmeared_output[first_bin:last_bin+1]\
-                                                        / output[first_bin:last_bin+1]
-                unsmeared_output = unsmeared_output[index]
-                unsmeared_data = unsmeared_data[index]
-                unsmeared_error = unsmeared_error
+                # Rescale data to unsmeared model
+                # Check that the arrays are compatible. If we only have a model but no data,
+                # the length of data.y will be zero.
+                if isinstance(self.data.y, np.ndarray) and output.shape == self.data.y.shape:
+                    unsmeared_data = np.zeros((len(self.data.x)))
+                    unsmeared_error = np.zeros((len(self.data.x)))
+                    unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
+                                                            * unsmeared_output[first_bin:last_bin+1]\
+                                                            / output[first_bin:last_bin+1]
+                    unsmeared_error[first_bin:last_bin+1] = self.data.dy[first_bin:last_bin+1]\
+                                                            * unsmeared_output[first_bin:last_bin+1]\
+                                                            / output[first_bin:last_bin+1]
+                    unsmeared_output = unsmeared_output[index]
+                    unsmeared_data = unsmeared_data[index]
+                    unsmeared_error = unsmeared_error
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 

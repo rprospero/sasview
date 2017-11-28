@@ -16,7 +16,7 @@ import numpy as np  # type: ignore
 from numpy import pi, exp # type:ignore
 
 from sasmodels.resolution import Slit1D, Pinhole1D
-from sasmodels.sesans import SesansTransform
+from sasmodels.sesans import SesansTransform2D
 from sasmodels.resolution2d import Pinhole2D
 
 from sas.sascalc.data_util.nxsunit import Converter
@@ -74,11 +74,12 @@ def smear_selection(data, model = None):
         zaccept = Converter("1/A")(q_max, "1/" + data.source.wavelength_unit),
 
         Rmax = 10000000
-        hankel = SesansTransform(data.x, SElength,
+        hankel = SesansTransform2D(data.x, SElength,
                                  data.source.wavelength,
                                  zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
-        return PySmear(hankel, model, offset=0)
+        return SesansSmear(hankel, model)
+        # return PySmear(hankel, model, offset=0)
 
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
@@ -252,3 +253,83 @@ class PySmear2D(object):
             val = self.model.evalDistribution(q_calc)
             return val
 
+
+class SesansSmear(object):
+    """
+    Q smearing class for SAS 2d pinhole data
+    """
+
+    def __init__(self, transform=None, model=None):
+        self.data = transform
+        self.model = model
+        self.accuracy = 'Low'
+        self.limit = 3.0
+        self.index = None
+        self.coords = 'polar'
+        self.smearer = True
+
+    def set_accuracy(self, accuracy='Low'):
+        """
+        Set accuracy.
+
+        :param accuracy:  string
+        """
+        self.accuracy = accuracy
+
+    def set_smearer(self, smearer=True):
+        """
+        Set whether or not smearer will be used
+
+        :param smearer: smear object
+
+        """
+        self.smearer = smearer
+
+    def set_data(self, data=None):
+        """
+        Set data.
+
+        :param data: DataLoader.Data_info type
+        """
+        self.data = data
+
+    def set_model(self, model=None):
+        """
+        Set model.
+
+        :param model: sas.models instance
+        """
+        self.model = model
+
+    def set_index(self, index=None):
+        """
+        Set index.
+
+        :param index: 1d arrays
+        """
+        self.index = index
+
+    def get_value(self):
+        """
+        Over sampling of r_nbins times phi_nbins, calculate Gaussian weights,
+        then find smeared intensity
+        """
+        logging.info("get_value")
+        logging.info(self.data)
+        logging.info(self.model)
+        logging.info(self.data.q)
+        return self.data.q
+
+        # if self.smearer:
+        #     res = Pinhole2D(data=self.data, index=self.index,
+        #                     nsigma=3.0, accuracy=self.accuracy,
+        #                     coords=self.coords)
+        #     val = self.model.evalDistribution(res.q_calc)
+        #     return res.apply(val)
+        # else:
+        #     index = self.index if self.index is not None else slice(None)
+        #     qx_data = self.data.qx_data[index]
+        #     qy_data = self.data.qy_data[index]
+        #     q_calc = [qx_data, qy_data]
+        #     val = self.model.evalDistribution(q_calc)
+        #     return val
