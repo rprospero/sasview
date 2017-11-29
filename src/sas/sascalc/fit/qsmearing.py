@@ -317,8 +317,18 @@ class SesansSmear(object):
         logging.info("get_value")
         logging.info(self.data)
         logging.info(self.model)
+        logging.info(type(self.model))
+        logging.info(dir(self.model))
         logging.info(self.data.q)
-        return self.data.q
+        qx = np.tile(self.data.q_calc, len(self.data.q_calc))
+        logging.info(qx.shape)
+        qy = np.sort(qx)
+        logging.info(qy.shape)
+
+        temp = self.model.evalDistribution([qx, qy]).reshape((-1, len(self.data.q_calc)))
+        # logging.info(temp)
+        logging.info(temp.shape)
+        return self.data.apply(temp)
 
         # if self.smearer:
         #     res = Pinhole2D(data=self.data, index=self.index,
