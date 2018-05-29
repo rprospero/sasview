@@ -154,10 +154,10 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 		}
 		//printf("aa%d=%g %g %d\n", i, (sumj_uu.re*sumj_uu.re + sumj_uu.im*sumj_uu.im), (sumj_dd.re*sumj_dd.re + sumj_dd.im*sumj_dd.im), count);
 
-		I_out[i] = (sumj_uu.re*sumj_uu.re + sumj_uu.im*sumj_uu.im);
-		I_out[i] += (sumj_ud.re*sumj_ud.re + sumj_ud.im*sumj_ud.im);
-		I_out[i] += (sumj_du.re*sumj_du.re + sumj_du.im*sumj_du.im);
-		I_out[i] += (sumj_dd.re*sumj_dd.re + sumj_dd.im*sumj_dd.im);
+		I_out[i] = sqrt(sumj_uu.re*sumj_uu.re + sumj_uu.im*sumj_uu.im);
+		I_out[i] += sqrt(sumj_ud.re*sumj_ud.re + sumj_ud.im*sumj_ud.im);
+		I_out[i] += sqrt(sumj_du.re*sumj_du.re + sumj_du.im*sumj_du.im);
+		I_out[i] += sqrt(sumj_dd.re*sumj_dd.re + sumj_dd.im*sumj_dd.im);
 
 		I_out[i] *= (1.0E+8 / count); //in cm (unit) / number; //to be multiplied by vol_pix
 	}
