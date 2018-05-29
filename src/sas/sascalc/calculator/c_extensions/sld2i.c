@@ -99,7 +99,8 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 				cal_msld(&b_sld, 0, qx[i], qy[i], this->sldn_val[j],
 							 this->mx_val[j], this->my_val[j], this->mz_val[j],
 			 				 this->inspin, this->outspin, this->stheta);
-				qr = (qx[i]*this->x_val[j] + qy[i]*this->y_val[j]);
+				qr = sqrt(qx[i]*this->x_val[j] * qx[i]*this->x_val[j]
+					  + qy[i]*this->y_val[j] * qy[i]*this->y_val[j]);
 				cassign(&iqr, 0.0, qr);
 				cplx_exp(&ephase, iqr);
 
