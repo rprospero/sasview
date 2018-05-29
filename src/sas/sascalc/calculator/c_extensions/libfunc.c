@@ -133,13 +133,13 @@ void cal_msld(polar_sld *p_sld, int isangle, double qx, double qy, double bn,
 	//No mag means no further calculation
 	if (isangle>0) {
 		if (m_max < 1.0e-32){
-			uu = sqrt(sqrt(in_spin * out_spin)) * uu;
-			dd = sqrt(sqrt((1.0 - in_spin) * (1.0 - out_spin))) * dd;
+			uu *= in_spin * out_spin;
+			dd *= (1.0 - in_spin) * (1.0 - out_spin);
 		}
 	}
 	else if (fabs(m_max)< 1.0e-32 && fabs(m_phi)< 1.0e-32 && fabs(m_theta)< 1.0e-32){
-			uu = sqrt(sqrt(in_spin * out_spin)) * uu;
-			dd = sqrt(sqrt((1.0 - in_spin) * (1.0 - out_spin))) * dd;
+	        uu *= in_spin * out_spin;
+		dd *= (1.0 - in_spin) * (1.0 - out_spin);
 	} else {
 
 		//These are needed because of the precision of inputs
@@ -196,13 +196,13 @@ void cal_msld(polar_sld *p_sld, int isangle, double qx, double qy, double bn,
 		im_ud = m_sigma_z;
 		im_du = -m_sigma_z;
 
-		uu = sqrt(sqrt(in_spin * out_spin)) * uu;
-		dd = sqrt(sqrt((1.0 - in_spin) * (1.0 - out_spin))) * dd;
+		uu *= in_spin * out_spin;
+		dd *= (1.0 - in_spin) * (1.0 - out_spin);
 
-		re_ud = sqrt(sqrt(in_spin * (1.0 - out_spin))) * re_ud;
-		im_ud = sqrt(sqrt(in_spin * (1.0 - out_spin))) * im_ud;
-		re_du = sqrt(sqrt((1.0 - in_spin) * out_spin)) * re_du;
-		im_du = sqrt(sqrt((1.0 - in_spin) * out_spin)) * im_du;
+		re_ud *= in_spin * (1.0 - out_spin);
+		im_ud *= in_spin * (1.0 - out_spin);
+		re_du *= (1.0 - in_spin) * out_spin;
+		im_du *= (1.0 - in_spin) * out_spin;
 	}
 	p_sld->uu = uu;
 	p_sld->dd = dd;
