@@ -106,29 +106,45 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 
 				//Let's multiply pixel(atomic) volume here
 				rcmult(&ephase, this->vol_pix[j], ephase);
-				//up_up
-				if (this->inspin > 0.0 && this->outspin > 0.0){
-					cassign(&comp_sld, b_sld.uu, 0.0);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_uu, sumj_uu, temp_fi);
+
+
+				//These conditions skip the edge cases
+				//where one state is purely up or
+				//down.  Since inspin and outspin are
+				//both bounded between zero and one,
+				//(they are the ratio of the up counts
+				//to the total counts), the not equals
+				//are equivalent to > 0.0 and < 1.0,
+				//but mark out intention a bit more
+				//clearly
+
+				if (this->inspin != 0.0) {
+				        //up_up
+				        if (this->outspin != 0.0) {
+					        cassign(&comp_sld, b_sld.uu, 0.0);
+						cplx_mult(&temp_fi, comp_sld, ephase);
+						cplx_add(&sumj_uu, sumj_uu, temp_fi);
+					}
+					//up_down
+				        if (this->outspin != 1.0) {
+				        	cassign(&comp_sld, b_sld.re_ud, b_sld.im_ud);
+					        cplx_mult(&temp_fi, comp_sld, ephase);
+        					cplx_add(&sumj_ud, sumj_ud, temp_fi);
+					}
 				}
-				//down_down
-				if (this->inspin < 1.0 && this->outspin < 1.0){
-					cassign(&comp_sld, b_sld.dd, 0.0);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_dd, sumj_dd, temp_fi);
-				}
-				//up_down
-				if (this->inspin > 0.0 && this->outspin < 1.0){
-					cassign(&comp_sld, b_sld.re_ud, b_sld.im_ud);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_ud, sumj_ud, temp_fi);
-				}
-				//down_up
-				if (this->inspin < 1.0 && this->outspin > 0.0){
-					cassign(&comp_sld, b_sld.re_du, b_sld.im_du);
-					cplx_mult(&temp_fi, comp_sld, ephase);
-					cplx_add(&sumj_du, sumj_du, temp_fi);
+				if (this->inspin != 1.0) {
+				        //down_up
+				        if (this->outspin != 0.0) {
+					        cassign(&comp_sld, b_sld.re_du, b_sld.im_du);
+					        cplx_mult(&temp_fi, comp_sld, ephase);
+					        cplx_add(&sumj_du, sumj_du, temp_fi);
+					}
+					//down_down
+					if (this->outspin != 1.0){
+					  cassign(&comp_sld, b_sld.dd, 0.0);
+					  cplx_mult(&temp_fi, comp_sld, ephase);
+					  cplx_add(&sumj_dd, sumj_dd, temp_fi);
+					}
 				}
 
 				if (i == 0){
