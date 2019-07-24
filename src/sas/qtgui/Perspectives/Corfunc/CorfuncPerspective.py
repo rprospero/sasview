@@ -263,8 +263,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
                            QtGui.QStandardItem("0.22"))
         self.model.setItem(W.W_BACKGROUND,
                            QtGui.QStandardItem("0"))
-        #self.model.setItem(W.W_TRANSFORM,
-        #                   QtGui.QStandardItem("Fourier"))
+        self.model.setItem(W.W_TRANSFORM,
+                          QtGui.QStandardItem("Fourier"))
         self.model.setItem(W.W_GUINIERA,
                            QtGui.QStandardItem("0.0"))
         self.model.setItem(W.W_GUINIERB,
@@ -321,9 +321,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
     def transform(self):
         """Calculate the real space version of the extrapolation."""
-        #method = self.model.item(W.W_TRANSFORM).text().lower()
+        method = self.model.item(W.W_TRANSFORM).text().lower()
 
-        method = "fourier"
 
         extrap = self._canvas.extrap
         background = float(self.model.item(W.W_BACKGROUND).text())
@@ -388,7 +387,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.mapper.addMapping(self.txtUpperQMin, W.W_QMAX)
         self.mapper.addMapping(self.txtUpperQMax, W.W_QCUTOFF)
         self.mapper.addMapping(self.txtBackground, W.W_BACKGROUND)
-        #self.mapper.addMapping(self.transformCombo, W.W_TRANSFORM)
+        self.mapper.addMapping(self.transformCombo, W.W_TRANSFORM)
 
         self.mapper.addMapping(self.txtGuinierA, W.W_GUINIERA)
         self.mapper.addMapping(self.txtGuinierB, W.W_GUINIERB)

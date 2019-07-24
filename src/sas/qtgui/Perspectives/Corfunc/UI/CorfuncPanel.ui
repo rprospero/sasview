@@ -214,13 +214,6 @@
 	  </property>
 	 </widget>
 	</item>
-	<item>
-	  <widget class="QLabel" name="test_abel">
-	    <property name="text">
-	      <string>Transform Type</string>
-	    </property>
-	  </widget>
-	</item>
        </layout>
       </item>
      </layout>
@@ -511,6 +504,20 @@
 	<string>Save</string>
        </property>
       </widget>
+     </item>
+     <item>
+       <widget class="QComboBox" name="transformCombo">
+	 <item>
+	   <property name="text">
+	     <string>Fourier</string>
+	   </property>
+	 </item>
+	 <item>
+	   <property name="text">
+	     <string>Hilbert</string>
+	   </property>
+	 </item>
+       </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer">
