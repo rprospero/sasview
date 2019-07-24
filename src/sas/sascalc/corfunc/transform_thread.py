@@ -91,11 +91,20 @@ class HilbertThread(CalcThread):
         self.background = bg
         self.extrapolation = extrapolated_data
 
+    def check_if_cancelled(self):
+        if self.isquit():
+            self.update("Hilbert transform cancelled.")
+            self.complete(transforms=True)
+            return True
+        return False
+
     def compute(self):
         qs = self.extrapolation.x
         iqs = self.extrapolation.y
         q = self.data.x
         background = self.background
+
+        xs = np.pi*np.arange(len(qs),dtype=np.float32)/(q[1]-q[0])/len(qs)
 
         self.ready(delay=0.0)
         self.update(msg="Starting Hilbert transform.")
@@ -129,7 +138,7 @@ class HilbertThread(CalcThread):
             # IDF(x) = int_0^inf q^4 * I(q) * cos(q*x) * dq
             # => IDF(0) = int_0^inf q^4 * I(q) * dq
             idf[0] = trapz(-qs**4 * (iqs-background), qs)
-            idf /= Q # Normalise using scattering invariant
+            idf /= float(Q) # Normalise using scattering invariant
 
         except Exception as e:
             import logging
