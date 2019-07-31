@@ -8,6 +8,7 @@ from scipy.interpolate import interp1d
 from scipy.fftpack import dct
 from scipy.signal import argrelextrema
 from numpy.linalg import lstsq
+from bumps.wsolve import wpolyfit
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.corfunc.transform_thread import FourierThread
 from sas.sascalc.corfunc.transform_thread import HilbertThread
@@ -121,14 +122,12 @@ class CorfuncCalculator(object):
         q = self._data.x
         iq = self._data.y
 
-        params, s2 = self._fit_data(q, iq)
-        # Extrapolate to 100*Qmax in experimental data
-        qs = np.arange(0, q[-1]*100, (q[1]-q[0]))
-        iqs = s2(qs)
+        qs = np.arange(0, q[-1]*100, (q[1]-q[0])/4.0)
+        params, iqs = self._fit_data(q, iq, qs)
 
         extrapolation = Data1D(qs, iqs)
 
-        return params, extrapolation, s2
+        return params, extrapolation, None
 
     def compute_transform(self, extrapolation, trans_type, background=None,
         completefn=None, updatefn=None):
@@ -255,33 +254,53 @@ class CorfuncCalculator(object):
         k, sigma, bg = fitp
         return k, sigma, bg
 
-    def _fit_data(self, q, iq):
+    def _fit_data(self, q, iq, oqs):
         """
         Given a data set, extrapolate out to large q with Porod and
         to q=0 with Guinier
-        """
-        mask = np.logical_and(q > self.upperq[0], q < self.upperq[1])
 
+        params
+        ======
+        q: array(float)
+          The experimental q values
+        iq: array(float)
+          The experimental iq values
+        oqs: array(float)
+          The q values where the smoothd value should be evaluated
+        """
+
+        bg = self.background
         # Returns an array where the 1st and 2nd elements are the values of k
         # and sigma for the best-fit Porod function
+        mask = np.logical_and(q > self.upperq[0], q < self.upperq[1])
         k, sigma, _ = self._fit_porod(q[mask], iq[mask])
-        bg = self.background
-
-        # Smooths between the best-fit porod function and the data to produce a
-        # better fitting curve
-        data = interp1d(q, iq)
-        s1 = self._Interpolator(data,
-            lambda x: self._porod(x, k, sigma, bg), self.upperq[0], q[-1])
-
-        mask = np.logical_and(q < self.lowerq, 0 < q)
-
+        porod_q = oqs[oqs > self.upperq[0]]
+        porod = self._porod(porod_q, k, sigma, bg)
         # Returns parameters for the best-fit Guinier function
+        mask = np.logical_and(q < self.lowerq, 0 < q)
         g = self._fit_guinier(q[mask], iq[mask])[0]
-
-        # Smooths between the best-fit Guinier function and the Porod curve
-        s2 = self._Interpolator((lambda x: (np.exp(g[1]+g[0]*x**2))), s1, q[0],
-            self.lowerq)
+        guinier_q = oqs[oqs < self.lowerq]
+        guinier = np.exp(g[1]+g[0]*guinier_q**2)
 
         params = {'A': g[1], 'B': g[0], 'K': k, 'sigma': sigma}
 
-        return params, s2
+        all_q = np.hstack([porod_q, q[q < self.upperq[1]], guinier_q])
+        all_iq = np.hstack([porod, iq[q < self.upperq[1]], guinier])
+
+        order = np.argsort(all_q)
+        all_q = all_q[order]
+        all_iq = all_iq[order]
+
+        all_iq = self._smooth(all_q, all_iq, 3)
+
+        return params, interp1d(all_q, all_iq)(oqs)
+
+    def _smooth(self, qs, iqs, order):
+        values = []
+        for i in range(order, len(qs)-order):
+            values.append(
+                wpolyfit(qs[i-order:i+order],
+                         iqs[i-order:i+order],
+                         degree=3)(qs[i]))
+        values = np.hstack([iqs[:order], values, iqs[-order:]])
+        return values

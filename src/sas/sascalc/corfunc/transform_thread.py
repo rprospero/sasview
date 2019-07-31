@@ -26,7 +26,7 @@ class FourierThread(CalcThread):
         q = self.data.x
         background = self.background
 
-        xs = np.pi*np.arange(len(qs),dtype=np.float32)/(q[1]-q[0])/len(qs)
+        xs = np.pi*np.arange(len(qs),dtype=np.float32)/(q[1]-q[0])*4/len(qs)
 
         self.ready(delay=0.0)
         self.update(msg="Fourier transform in progress.")
