@@ -23,6 +23,8 @@
 /.pydevproject
 /.idea
 /.vs
+/.envrc
+/.direnv
 
 # Build and run files
 **/__pycache__
